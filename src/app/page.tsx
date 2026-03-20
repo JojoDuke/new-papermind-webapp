@@ -3,9 +3,9 @@ import { Navbar } from '@/components/Navbar';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50/50 to-indigo-100/30">
+    <div className="min-h-screen bg-linear-to-br from-blue-50/50 to-indigo-100/30 relative">
       <Navbar />
-      <main className="container mx-auto px-4 py-16">
+      <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-16 text-center">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-6xl font-bold text-gray-900 mb-6">

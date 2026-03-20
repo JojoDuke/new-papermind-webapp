@@ -31,7 +31,15 @@ export default function RootLayout({
         className={`${jakartaSans.variable} ${ptSerif.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ConvexClientProvider>
+          <div className="relative min-h-screen">
+            {/* Visual Guide Lines (1200px) */}
+            <div className="fixed inset-0 pointer-events-none z-[9999] flex justify-center">
+              <div className="w-full max-w-[1200px] border-x border-red-500/20 h-full" />
+            </div>
+            {children}
+          </div>
+        </ConvexClientProvider>
       </body>
     </html>
   );

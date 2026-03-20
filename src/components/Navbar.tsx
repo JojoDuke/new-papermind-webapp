@@ -1,20 +1,29 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md font-sans">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-0 h-16 flex items-center justify-between relative text-gray-900">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold font-serif text-gray-900 leading-none">
-            Paper<span className="text-blue-600">mind</span>
+        <Link href="/" className="flex items-center gap-2.5 relative z-10 group">
+          <Image 
+            src="/logos-icons/pmIcon.png" 
+            alt="Papermind Logo" 
+            width={32} 
+            height={32}
+            className="w-8 h-8 rounded-lg shadow-sm group-hover:shadow transition-all"
+            priority
+          />
+          <span className="text-2xl font-bold font-serif leading-none tracking-tight">
+            Papermind
           </span>
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-8 font-sans">
+        <div className="hidden md:flex items-center gap-8 font-sans absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
           <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
             Features
           </Link>
@@ -27,7 +36,7 @@ export function Navbar() {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex items-center gap-4 font-sans">
+        <div className="flex items-center gap-4 font-sans relative z-10">
           <Link href="/auth" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-4 py-2">
             Sign In
           </Link>
