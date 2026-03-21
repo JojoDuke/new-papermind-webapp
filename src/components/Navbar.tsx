@@ -24,13 +24,13 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-8 font-sans absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-          <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+          <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             Features
           </Link>
-          <Link href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+          <Link href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             How it Works
           </Link>
-          <Link href="#pricing" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+          <Link href="#pricing" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             Pricing
           </Link>
         </div>
@@ -42,7 +42,7 @@ export function Navbar() {
           </Link>
           <Link 
             href="/auth" 
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95"
+            className="bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95 font-sans"
           >
             Get Started
           </Link>
