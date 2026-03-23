@@ -9,10 +9,10 @@ export function Navbar() {
       <div className="max-w-[1200px] mx-auto px-4 md:px-0 h-16 flex items-center justify-between relative text-gray-900">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 relative z-10 group">
-          <Image 
-            src="/logos-icons/pmIcon.png" 
-            alt="Papermind Logo" 
-            width={32} 
+          <Image
+            src="/logos-icons/pmIcon.png"
+            alt="Papermind Logo"
+            width={32}
             height={32}
             className="w-8 h-8 rounded-lg shadow-sm group-hover:shadow transition-all"
             priority
@@ -36,11 +36,11 @@ export function Navbar() {
           <Link href="/auth" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-4 py-2">
             Sign In
           </Link>
-          <Link 
-            href="/auth" 
+          <Link
+            href="/auth"
             className="bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95 font-sans"
           >
-            Get Started
+            Start Studying
           </Link>
         </div>
       </div>

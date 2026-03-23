@@ -5,25 +5,30 @@
   --foreground: #171717;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-jakarta-sans), system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-pt-serif), Georgia, serif;
+  --font-sans: var(--font-jakarta-sans);
+  --font-serif: var(--font-pt-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-jakarta-sans), system-ui, -apple-system, sans-serif;
 }
 
-
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-pt-serif), Georgia, serif;
 }
 
 @layer utilities {
+  .font-serif {
+    font-family: var(--font-pt-serif), Georgia, serif;
+  }
+  .font-sans {
+    font-family: var(--font-jakarta-sans), system-ui, -apple-system, sans-serif;
+  }
   .pink-glowing-button {
     background: linear-gradient(180deg, #FF7DB4 0%, #FF5392 100%);
     box-shadow: 
@@ -51,5 +56,3 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-mask-composite: destination-out;
   }
 }
-
-
