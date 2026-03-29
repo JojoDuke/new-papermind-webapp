@@ -48,22 +48,74 @@ export default function Home() {
               <span className="relative z-30">Start Studying — It's free</span>
             </Link>
           </div>
+        </div>
 
-          {/* Webapp Preview Box */}
-          <div className="mt-8 relative max-w-5xl mx-auto group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-pink-200 to-purple-200 rounded-[24px] blur-xl opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-            <div className="relative bg-white border border-white/40 shadow-2xl rounded-[20px] overflow-hidden backdrop-blur-sm aspect-[16/9] flex items-center justify-center">
-              <img 
-                src="/assets/webapp_preview_screenshot.png"
-                alt="Papermind Webapp Preview"
-                className="w-full h-full object-cover rounded-[18px]"
-              />
-              {/* Subtle Overlay Glow */}
-              <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
-            </div>
+        {/* Webapp Preview Box — full 1200px width */}
+        <div className="mt-8 relative w-full group">
+          <div className="absolute -inset-1 bg-linear-to-r from-pink-200 to-purple-200 rounded-[24px] blur-xl opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+          <div className="relative bg-white border border-white/40 shadow-2xl rounded-[20px] overflow-hidden backdrop-blur-sm aspect-[16/9] flex items-center justify-center">
+            <img 
+              src="/assets/webapp_preview_screenshot.png"
+              alt="Papermind Webapp Preview"
+              className="w-full h-full object-cover rounded-[18px]"
+            />
+            {/* Subtle Overlay Glow */}
+            <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
           </div>
         </div>
 
+        {/* Trust Bar */}
+        <div className="mt-20 w-full">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-8">
+            Trusted by students preparing for the world's most competitive exams
+          </p>
+          <div className="relative w-full overflow-hidden">
+            {/* Fade edges */}
+            <div className="absolute left-0 top-0 h-full w-24 bg-linear-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 h-full w-24 bg-linear-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+            {/* Scrolling track */}
+            <div className="flex animate-marquee items-center gap-16 w-max">
+              {([
+                { type: 'img', src: '/trust-logos/oxford.svg',   alt: 'University of Oxford',   height: 'h-7' },
+                { type: 'img', src: '/trust-logos/cambridge.svg',alt: 'University of Cambridge', height: 'h-9' },
+                { type: 'img', src: '/trust-logos/mit.svg',       alt: 'MIT',                    height: 'h-6' },
+                { type: 'img', src: '/trust-logos/imperial.svg',  alt: 'Imperial College London',height: 'h-7' },
+                { type: 'img', src: '/trust-logos/usmle.png',    alt: 'USMLE',                  height: 'h-10' },
+                { type: 'img', src: '/trust-logos/cfa.svg',       alt: 'CFA Institute',          height: 'h-8' },
+                { type: 'img', src: '/trust-logos/acca.svg',      alt: 'ACCA',                   height: 'h-8' },
+                { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
+                /* duplicate for seamless loop */
+                { type: 'img', src: '/trust-logos/oxford.svg',   alt: 'University of Oxford',   height: 'h-7' },
+                { type: 'img', src: '/trust-logos/cambridge.svg',alt: 'University of Cambridge', height: 'h-9' },
+                { type: 'img', src: '/trust-logos/mit.svg',       alt: 'MIT',                    height: 'h-6' },
+                { type: 'img', src: '/trust-logos/imperial.svg',  alt: 'Imperial College London',height: 'h-7' },
+                { type: 'img', src: '/trust-logos/usmle.png',    alt: 'USMLE',                  height: 'h-10' },
+                { type: 'img', src: '/trust-logos/cfa.svg',       alt: 'CFA Institute',          height: 'h-8' },
+                { type: 'img', src: '/trust-logos/acca.svg',      alt: 'ACCA',                   height: 'h-8' },
+                { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
+              ] as Array<
+                | { type: 'img'; src: string; alt: string; height: string }
+                | { type: 'txt'; name: string; style: string }
+              >).map((item, i) =>
+                item.type === 'img' ? (
+                  <img
+                    key={i}
+                    src={item.src}
+                    alt={item.alt}
+                    className={`${item.height} w-auto object-contain select-none grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500`}
+                  />
+                ) : (
+                  <span
+                    key={i}
+                    className={`text-gray-300 hover:text-blue-500 whitespace-nowrap select-none transition-colors duration-500 ${item.style}`}
+                  >
+                    {item.name}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        </div>
 
       </main>
       <Footer />
