@@ -5,9 +5,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { useState, useRef } from 'react';
-import { useQuery } from 'convex/react';
+import { useState, useRef, useEffect } from 'react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
+import { Id } from '../../../convex/_generated/dataModel';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
   const { signOut } = useAuthActions();
@@ -15,18 +17,72 @@ export default function DashboardPage() {
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<Id<'documents'> | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<Id<'documents'> | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
+  const documents = useQuery(api.documents.listDocuments);
+  const generateUploadUrl = useMutation(api.documents.generateUploadUrl);
+  const saveDocument = useMutation(api.documents.saveDocument);
+  const deleteDocument = useMutation(api.documents.deleteDocument);
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    if (openMenuId) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openMenuId]);
+
+  const handleDelete = async () => {
+    if (!confirmDeleteId) return;
+    setIsDeleting(true);
+    try {
+      await deleteDocument({ documentId: confirmDeleteId });
+      toast.success('Document deleted.');
+    } catch {
+      toast.error('Failed to delete. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setConfirmDeleteId(null);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
     router.push('/');
   };
 
-  const handleFileSelect = (files: FileList | null) => {
-    if (files && files.length > 0) {
-      // Handle file upload logic here
-      console.log('Files selected:', files);
+  const handleFileSelect = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+
+    setIsUploading(true);
+    setUploadingFileName(file.name);
+
+    try {
+      const uploadUrl = await generateUploadUrl();
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      const { storageId } = await response.json();
+      await saveDocument({ storageId, name: file.name });
+      toast.success(`"${file.name}" uploaded successfully!`);
+    } catch (err) {
+      toast.error("Upload failed. Please try again.");
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+      setUploadingFileName(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -207,15 +263,8 @@ export default function DashboardPage() {
               Welcome {user?.name || 'there'}
             </h1>
 
-            {/* Top Divs */}
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1 bg-pink-100 rounded-lg min-h-[100px] p-6 flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-gray-900">📚 Study Space</h2>
-              </div>
-              <div className="flex-1 bg-pink-100 rounded-lg min-h-[100px] p-6 flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-gray-900">🎯 Exam Prep</h2>
-              </div>
-            </div>
+            {/* Subtitle */}
+            <p className="text-gray-500 -mt-8 mb-8">Click or drag and drop a document here to generate flashcards and quizzes from it</p>
 
             {/* File Upload Area */}
             <div
@@ -223,13 +272,12 @@ export default function DashboardPage() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-                isDragging ? 'border-green-400 bg-green-50' : 'border-green-200 bg-white'
+                isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
               }`}
             >
               <input
                 ref={fileInputRef}
                 type="file"
-                multiple
                 className="hidden"
                 onChange={(e) => handleFileSelect(e.target.files)}
                 accept=".pdf"
@@ -237,12 +285,13 @@ export default function DashboardPage() {
               
               <button
                 onClick={handleClickUpload}
-                className="bg-green-100 hover:bg-green-200 text-green-800 font-medium px-6 py-3 rounded-lg transition-colors mb-4"
+                disabled={isUploading}
+                className="bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium px-6 py-3 rounded-lg transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                click to upload
+                {isUploading ? 'Uploading...' : 'click to upload'}
               </button>
               
-              <p className="text-gray-700 mb-8">or drag & drop files here</p>
+              <p className="text-gray-500 mb-8">or drag & drop files here</p>
 
               {/* Supported File Types */}
               <div className="flex flex-wrap justify-center items-center gap-6 text-sm">
@@ -255,9 +304,157 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
+            {/* Documents Section */}
+            {(isUploading || (documents && documents.length > 0)) && (
+              <div className="mt-10">
+                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Documents</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
+                  {/* Uploading skeleton card */}
+                  {isUploading && uploadingFileName && (
+                    <div className="bg-white border border-pink-100 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm">
+                      {/* Animated PDF icon */}
+                      <div className="relative w-12 h-14 flex items-center justify-center">
+                        <svg className="w-12 h-14 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+                          <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                        {/* Spinning ring over the icon */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-7 h-7 border-2 border-pink-400 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      </div>
+                      {/* Shimmer lines */}
+                      <div className="w-full space-y-2 animate-pulse">
+                        <div className="h-2.5 bg-pink-100 rounded-full w-3/4 mx-auto" />
+                        <div className="h-2 bg-pink-50 rounded-full w-1/2 mx-auto" />
+                      </div>
+                      <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">Reading document…</p>
+                    </div>
+                  )}
+
+                  {/* Completed document cards */}
+                  {documents?.map((doc) => (
+                    <div
+                      key={doc._id}
+                      className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
+                    >
+                      {/* 3-dot menu button */}
+                      <div className="absolute top-2 right-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(openMenuId === doc._id ? null : doc._id);
+                          }}
+                          className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="5" r="1.5" />
+                            <circle cx="12" cy="12" r="1.5" />
+                            <circle cx="12" cy="19" r="1.5" />
+                          </svg>
+                        </button>
+
+                        {/* Dropdown */}
+                        {openMenuId === doc._id && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
+                          >
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setConfirmDeleteId(doc._id);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <Link
+                        href={`/dashboard/document/${doc._id}`}
+                        className="flex flex-col items-center gap-3 w-full"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="relative w-12 h-14">
+                          <svg className="w-12 h-14 text-pink-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+                            <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white tracking-widest">PDF</span>
+                        </div>
+                        <div className="w-full text-center">
+                          <p className="text-xs font-medium text-gray-700 truncate w-full" title={doc.name}>
+                            {doc.name}
+                          </p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            {new Date(doc.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </Link>
+                    </div>
+                  ))}
+
+                </div>
+              </div>
+            )}
+
           </div>
         </main>
       </div>
+
+      {/* Delete confirmation modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => !isDeleting && setConfirmDeleteId(null)}
+          />
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Delete document?</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  This will permanently remove the file. This action can't be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting && (
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                {isDeleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }
