@@ -5,6 +5,16 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import dynamic from 'next/dynamic';
+
+const PdfViewer = dynamic(
+  () => import('@/components/PdfViewer').then((m) => m.PdfViewer),
+  { ssr: false, loading: () => (
+    <div className="h-full flex items-center justify-center">
+      <div className="w-7 h-7 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )}
+);
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
@@ -22,9 +32,14 @@ export default function DashboardPage() {
   const [openMenuId, setOpenMenuId] = useState<Id<'documents'> | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<Id<'documents'> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<Id<'documents'> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
   const documents = useQuery(api.documents.listDocuments);
+  const selectedDoc = useQuery(
+    api.documents.getDocument,
+    selectedDocId ? { documentId: selectedDocId } : 'skip'
+  );
   const generateUploadUrl = useMutation(api.documents.generateUploadUrl);
   const saveDocument = useMutation(api.documents.saveDocument);
   const deleteDocument = useMutation(api.documents.deleteDocument);
@@ -42,6 +57,7 @@ export default function DashboardPage() {
     setIsDeleting(true);
     try {
       await deleteDocument({ documentId: confirmDeleteId });
+      if (selectedDocId === confirmDeleteId) setSelectedDocId(null);
       toast.success('Document deleted.');
     } catch {
       toast.error('Failed to delete. Please try again.');
@@ -108,7 +124,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
         {/* Sidebar */}
         <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-64'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
           {/* Logo and Collapse Button */}
@@ -255,159 +271,214 @@ export default function DashboardPage() {
           )}
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Welcome Greeting */}
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-12">
-              Welcome {user?.name || 'there'}
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-gray-500 -mt-8 mb-8">Click or drag and drop a document here to generate flashcards and quizzes from it</p>
-
-            {/* File Upload Area */}
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-                isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
-              }`}
+        {selectedDocId ? (
+          /* ── Document view ── */
+          <main className="flex-1 overflow-y-auto p-8">
+            {/* Back button */}
+            <button
+              onClick={() => setSelectedDocId(null)}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors cursor-pointer mb-5"
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={(e) => handleFileSelect(e.target.files)}
-                accept=".pdf"
-              />
-              
-              <button
-                onClick={handleClickUpload}
-                disabled={isUploading}
-                className="bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium px-6 py-3 rounded-lg transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUploading ? 'Uploading...' : 'click to upload'}
-              </button>
-              
-              <p className="text-gray-500 mb-8">or drag & drop files here</p>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
 
-              {/* Supported File Types */}
-              <div className="flex flex-wrap justify-center items-center gap-6 text-sm">
-                <span className="text-gray-700">Supported Files:</span>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-gray-700">PDF</span>
-                </div>
+            {/* Contained card */}
+            <div className="border border-gray-200 rounded-2xl overflow-hidden flex" style={{ height: 'calc(100vh - 10rem)' }}>
+
+              {/* Left — PDF viewer (70%) */}
+              <div className="flex flex-col border-r border-gray-200 overflow-hidden" style={{ width: '70%' }}>
+                {selectedDoc === undefined ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-7 h-7 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
+                      <p className="text-xs text-gray-400">Loading document…</p>
+                    </div>
+                  </div>
+                ) : selectedDoc?.url ? (
+                  <PdfViewer url={selectedDoc.url} />
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-sm text-gray-400">Could not load document.</p>
+                  </div>
+                )}
               </div>
+
+              {/* Right — Tools panel (30%) */}
+              <div className="flex flex-col p-6 gap-5 overflow-y-auto bg-white" style={{ width: '30%' }}>
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900">Study Tools</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">Generate study materials from this document.</p>
+                </div>
+
+                <button
+                  disabled={!selectedDoc}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <div className="w-8 h-8 bg-pink-200 group-hover:bg-pink-300 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg className="w-4 h-4 text-pink-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-pink-800">Generate Flashcards</p>
+                    <p className="text-[11px] text-pink-400 mt-0.5">Turn key concepts into cards</p>
+                  </div>
+                </button>
+              </div>
+
             </div>
+          </main>
 
-            {/* Documents Section */}
-            {(isUploading || (documents && documents.length > 0)) && (
-              <div className="mt-10">
-                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Documents</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        ) : (
+          /* ── Home view ── */
+          <main className="flex-1 overflow-y-auto p-8">
+            <div className="max-w-4xl mx-auto">
+              {/* Welcome Greeting */}
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-12">
+                Welcome {user?.name || 'there'}
+              </h1>
 
-                  {/* Uploading skeleton card */}
-                  {isUploading && uploadingFileName && (
-                    <div className="bg-white border border-pink-100 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm">
-                      {/* Animated PDF icon */}
-                      <div className="relative w-12 h-14 flex items-center justify-center">
-                        <svg className="w-12 h-14 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-                          <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
-                        {/* Spinning ring over the icon */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-7 h-7 border-2 border-pink-400 border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      </div>
-                      {/* Shimmer lines */}
-                      <div className="w-full space-y-2 animate-pulse">
-                        <div className="h-2.5 bg-pink-100 rounded-full w-3/4 mx-auto" />
-                        <div className="h-2 bg-pink-50 rounded-full w-1/2 mx-auto" />
-                      </div>
-                      <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">Reading document…</p>
-                    </div>
-                  )}
+              {/* Subtitle */}
+              <p className="text-gray-500 -mt-8 mb-8">Click or drag and drop a document here to generate flashcards and quizzes from it</p>
 
-                  {/* Completed document cards */}
-                  {documents?.map((doc) => (
-                    <div
-                      key={doc._id}
-                      className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
-                    >
-                      {/* 3-dot menu button */}
-                      <div className="absolute top-2 right-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuId(openMenuId === doc._id ? null : doc._id);
-                          }}
-                          className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
-                        >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="5" r="1.5" />
-                            <circle cx="12" cy="12" r="1.5" />
-                            <circle cx="12" cy="19" r="1.5" />
-                          </svg>
-                        </button>
+              {/* File Upload Area */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+                  isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                  accept=".pdf"
+                />
 
-                        {/* Dropdown */}
-                        {openMenuId === doc._id && (
-                          <div
-                            onClick={(e) => e.stopPropagation()}
-                            className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
-                          >
-                            <button
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                setConfirmDeleteId(doc._id);
-                              }}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                <button
+                  onClick={handleClickUpload}
+                  disabled={isUploading}
+                  className="bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium px-6 py-3 rounded-lg transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? 'Uploading...' : 'click to upload'}
+                </button>
 
-                      <Link
-                        href={`/dashboard/document/${doc._id}`}
-                        className="flex flex-col items-center gap-3 w-full"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="relative w-12 h-14">
-                          <svg className="w-12 h-14 text-pink-300" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-                            <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                          </svg>
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white tracking-widest">PDF</span>
-                        </div>
-                        <div className="w-full text-center">
-                          <p className="text-xs font-medium text-gray-700 truncate w-full" title={doc.name}>
-                            {doc.name}
-                          </p>
-                          <p className="text-[10px] text-gray-400 mt-0.5">
-                            {new Date(doc.uploadedAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </Link>
-                    </div>
-                  ))}
+                <p className="text-gray-500 mb-8">or drag & drop files here</p>
 
+                {/* Supported File Types */}
+                <div className="flex flex-wrap justify-center items-center gap-6 text-sm">
+                  <span className="text-gray-700">Supported Files:</span>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-gray-700">PDF</span>
+                  </div>
                 </div>
               </div>
-            )}
 
-          </div>
-        </main>
+              {/* Documents Section */}
+              {(isUploading || (documents && documents.length > 0)) && (
+                <div className="mt-10">
+                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Documents</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
+                    {/* Uploading skeleton card */}
+                    {isUploading && uploadingFileName && (
+                      <div className="bg-white border border-pink-100 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm">
+                        <div className="relative w-12 h-14 flex items-center justify-center">
+                          <svg className="w-12 h-14 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+                            <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-7 h-7 border-2 border-pink-400 border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        </div>
+                        <div className="w-full space-y-2 animate-pulse">
+                          <div className="h-2.5 bg-pink-100 rounded-full w-3/4 mx-auto" />
+                          <div className="h-2 bg-pink-50 rounded-full w-1/2 mx-auto" />
+                        </div>
+                        <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">Reading document…</p>
+                      </div>
+                    )}
+
+                    {/* Completed document cards */}
+                    {documents?.map((doc) => (
+                      <div
+                        key={doc._id}
+                        className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
+                      >
+                        {/* 3-dot menu */}
+                        <div className="absolute top-2 right-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(openMenuId === doc._id ? null : doc._id);
+                            }}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <circle cx="12" cy="5" r="1.5" />
+                              <circle cx="12" cy="12" r="1.5" />
+                              <circle cx="12" cy="19" r="1.5" />
+                            </svg>
+                          </button>
+                          {openMenuId === doc._id && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
+                            >
+                              <button
+                                onClick={() => { setOpenMenuId(null); setConfirmDeleteId(doc._id); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Clickable card body */}
+                        <button
+                          onClick={() => setSelectedDocId(doc._id)}
+                          className="flex flex-col items-center gap-3 w-full cursor-pointer"
+                        >
+                          <div className="relative w-12 h-14">
+                            <svg className="w-12 h-14 text-pink-300" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+                              <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white tracking-widest">PDF</span>
+                          </div>
+                          <div className="w-full text-center">
+                            <p className="text-xs font-medium text-gray-700 truncate w-full" title={doc.name}>
+                              {doc.name}
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">
+                              {new Date(doc.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </button>
+                      </div>
+                    ))}
+
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </main>
+        )}
       </div>
 
       {/* Delete confirmation modal */}
