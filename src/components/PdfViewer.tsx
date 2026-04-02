@@ -2,12 +2,25 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+const ExpandIcon = () => (
+  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+  </svg>
+);
+
+const CompressIcon = () => (
+  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+  </svg>
+);
+
 interface PdfViewerProps {
   url: string;
 }
 
 export function PdfViewer({ url }: PdfViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
   const pdfDocRef = useRef<any>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -15,6 +28,23 @@ export function PdfViewer({ url }: PdfViewerProps) {
   const [scale, setScale] = useState(1.2);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInput, setPageInput] = useState('1');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const renderPage = useCallback(async (doc: any, page: number, scaleVal: number) => {
     if (!canvasRef.current || !doc) return;
@@ -94,7 +124,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div ref={containerRef} className="flex flex-col h-full bg-white">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50 shrink-0">
         {/* Page navigation */}
@@ -133,7 +163,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
           </button>
         </div>
 
-        {/* Zoom */}
+        {/* Zoom + Fullscreen */}
         <div className="flex items-center gap-1.5">
           <button
             onClick={zoomOut}
@@ -155,6 +185,16 @@ export function PdfViewer({ url }: PdfViewerProps) {
             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
+          </button>
+
+          <div className="w-px h-4 bg-gray-200 mx-1" />
+
+          <button
+            onClick={toggleFullscreen}
+            className="p-1.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          >
+            {isFullscreen ? <CompressIcon /> : <ExpandIcon />}
           </button>
         </div>
       </div>
