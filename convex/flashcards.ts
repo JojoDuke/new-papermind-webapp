@@ -77,6 +77,41 @@ export const generateStubDeck = mutation({
   },
 });
 
+export const listMyFlashcardDecks = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const decks = await ctx.db
+      .query("flashcardDecks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    decks.sort((a, b) => b.createdAt - a.createdAt);
+
+    const result = [];
+    for (const deck of decks) {
+      const doc = await ctx.db.get(deck.documentId);
+      const cards = await ctx.db
+        .query("flashcards")
+        .withIndex("by_deck", (q) => q.eq("deckId", deck._id))
+        .collect();
+
+      result.push({
+        _id: deck._id,
+        createdAt: deck.createdAt,
+        pageRangeStart: deck.pageRangeStart,
+        pageRangeEnd: deck.pageRangeEnd,
+        documentName: doc?.name ?? "Document",
+        cardCount: cards.length,
+      });
+    }
+
+    return result;
+  },
+});
+
 export const getDeckWithCards = query({
   args: {
     deckId: v.id("flashcardDecks"),
