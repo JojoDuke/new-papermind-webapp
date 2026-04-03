@@ -5,16 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import dynamic from 'next/dynamic';
-
-const PdfViewer = dynamic(
-  () => import('@/components/PdfViewer').then((m) => m.PdfViewer),
-  { ssr: false, loading: () => (
-    <div className="h-full flex items-center justify-center">
-      <div className="w-7 h-7 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )}
-);
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
@@ -33,6 +23,12 @@ export default function DashboardPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<Id<'documents'> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<Id<'documents'> | null>(null);
+  const [cardCount, setCardCount] = useState<'low' | 'medium' | 'high'>('low');
+  const [cardTypes, setCardTypes] = useState({ termDef: true, qa: true });
+  const [pageRangeFrom, setPageRangeFrom] = useState(1);
+  const [pageRangeTo, setPageRangeTo] = useState(10);
+  const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
+  const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
   const documents = useQuery(api.documents.listDocuments);
@@ -43,6 +39,7 @@ export default function DashboardPage() {
   const generateUploadUrl = useMutation(api.documents.generateUploadUrl);
   const saveDocument = useMutation(api.documents.saveDocument);
   const deleteDocument = useMutation(api.documents.deleteDocument);
+  const generateStubDeck = useMutation(api.flashcards.generateStubDeck);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -120,6 +117,40 @@ export default function DashboardPage() {
 
   const handleClickUpload = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleGenerateFlashcards = async () => {
+    if (!selectedDocId || selectedDoc === undefined || selectedDoc === null) return;
+    if (!cardTypes.termDef && !cardTypes.qa) {
+      toast.error('Select at least one flashcard type.');
+      return;
+    }
+    if (pageRangeFrom < 1 || pageRangeTo < 1) {
+      toast.error('Page numbers must be at least 1.');
+      return;
+    }
+    if (pageRangeFrom > pageRangeTo) {
+      toast.error('The first page must come before the last page.');
+      return;
+    }
+    setIsGeneratingDeck(true);
+    try {
+      const { deckId } = await generateStubDeck({
+        documentId: selectedDocId,
+        pageRangeStart: pageRangeFrom,
+        pageRangeEnd: pageRangeTo,
+        cardCount,
+        includeTermDef: cardTypes.termDef,
+        includeQa: cardTypes.qa,
+      });
+      router.push(`/dashboard/flashcards/${deckId}`);
+      toast.success('Flashcards generated.');
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not generate flashcards. Try again.');
+    } finally {
+      setIsGeneratingDeck(false);
+    }
   };
 
   return (
@@ -272,12 +303,11 @@ export default function DashboardPage() {
         </aside>
 
         {selectedDocId ? (
-          /* ── Document view ── */
+          /* ── Generation config view ── */
           <main className="flex-1 overflow-y-auto p-8">
-            {/* Back button */}
             <button
               onClick={() => setSelectedDocId(null)}
-              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors cursor-pointer mb-5"
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors cursor-pointer mb-6"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -285,50 +315,139 @@ export default function DashboardPage() {
               Back
             </button>
 
-            {/* Contained card */}
-            <div className="border border-gray-200 rounded-2xl overflow-hidden flex" style={{ height: 'calc(100vh - 10rem)' }}>
+            <div className="max-w-md mx-auto flex flex-col gap-4">
 
-              {/* Left — PDF viewer (70%) */}
-              <div className="flex flex-col border-r border-gray-200 overflow-hidden" style={{ width: '70%' }}>
-                {selectedDoc === undefined ? (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-7 h-7 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
-                      <p className="text-xs text-gray-400">Loading document…</p>
-                    </div>
+              {/* Document name + generate button */}
+              <div className="bg-pink-50 border border-pink-100 rounded-2xl p-6 flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-pink-200 rounded-xl flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-pink-700" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
+                      <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
                   </div>
-                ) : selectedDoc?.url ? (
-                  <PdfViewer url={selectedDoc.url} />
-                ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-sm text-gray-400">Could not load document.</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right — Tools panel (30%) */}
-              <div className="flex flex-col p-6 gap-5 overflow-y-auto bg-white" style={{ width: '30%' }}>
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-900">Study Tools</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Generate study materials from this document.</p>
+                  <span className="text-sm font-semibold text-gray-800 truncate">
+                    {selectedDoc === undefined
+                      ? <span className="inline-block w-40 h-3 bg-pink-200 rounded animate-pulse" />
+                      : selectedDoc?.name}
+                  </span>
                 </div>
 
                 <button
-                  disabled={!selectedDoc}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                  type="button"
+                  onClick={handleGenerateFlashcards}
+                  disabled={
+                    !selectedDoc || selectedDoc === undefined || isGeneratingDeck
+                  }
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold text-sm tracking-wide transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
-                  <div className="w-8 h-8 bg-pink-200 group-hover:bg-pink-300 rounded-lg flex items-center justify-center shrink-0 transition-colors">
-                    <svg className="w-4 h-4 text-pink-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-pink-800">Generate Flashcards</p>
-                    <p className="text-[11px] text-pink-400 mt-0.5">Turn key concepts into cards</p>
-                  </div>
+                  {isGeneratingDeck && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
+                  )}
+                  {isGeneratingDeck ? 'Generating…' : 'generate flashcards'}
                 </button>
               </div>
 
+              {/* Options card */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-5">
+
+                {/* Page range */}
+                <div>
+                  <p className="text-xs font-medium text-gray-600 mb-2">page range</p>
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1 flex flex-col gap-1">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wide">From</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={pageRangeFrom}
+                        onChange={(e) => setPageRangeFrom(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-300"
+                      />
+                    </label>
+                    <span className="text-gray-300 pt-5">—</span>
+                    <label className="flex-1 flex flex-col gap-1">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wide">To</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={pageRangeTo}
+                        onChange={(e) => setPageRangeTo(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-300"
+                      />
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-2">
+                    Flashcards will target this span of pages once PDF text extraction is connected.
+                  </p>
+                </div>
+
+                <div className="h-px bg-gray-100" />
+
+                {/* Number of flashcards */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-600">number of flashcards</span>
+                    <span className="text-xs text-gray-400">estimated {cardCountMap[cardCount]}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['low', 'medium', 'high'] as const).map((level) => {
+                      const isLow = level === 'low';
+                      return (
+                        <button
+                          key={level}
+                          type="button"
+                          disabled={!isLow}
+                          title={!isLow ? 'Coming soon' : undefined}
+                          onClick={() => isLow && setCardCount(level)}
+                          className={`py-2 rounded-lg text-xs font-medium border transition-all ${
+                            !isLow
+                              ? 'opacity-45 cursor-not-allowed bg-gray-50 text-gray-400 border-gray-100'
+                              : cardCount === level
+                                ? 'bg-pink-500 text-white border-pink-500 shadow-sm cursor-pointer'
+                                : 'bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-600 cursor-pointer'
+                          }`}
+                        >
+                          {level}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-gray-100" />
+
+                {/* Flashcard types */}
+                <div>
+                  <p className="text-xs font-medium text-gray-600 mb-3">flashcard types</p>
+                  <div className="flex flex-col gap-2.5">
+                    {[
+                      { key: 'termDef', label: 'term & definition' },
+                      { key: 'qa',      label: 'question & answer' },
+                    ].map(({ key, label }) => (
+                      <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                        <div
+                          onClick={() => setCardTypes((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+                          className={`w-4 h-4 rounded flex items-center justify-center border transition-all cursor-pointer ${
+                            cardTypes[key as keyof typeof cardTypes]
+                              ? 'bg-pink-500 border-pink-500'
+                              : 'bg-white border-gray-300 group-hover:border-pink-400'
+                          }`}
+                        >
+                          {cardTypes[key as keyof typeof cardTypes] && (
+                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-600 select-none">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
             </div>
           </main>
 
