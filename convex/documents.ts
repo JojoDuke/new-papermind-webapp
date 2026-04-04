@@ -62,6 +62,21 @@ export const getDocument = query({
   },
 });
 
+export const getDocumentUrl = query({
+  args: {
+    documentId: v.id("documents"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc || doc.userId !== userId) return null;
+
+    return await ctx.storage.getUrl(doc.storageId);
+  },
+});
+
 export const listDocuments = query({
   args: {},
   handler: async (ctx) => {

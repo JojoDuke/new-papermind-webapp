@@ -77,6 +77,54 @@ export const generateStubDeck = mutation({
   },
 });
 
+export const saveAIGeneratedDeck = mutation({
+  args: {
+    documentId: v.id("documents"),
+    pageRangeStart: v.number(),
+    pageRangeEnd: v.number(),
+    cardCountPreset: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    includeTermDef: v.boolean(),
+    includeQa: v.boolean(),
+    cards: v.array(
+      v.object({
+        front: v.string(),
+        back: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc || doc.userId !== userId) throw new Error("Document not found");
+
+    if (args.cards.length === 0) throw new Error("No cards provided");
+
+    const deckId = await ctx.db.insert("flashcardDecks", {
+      userId,
+      documentId: args.documentId,
+      pageRangeStart: args.pageRangeStart,
+      pageRangeEnd: args.pageRangeEnd,
+      cardCountPreset: args.cardCountPreset,
+      createdAt: Date.now(),
+    });
+
+    for (let i = 0; i < args.cards.length; i++) {
+      const card = args.cards[i];
+      await ctx.db.insert("flashcards", {
+        deckId,
+        front: card.front.trim(),
+        back: card.back.trim(),
+        order: i,
+        isNew: i === 0,
+      });
+    }
+
+    return { deckId };
+  },
+});
+
 export const listMyFlashcardDecks = query({
   args: {},
   handler: async (ctx) => {

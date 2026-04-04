@@ -8,6 +8,7 @@ import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { useAuthToken } from '@convex-dev/auth/react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   const saveDocument = useMutation(api.documents.saveDocument);
   const deleteDocument = useMutation(api.documents.deleteDocument);
   const generateStubDeck = useMutation(api.flashcards.generateStubDeck);
+  const authToken = useAuthToken();
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -125,19 +127,46 @@ export default function DashboardPage() {
     }
     setIsGeneratingDeck(true);
     try {
-      const { deckId } = await generateStubDeck({
-        documentId: selectedDocId,
-        pageRangeStart: pageRangeFrom,
-        pageRangeEnd: pageRangeTo,
-        cardCount,
-        includeTermDef: cardTypes.termDef,
-        includeQa: cardTypes.qa,
-      });
-      router.push(`/dashboard/flashcards/${deckId}`);
-      toast.success('Flashcards generated.');
+      if (authToken) {
+        // Use AI generation via the backend API
+        const res = await fetch('/api/flashcards/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            documentId: selectedDocId,
+            pageRangeStart: pageRangeFrom,
+            pageRangeEnd: pageRangeTo,
+            cardCountPreset: cardCount,
+            includeTermDef: cardTypes.termDef,
+            includeQa: cardTypes.qa,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(err.error ?? 'Generation failed');
+        }
+        const { deckId } = await res.json();
+        router.push(`/dashboard/flashcards/${deckId}`);
+        toast.success('Flashcards generated.');
+      } else {
+        // Fallback: stub deck (no auth token yet)
+        const { deckId } = await generateStubDeck({
+          documentId: selectedDocId,
+          pageRangeStart: pageRangeFrom,
+          pageRangeEnd: pageRangeTo,
+          cardCount,
+          includeTermDef: cardTypes.termDef,
+          includeQa: cardTypes.qa,
+        });
+        router.push(`/dashboard/flashcards/${deckId}`);
+        toast.success('Flashcards generated.');
+      }
     } catch (e) {
       console.error(e);
-      toast.error('Could not generate flashcards. Try again.');
+      toast.error(e instanceof Error ? e.message : 'Could not generate flashcards. Try again.');
     } finally {
       setIsGeneratingDeck(false);
     }
