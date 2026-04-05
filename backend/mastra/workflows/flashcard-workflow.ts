@@ -1,9 +1,11 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
 import { z } from "zod";
 import { flashcardAuthorAgent, flashcardSchema } from "../agents/flashcard-author";
-
-type PdfParseResult = { numpages: number; text: string };
-type PdfParseFn = (buf: Buffer, opts?: Record<string, unknown>) => Promise<PdfParseResult>;
+import {
+  dedupeCardsByFront,
+  distributeCardsAcrossBatches,
+  groupChunksIntoBatches,
+} from "../chunk-text";
 
 // ─── Shared config schema (passed through the pipeline) ──────────────────────
 
@@ -36,39 +38,24 @@ const extractPdfStep = createStep({
     }
     const buffer = Buffer.from(await response.arrayBuffer());
 
-    // Dynamic import handles CJS/ESM interop correctly in the Next.js server
-    // runtime — a top-level require() gets mis-bundled by webpack.
-    const pdfParseMod = await import("pdf-parse");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfParse = ((pdfParseMod as any).default ?? pdfParseMod) as PdfParseFn;
+    // pdf-parse v2+ exports the PDFParse class (no default function). Use
+    // getText({ first, last }) for an inclusive page range — see ParseParameters.
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: buffer });
 
-    // pdf-parse processes pages sequentially (1 → N), so a simple counter
-    // is the only reliable way to identify page numbers — the pdfjs page
-    // object exposed to pagerender has no public pageIndex/pageNumber field
-    // that is stable across pdf-parse versions.
-    const pagesInRange: string[] = [];
-    let pageCounter = 0;
+    let text = "";
+    let pageCount = 0;
+    try {
+      const textResult = await parser.getText({
+        first: pageRangeStart,
+        last: pageRangeEnd,
+      });
+      text = textResult.text.trim();
+      pageCount = textResult.total;
+    } finally {
+      await parser.destroy();
+    }
 
-    const parsed = await pdfParse(buffer, {
-      pagerender: (pageData: {
-        getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
-      }) => {
-        pageCounter++;
-        const currentPage = pageCounter;
-        if (currentPage >= pageRangeStart && currentPage <= pageRangeEnd) {
-          return pageData.getTextContent().then((content) => {
-            const pageText = content.items.map((item) => item.str).join(" ");
-            pagesInRange.push(pageText);
-            return pageText;
-          });
-        }
-        // Return empty string for pages outside the range so pdf-parse
-        // doesn't accumulate their text in parsed.text either.
-        return Promise.resolve("");
-      },
-    });
-
-    const text = pagesInRange.join("\n\n").trim();
     if (!text) {
       throw new Error(
         `No text found in pages ${pageRangeStart}–${pageRangeEnd}. ` +
@@ -76,7 +63,7 @@ const extractPdfStep = createStep({
       );
     }
 
-    return { text, pageCount: parsed.numpages, cardCountPreset, includeTermDef, includeQa };
+    return { text, pageCount, cardCountPreset, includeTermDef, includeQa };
   },
 });
 
@@ -84,9 +71,12 @@ const extractPdfStep = createStep({
 
 const CARD_COUNTS = { low: 5, medium: 8, high: 12 } as const;
 
+/** Keep each LLM prompt under this size so long page ranges stay reliable. */
+const MAX_BATCH_CHARS = 10_000;
+
 const generateCardsStep = createStep({
   id: "generate-cards",
-  description: "Use the flashcard-author agent to turn extracted text into cards",
+  description: "Chunk text with MDocument, then generate flashcards per batch",
   inputSchema: z.object({
     text: z.string(),
     pageCount: z.number(),
@@ -101,26 +91,64 @@ const generateCardsStep = createStep({
     if (includeQa) typeParts.push("question-answer pairs");
     const typesDescription = typeParts.length > 0 ? typeParts.join(" and ") : "question-answer pairs";
 
-    const prompt = `
-Generate exactly ${targetCount} flashcards (${typesDescription}) from the following passage.
+    // 1) Mastra RAG: split into manageable chunks (no embeddings / vector DB).
+    const { MDocument } = await import("@mastra/rag");
+    const doc = MDocument.fromText(text, { source: "pdf-page-range" });
+    const ragChunks = await doc.chunk({
+      strategy: "recursive",
+      maxSize: 512,
+      overlap: 50,
+      separators: ["\n\n", "\n", " "],
+    });
+
+    let chunkTexts = ragChunks.map((c) => c.text.trim()).filter(Boolean);
+    if (chunkTexts.length === 0) {
+      chunkTexts = [text.trim()];
+    }
+
+    const batches = groupChunksIntoBatches(chunkTexts, MAX_BATCH_CHARS);
+    if (batches.length === 0) {
+      throw new Error("No text left to generate cards from after chunking.");
+    }
+
+    const lengths = batches.map((b) => b.length);
+    const perBatch = distributeCardsAcrossBatches(targetCount, lengths);
+
+    const merged: { front: string; back: string }[] = [];
+
+    for (let i = 0; i < batches.length; i++) {
+      const n = perBatch[i] ?? 0;
+      if (n <= 0) continue;
+
+      const passage = batches[i];
+      const prompt = `
+Generate exactly ${n} flashcards (${typesDescription}) from the following passage excerpt (batch ${i + 1} of ${batches.length}).
+Cover distinct ideas from this excerpt only; do not repeat cards you would make for other excerpts.
 Return ONLY valid JSON that matches the schema — no markdown, no commentary.
 
 PASSAGE:
-${text}
+${passage}
 `.trim();
 
-    const result = await flashcardAuthorAgent.generate(prompt, {
-      structuredOutput: { schema: flashcardSchema },
-    });
+      const result = await flashcardAuthorAgent.generate(prompt, {
+        structuredOutput: { schema: flashcardSchema },
+      });
 
-    const parsed = flashcardSchema.safeParse(result.object);
-    if (!parsed.success) {
-      throw new Error(`Agent returned invalid card structure: ${parsed.error.message}`);
+      const parsed = flashcardSchema.safeParse(result.object);
+      if (!parsed.success) {
+        throw new Error(`Agent returned invalid card structure: ${parsed.error.message}`);
+      }
+
+      const batchCards = parsed.data.cards
+        .map((card) => ({ front: card.front.trim(), back: card.back.trim() }))
+        .filter((card) => card.front.length > 0 && card.back.length > 0)
+        .slice(0, n);
+
+      merged.push(...batchCards);
     }
 
-    const cards = parsed.data.cards
-      .map((card) => ({ front: card.front.trim(), back: card.back.trim() }))
-      .filter((card) => card.front.length > 0 && card.back.length > 0);
+    let cards = dedupeCardsByFront(merged);
+    cards = cards.slice(0, targetCount);
 
     if (cards.length === 0) {
       throw new Error("Agent returned no usable cards.");
