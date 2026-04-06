@@ -13,6 +13,7 @@ export default function StudyDecksPage() {
   const flashcardDecks = useQuery(api.flashcards.listMyFlashcardDecks);
   const user = useQuery(api.auth.currentUser);
   const deleteFlashcardDeck = useMutation(api.flashcards.deleteFlashcardDeck);
+  const renameFlashcardDeck = useMutation(api.flashcards.renameFlashcardDeck);
 
   const handleDeleteDeck = async (deckId: Id<'flashcardDecks'>) => {
     try {
@@ -21,6 +22,15 @@ export default function StudyDecksPage() {
     } catch {
       toast.error('Failed to delete deck. Please try again.');
       throw new Error('Delete failed');
+    }
+  };
+
+  const handleRenameDeck = async (deckId: Id<'flashcardDecks'>, newName: string) => {
+    try {
+      await renameFlashcardDeck({ deckId, deckName: newName });
+    } catch {
+      toast.error('Failed to rename deck. Please try again.');
+      throw new Error('Rename failed');
     }
   };
 
@@ -57,23 +67,24 @@ export default function StudyDecksPage() {
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h2 className="text-base font-semibold text-gray-800">Flashcard Decks</h2>
                   <Link
-                    href="/dashboard/study-decks#flashcard-decks"
+                    href="/dashboard/study-decks/flashcard-decks"
                     className="text-xs font-semibold text-blue-600 tracking-wide hover:text-blue-700 transition-colors"
                   >
                     SEE ALL
                   </Link>
                 </div>
                 {hasFlashcards ? (
-                  <div className="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1">
-                    {flashcardDecks!.map((deck) => (
+                  <div className="flex flex-wrap gap-4">
+                    {flashcardDecks!.slice(0, 5).map((deck) => (
                       <StudyDeckCard
                         key={deck._id}
                         deckId={deck._id}
-                        title={deck.documentName}
+                        title={deck.deckName}
                         cardCount={deck.cardCount}
                         progress={0}
                         userInitial={userInitial}
                         onDelete={() => handleDeleteDeck(deck._id)}
+                        onRename={(newName) => handleRenameDeck(deck._id, newName)}
                       />
                     ))}
                   </div>

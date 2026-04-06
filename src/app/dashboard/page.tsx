@@ -24,6 +24,8 @@ export default function DashboardPage() {
   const [pageRangeFrom, setPageRangeFrom] = useState(1);
   const [pageRangeTo, setPageRangeTo] = useState(10);
   const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
+  const [deckName, setDeckName] = useState('');
+  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
   const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
@@ -79,8 +81,17 @@ export default function DashboardPage() {
       if (!response.ok) throw new Error("Upload failed");
 
       const { storageId } = await response.json();
-      await saveDocument({ storageId, name: file.name });
+      const documentId = await saveDocument({ storageId, name: file.name });
       toast.success(`"${file.name}" uploaded successfully!`);
+
+      // Fire-and-forget: count pages in the background and store on the document
+      if (authToken) {
+        fetch('/api/documents/count-pages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ documentId }),
+        }).catch(() => {/* non-critical, fail silently */});
+      }
     } catch (err) {
       toast.error("Upload failed. Please try again.");
       console.error(err);
@@ -113,6 +124,10 @@ export default function DashboardPage() {
 
   const handleGenerateFlashcards = async () => {
     if (!selectedDocId || selectedDoc === undefined || selectedDoc === null) return;
+    if (!deckName.trim()) {
+      toast.error('Please give your deck a name.');
+      return;
+    }
     if (!cardTypes.termDef && !cardTypes.qa) {
       toast.error('Select at least one flashcard type.');
       return;
@@ -137,6 +152,7 @@ export default function DashboardPage() {
           },
           body: JSON.stringify({
             documentId: selectedDocId,
+            deckName: deckName.trim(),
             pageRangeStart: pageRangeFrom,
             pageRangeEnd: pageRangeTo,
             cardCountPreset: cardCount,
@@ -155,6 +171,7 @@ export default function DashboardPage() {
         // Fallback: stub deck (no auth token yet)
         const { deckId } = await generateStubDeck({
           documentId: selectedDocId,
+          deckName: deckName.trim(),
           pageRangeStart: pageRangeFrom,
           pageRangeEnd: pageRangeTo,
           cardCount,
@@ -181,7 +198,7 @@ export default function DashboardPage() {
           /* ── Generation config view ── */
           <main className="flex-1 overflow-y-auto p-8">
             <button
-              onClick={() => setSelectedDocId(null)}
+              onClick={() => { setSelectedDocId(null); setDeckName(''); }}
               className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors cursor-pointer mb-6"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,11 +225,25 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-gray-600">
+                    Deck Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="What would you like to name this deck?"
+                    value={deckName}
+                    onChange={(e) => setDeckName(e.target.value)}
+                    maxLength={80}
+                    className="w-full px-3 py-2.5 rounded-lg border border-pink-200 bg-white text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition"
+                  />
+                </div>
+
                 <button
                   type="button"
                   onClick={handleGenerateFlashcards}
                   disabled={
-                    !selectedDoc || selectedDoc === undefined || isGeneratingDeck
+                    !selectedDoc || selectedDoc === undefined || isGeneratingDeck || !deckName.trim()
                   }
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold text-sm tracking-wide transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
@@ -228,7 +259,7 @@ export default function DashboardPage() {
 
                 {/* Page range */}
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-2">page range</p>
+                  <p className="text-xs font-medium text-gray-600 mb-2">Page Range</p>
                   <div className="flex items-center gap-2">
                     <label className="flex-1 flex flex-col gap-1">
                       <span className="text-[10px] text-gray-400 uppercase tracking-wide">From</span>
@@ -253,7 +284,9 @@ export default function DashboardPage() {
                     </label>
                   </div>
                   <p className="text-[11px] text-gray-400 mt-2">
-                    Flashcards will target this span of pages once PDF text extraction is connected.
+                    {selectedDoc?.pageCount
+                      ? `This document has ${selectedDoc.pageCount} page${selectedDoc.pageCount === 1 ? '' : 's'}.`
+                      : 'Flashcards will be generated from the selected pages.'}
                   </p>
                 </div>
 
@@ -262,7 +295,7 @@ export default function DashboardPage() {
                 {/* Number of flashcards */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-gray-600">number of flashcards</span>
+                    <span className="text-xs font-medium text-gray-600">Number of Flashcards</span>
                     <span className="text-xs text-gray-400">estimated {cardCountMap[cardCount]}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -272,15 +305,13 @@ export default function DashboardPage() {
                         <button
                           key={level}
                           type="button"
-                          disabled={!isLow}
-                          title={!isLow ? 'Coming soon' : undefined}
-                          onClick={() => isLow && setCardCount(level)}
-                          className={`py-2 rounded-lg text-xs font-medium border transition-all ${
+                          onClick={() => isLow ? setCardCount(level) : setShowUpgradePopup(true)}
+                          className={`py-2 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                             !isLow
-                              ? 'opacity-45 cursor-not-allowed bg-gray-50 text-gray-400 border-gray-100'
+                              ? 'bg-gray-50 text-gray-400 border-gray-100 hover:border-pink-200 hover:text-pink-400'
                               : cardCount === level
-                                ? 'bg-pink-500 text-white border-pink-500 shadow-sm cursor-pointer'
-                                : 'bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-600 cursor-pointer'
+                                ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
+                                : 'bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-600'
                           }`}
                         >
                           {level}
@@ -295,7 +326,7 @@ export default function DashboardPage() {
 
                 {/* Flashcard types */}
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-3">flashcard types</p>
+                  <p className="text-xs font-medium text-gray-600 mb-3">Flashcard Types</p>
                   <div className="flex flex-col gap-2.5">
                     {[
                       { key: 'termDef', label: 'term & definition' },
@@ -517,6 +548,36 @@ export default function DashboardPage() {
                 {isDeleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade popup */}
+      {showUpgradePopup && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowUpgradePopup(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
+              <svg className="w-6 h-6 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 text-center">Upgrade to unlock</h2>
+            <p className="text-sm text-gray-500 text-center">
+              Medium and High card counts are available on paid plans. Upgrade to generate more flashcards per session.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowUpgradePopup(false)}
+              className="w-full py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition-colors cursor-pointer"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}

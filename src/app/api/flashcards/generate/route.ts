@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
   // ── Parse body ──────────────────────────────────────────────────────────────
   let body: {
     documentId: string;
+    deckName: string;
     pageRangeStart: number;
     pageRangeEnd: number;
     cardCountPreset: "low" | "medium" | "high";
@@ -30,8 +31,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { documentId, pageRangeStart, pageRangeEnd, cardCountPreset, includeTermDef, includeQa } = body;
-  if (!documentId || !pageRangeStart || !pageRangeEnd || !cardCountPreset) {
+  const { documentId, deckName, pageRangeStart, pageRangeEnd, cardCountPreset, includeTermDef, includeQa } = body;
+  if (!documentId || !deckName?.trim() || !pageRangeStart || !pageRangeEnd || !cardCountPreset) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
   try {
     const { deckId } = await convex.mutation(api.flashcards.saveAIGeneratedDeck, {
       documentId: docId,
+      deckName: deckName.trim(),
       pageRangeStart,
       pageRangeEnd,
       cardCountPreset,

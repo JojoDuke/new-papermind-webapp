@@ -139,8 +139,24 @@ export function DashboardSidebar() {
         </Link>
       </nav>
 
-      {!isSidebarCollapsed && (
-        <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200">
+        {isSidebarCollapsed ? (
+          <div className="group relative flex justify-center">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
+              aria-label="Sign Out"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+            <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-white text-gray-900 text-xs rounded-md whitespace-nowrap pointer-events-none z-50 shadow-md border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              Sign Out
+            </div>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={handleSignOut}
@@ -148,8 +164,8 @@ export function DashboardSidebar() {
           >
             Sign Out
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

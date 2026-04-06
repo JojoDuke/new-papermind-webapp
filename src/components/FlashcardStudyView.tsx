@@ -46,8 +46,59 @@ function buildQuizQuestions(cards: QuizCard[]): QuizQuestion[] {
 type FlashcardStudyViewProps = {
   cards: FlashcardStudyCard[] | undefined;
   loading: boolean;
-  documentName?: string;
+  deckName?: string;
 };
+
+function playSuccessSound(higher = false) {
+  try {
+    const ctx = new AudioContext();
+    // Normal: D5 → A5 | Higher: F#5 → C#6
+    const notes = higher ? [739.99, 1108.73] : [587.33, 880];
+    let time = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(0.35, time + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + (i === 0 ? 0.18 : 0.38));
+      osc.start(time);
+      osc.stop(time + 0.4);
+      time += 0.13;
+    });
+    setTimeout(() => ctx.close(), 1000);
+  } catch {
+    // silently ignore if Web Audio not available
+  }
+}
+
+function playErrorSound() {
+  try {
+    const ctx = new AudioContext();
+    const notes = [311.13, 233.08]; // Eb4 → Bb3 (descending minor third)
+    let time = ctx.currentTime;
+    notes.forEach((freq) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(0.3, time + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+      osc.start(time);
+      osc.stop(time + 0.32);
+      time += 0.16;
+    });
+    setTimeout(() => ctx.close(), 1000);
+  } catch {
+    // silently ignore if Web Audio not available
+  }
+}
 
 function buildQuizCards(cards: FlashcardStudyCard[]): QuizCard[] {
   const backs = cards.map((c) => c.back);
@@ -60,7 +111,7 @@ function buildQuizCards(cards: FlashcardStudyCard[]): QuizCard[] {
   });
 }
 
-export function FlashcardStudyView({ cards, loading, documentName }: FlashcardStudyViewProps) {
+export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyViewProps) {
   // ── Build quiz cards instantly from the deck (no API call) ───────────────
   const [quizCards, setQuizCards] = useState<QuizCard[] | null>(null);
   const builtRef = useRef(false);
@@ -95,6 +146,23 @@ export function FlashcardStudyView({ cards, loading, documentName }: FlashcardSt
 
   // result
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // ── Space key → flip card during learn phase ─────────────────────────────
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.code !== 'Space') return;
+      if (phase !== 'learn') return;
+      // Don't fire when focus is inside a text input / button
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+      e.preventDefault();
+      setLearnFlipped((f) => !f);
+      setLearnSeen(true);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase]);
 
   // Start session once quiz cards are ready
   useEffect(() => {
@@ -170,7 +238,8 @@ export function FlashcardStudyView({ cards, loading, documentName }: FlashcardSt
     setWasCorrect(correct);
     setAnswerState('answered');
     recordResult(q.card._id, correct);
-    if (!correct) missedCards.current.push(q.card);
+    if (correct) { if (soundEnabled) playSuccessSound(quizIdx >= Math.floor(quizQueue.length / 2)); }
+    else { if (soundEnabled) playErrorSound(); missedCards.current.push(q.card); }
   }
 
   function handleFreeTextSubmit() {
@@ -183,7 +252,8 @@ export function FlashcardStudyView({ cards, loading, documentName }: FlashcardSt
     setWasCorrect(correct);
     setAnswerState('answered');
     recordResult(q.card._id, correct);
-    if (!correct) missedCards.current.push(q.card);
+    if (correct) { if (soundEnabled) playSuccessSound(quizIdx >= Math.floor(quizQueue.length / 2)); }
+    else { if (soundEnabled) playErrorSound(); missedCards.current.push(q.card); }
   }
 
   function handleSkip() {
@@ -261,16 +331,60 @@ export function FlashcardStudyView({ cards, loading, documentName }: FlashcardSt
 
   function renderHeader() {
     return (
-      <div className="px-6 pt-8 pb-2 shrink-0">
-        <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-pink-400 rounded-full transition-all duration-300 ease-out"
-            style={{ width: `${progress * 100}%` }}
-          />
+      <div className="px-6 pt-6 pb-2 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-1 justify-center pr-3">
+            <div className="w-[90%] h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-pink-400 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Sound toggle */}
+          <div className="relative group shrink-0">
+            <button
+              type="button"
+              onClick={() => setSoundEnabled((v) => !v)}
+              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                soundEnabled
+                  ? 'text-pink-500 bg-pink-50 border-pink-200 hover:bg-pink-100'
+                  : 'text-gray-400 bg-gray-50 border-gray-200 hover:bg-gray-100'
+              }`}
+              aria-label={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
+            >
+              {soundEnabled ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" />
+                </svg>
+              )}
+            </button>
+
+            {/* Tooltip */}
+            <div className="pointer-events-none absolute right-0 top-full mt-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+              <div className="relative bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+                <span className="block font-medium">
+                  {soundEnabled ? 'Sound is on' : 'Sound is off'}
+                </span>
+                <span className="block text-gray-400 mt-0.5">
+                  {soundEnabled ? 'Click to mute feedback sounds' : 'Click to enable feedback sounds'}
+                </span>
+                {/* Arrow */}
+                <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-900 rotate-45" />
+              </div>
+            </div>
+          </div>
         </div>
-        {documentName && (
-          <p className="text-[11px] text-gray-400 truncate mt-2 text-center" title={documentName}>
-            {documentName}
+
+        {deckName && (
+          <p className="text-[11px] text-gray-400 truncate mt-2 text-center" title={deckName}>
+            {deckName}
           </p>
         )}
       </div>
@@ -395,12 +509,11 @@ export function FlashcardStudyView({ cards, loading, documentName }: FlashcardSt
         )}
 
         <div className="flex-1 flex flex-row gap-0 divide-x divide-gray-100 min-h-0">
-          {/* Left — card front */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
-            <div className="w-full max-w-xs rounded-2xl border border-gray-200 bg-gray-50 p-6 flex items-center justify-center min-h-[180px]">
+          {/* Left — card front (same style as learn phase) */}
+          <div className="flex-1 flex flex-col items-center justify-start px-6 py-6">
+            <div className="w-full max-w-xs aspect-4/5 max-h-[280px] rounded-2xl border border-gray-200 bg-white shadow-sm flex items-center justify-center p-6">
               <p className="text-center text-lg font-semibold text-gray-800 leading-snug">{q.card.front}</p>
             </div>
-            <p className="mt-3 text-[10px] text-gray-400 uppercase tracking-widest">Question</p>
           </div>
 
           {/* Right — answer area */}

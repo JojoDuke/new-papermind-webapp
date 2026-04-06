@@ -9,11 +9,13 @@ export default defineSchema({
     name: v.string(),
     storageId: v.id("_storage"),
     uploadedAt: v.number(),
+    pageCount: v.optional(v.number()),
   }).index("by_user", ["userId"]),
 
   flashcardDecks: defineTable({
     userId: v.id("users"),
     documentId: v.id("documents"),
+    deckName: v.string(),
     pageRangeStart: v.number(),
     pageRangeEnd: v.number(),
     cardCountPreset: v.union(

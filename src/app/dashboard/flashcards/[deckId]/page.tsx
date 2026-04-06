@@ -78,7 +78,7 @@ export default function FlashcardDeckPage() {
             <FlashcardStudyView
               cards={data?.cards}
               loading={loading}
-              documentName={data?.documentName}
+              deckName={data?.deckName}
             />
           )}
         </main>

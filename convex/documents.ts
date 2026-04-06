@@ -29,6 +29,22 @@ export const saveDocument = mutation({
   },
 });
 
+export const updateDocumentPageCount = mutation({
+  args: {
+    documentId: v.id("documents"),
+    pageCount: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc || doc.userId !== userId) throw new Error("Document not found");
+
+    await ctx.db.patch(args.documentId, { pageCount: args.pageCount });
+  },
+});
+
 export const deleteDocument = mutation({
   args: {
     documentId: v.id("documents"),

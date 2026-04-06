@@ -7,6 +7,7 @@ const CARD_COUNTS = { low: 5, medium: 8, high: 12 } as const;
 export const generateStubDeck = mutation({
   args: {
     documentId: v.id("documents"),
+    deckName: v.string(),
     pageRangeStart: v.number(),
     pageRangeEnd: v.number(),
     cardCount: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
@@ -40,6 +41,7 @@ export const generateStubDeck = mutation({
     const deckId = await ctx.db.insert("flashcardDecks", {
       userId,
       documentId: args.documentId,
+      deckName: args.deckName.trim(),
       pageRangeStart: args.pageRangeStart,
       pageRangeEnd: args.pageRangeEnd,
       cardCountPreset: args.cardCount,
@@ -80,6 +82,7 @@ export const generateStubDeck = mutation({
 export const saveAIGeneratedDeck = mutation({
   args: {
     documentId: v.id("documents"),
+    deckName: v.string(),
     pageRangeStart: v.number(),
     pageRangeEnd: v.number(),
     cardCountPreset: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
@@ -104,6 +107,7 @@ export const saveAIGeneratedDeck = mutation({
     const deckId = await ctx.db.insert("flashcardDecks", {
       userId,
       documentId: args.documentId,
+      deckName: args.deckName.trim(),
       pageRangeStart: args.pageRangeStart,
       pageRangeEnd: args.pageRangeEnd,
       cardCountPreset: args.cardCountPreset,
@@ -151,12 +155,32 @@ export const listMyFlashcardDecks = query({
         createdAt: deck.createdAt,
         pageRangeStart: deck.pageRangeStart,
         pageRangeEnd: deck.pageRangeEnd,
+        deckName: deck.deckName,
         documentName: doc?.name ?? "Document",
         cardCount: cards.length,
       });
     }
 
     return result;
+  },
+});
+
+export const renameFlashcardDeck = mutation({
+  args: {
+    deckId: v.id("flashcardDecks"),
+    deckName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const deck = await ctx.db.get(args.deckId);
+    if (!deck || deck.userId !== userId) throw new Error("Deck not found");
+
+    const name = args.deckName.trim();
+    if (!name) throw new Error("Deck name cannot be empty");
+
+    await ctx.db.patch(args.deckId, { deckName: name });
   },
 });
 
@@ -207,6 +231,7 @@ export const getDeckWithCards = query({
     return {
       deck,
       cards,
+      deckName: deck.deckName,
       documentName: doc?.name ?? "Document",
     };
   },
