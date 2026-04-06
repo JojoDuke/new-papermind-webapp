@@ -1,15 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { StudyDeckCard } from '@/components/StudyDeckCard';
+import toast from 'react-hot-toast';
+import type { Id } from '../../../../convex/_generated/dataModel';
 
 export default function StudyDecksPage() {
   const flashcardDecks = useQuery(api.flashcards.listMyFlashcardDecks);
   const user = useQuery(api.auth.currentUser);
+  const deleteFlashcardDeck = useMutation(api.flashcards.deleteFlashcardDeck);
+
+  const handleDeleteDeck = async (deckId: Id<'flashcardDecks'>) => {
+    try {
+      await deleteFlashcardDeck({ deckId });
+      toast.success('Deck deleted.');
+    } catch {
+      toast.error('Failed to delete deck. Please try again.');
+      throw new Error('Delete failed');
+    }
+  };
 
   const loading = flashcardDecks === undefined;
   const hasFlashcards = (flashcardDecks?.length ?? 0) > 0;
@@ -60,6 +73,7 @@ export default function StudyDecksPage() {
                         cardCount={deck.cardCount}
                         progress={0}
                         userInitial={userInitial}
+                        onDelete={() => handleDeleteDeck(deck._id)}
                       />
                     ))}
                   </div>

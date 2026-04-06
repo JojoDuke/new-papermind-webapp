@@ -160,6 +160,30 @@ export const listMyFlashcardDecks = query({
   },
 });
 
+export const deleteFlashcardDeck = mutation({
+  args: {
+    deckId: v.id("flashcardDecks"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const deck = await ctx.db.get(args.deckId);
+    if (!deck || deck.userId !== userId) throw new Error("Deck not found");
+
+    const cards = await ctx.db
+      .query("flashcards")
+      .withIndex("by_deck", (q) => q.eq("deckId", args.deckId))
+      .collect();
+
+    for (const card of cards) {
+      await ctx.db.delete(card._id);
+    }
+
+    await ctx.db.delete(args.deckId);
+  },
+});
+
 export const getDeckWithCards = query({
   args: {
     deckId: v.id("flashcardDecks"),
