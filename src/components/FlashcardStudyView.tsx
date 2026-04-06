@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useEffect, useRef, useState } from 'react';
 
 export type FlashcardStudyCard = {
   _id: string;
@@ -11,72 +10,261 @@ export type FlashcardStudyCard = {
   isNew: boolean;
 };
 
+type QuizCard = FlashcardStudyCard & { distractors: [string, string] };
+type QuestionType = 'mc' | 'free_text';
+type QuizQuestion = {
+  card: QuizCard;
+  type: QuestionType;
+  options: string[]; // always 3, shuffled (mc only meaningful)
+};
+
+type Phase = 'learn' | 'quiz' | 'requeue' | 'result';
+type AnswerState = 'idle' | 'answered' | 'skipped' | 'self_mark';
+
+const BATCH_SIZE = 2;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuizQuestions(cards: QuizCard[]): QuizQuestion[] {
+  return cards.map((card) => {
+    const hasEnoughDistractors = card.distractors[0] != null && card.distractors[1] != null;
+    const type: QuestionType = hasEnoughDistractors && Math.random() < 0.5 ? 'mc' : 'free_text';
+    const options = hasEnoughDistractors
+      ? shuffle([card.back, card.distractors[0], card.distractors[1]])
+      : [];
+    return { card, type, options };
+  });
+}
+
 type FlashcardStudyViewProps = {
   cards: FlashcardStudyCard[] | undefined;
   loading: boolean;
   documentName?: string;
 };
 
-export function FlashcardStudyView({
-  cards,
-  loading,
-  documentName,
-}: FlashcardStudyViewProps) {
-  const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [peek, setPeek] = useState(false);
+function buildQuizCards(cards: FlashcardStudyCard[]): QuizCard[] {
+  const backs = cards.map((c) => c.back);
+  return cards.map((card, i) => {
+    const pool = shuffle(backs.filter((_, j) => j !== i));
+    // null signals "not enough cards for MC — use free_text instead"
+    const d1 = pool[0] ?? null;
+    const d2 = pool[1] ?? null;
+    return { ...card, distractors: [d1, d2] as unknown as [string, string] };
+  });
+}
 
-  const total = cards?.length ?? 0;
-  const card = total > 0 && cards ? cards[index] : undefined;
-
-  useEffect(() => {
-    setIndex(0);
-    setFlipped(false);
-    setPeek(false);
-  }, [cards]);
-
-  const goNext = useCallback(() => {
-    if (!cards?.length) return;
-    setIndex((i) => Math.min(cards.length - 1, i + 1));
-    setFlipped(false);
-    setPeek(false);
-  }, [cards]);
-
-  const goPrev = useCallback(() => {
-    if (!cards?.length) return;
-    setIndex((i) => Math.max(0, i - 1));
-    setFlipped(false);
-    setPeek(false);
-  }, [cards]);
+export function FlashcardStudyView({ cards, loading, documentName }: FlashcardStudyViewProps) {
+  // ── Build quiz cards instantly from the deck (no API call) ───────────────
+  const [quizCards, setQuizCards] = useState<QuizCard[] | null>(null);
+  const builtRef = useRef(false);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        setFlipped((f) => !f);
-      }
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        goNext();
-      }
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        goPrev();
-      }
-    };
+    if (!cards || cards.length === 0) return;
+    if (builtRef.current) return;
+    builtRef.current = true;
+    setQuizCards(buildQuizCards(cards));
+  }, [cards]);
 
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [goNext, goPrev]);
+  // ── Session state ─────────────────────────────────────────────────────────
+  const [phase, setPhase] = useState<Phase>('learn');
+  const [batchIndex, setBatchIndex] = useState(0);
 
-  const progress = total > 0 ? (index + 1) / total : 0;
+  // learn phase
+  const [learnIdx, setLearnIdx] = useState(0);
+  const [learnFlipped, setLearnFlipped] = useState(false);
+  const [learnSeen, setLearnSeen] = useState(false);
 
-  return (
-    <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col min-h-[420px]">
-      <div className="px-6 pt-8 pb-2">
+  // quiz phase
+  const [quizQueue, setQuizQueue] = useState<QuizQuestion[]>([]);
+  const [quizIdx, setQuizIdx] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [freeText, setFreeText] = useState('');
+  const [answerState, setAnswerState] = useState<AnswerState>('idle');
+  const [wasCorrect, setWasCorrect] = useState(false);
+
+  // scoring
+  const firstAttempt = useRef<Map<string, boolean>>(new Map());
+  const missedCards = useRef<QuizCard[]>([]);
+
+  // result
+  const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
+
+  // Start session once quiz cards are ready
+  useEffect(() => {
+    if (quizCards) {
+      missedCards.current = [];
+      firstAttempt.current = new Map();
+      setBatchIndex(0);
+      startLearnPhase(0, quizCards);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizCards]);
+
+  function startLearnPhase(batch: number, qc: QuizCard[]) {
+    const start = batch * BATCH_SIZE;
+    if (start >= qc.length) {
+      // no more new cards — go to requeue or result
+      finishAllBatches();
+      return;
+    }
+    setBatchIndex(batch);
+    setLearnIdx(0);
+    setLearnFlipped(false);
+    setLearnSeen(false);
+    setPhase('learn');
+  }
+
+  function currentLearnCard(): QuizCard | undefined {
+    if (!quizCards) return undefined;
+    const start = batchIndex * BATCH_SIZE;
+    return quizCards[start + learnIdx];
+  }
+
+  function currentBatchCards(): QuizCard[] {
+    if (!quizCards) return [];
+    const start = batchIndex * BATCH_SIZE;
+    return quizCards.slice(start, start + BATCH_SIZE);
+  }
+
+  function advanceLearn() {
+    const batchCards = currentBatchCards();
+    if (learnIdx + 1 < batchCards.length) {
+      setLearnIdx((i) => i + 1);
+      setLearnFlipped(false);
+      setLearnSeen(false);
+    } else {
+      // start quiz for this batch
+      const questions = buildQuizQuestions(batchCards);
+      setQuizQueue(questions);
+      setQuizIdx(0);
+      resetQuizInput();
+      setPhase('quiz');
+    }
+  }
+
+  // ── Quiz helpers ──────────────────────────────────────────────────────────
+  function resetQuizInput() {
+    setSelectedOption(null);
+    setFreeText('');
+    setAnswerState('idle');
+    setWasCorrect(false);
+  }
+
+  function recordResult(cardId: string, correct: boolean) {
+    if (!firstAttempt.current.has(cardId)) {
+      firstAttempt.current.set(cardId, correct);
+    }
+  }
+
+  function handleMCSubmit() {
+    if (!selectedOption || answerState !== 'idle') return;
+    const q = quizQueue[quizIdx];
+    const correct = selectedOption === q.card.back;
+    setWasCorrect(correct);
+    setAnswerState('answered');
+    recordResult(q.card._id, correct);
+    if (!correct) missedCards.current.push(q.card);
+  }
+
+  function handleFreeTextSubmit() {
+    if (answerState !== 'idle') return;
+    setAnswerState('self_mark');
+  }
+
+  function handleSelfMark(correct: boolean) {
+    const q = quizQueue[quizIdx];
+    setWasCorrect(correct);
+    setAnswerState('answered');
+    recordResult(q.card._id, correct);
+    if (!correct) missedCards.current.push(q.card);
+  }
+
+  function handleSkip() {
+    if (answerState !== 'idle') return;
+    const q = quizQueue[quizIdx];
+    setWasCorrect(false);
+    setAnswerState('skipped');
+    recordResult(q.card._id, false);
+    missedCards.current.push(q.card);
+  }
+
+  function advanceQuiz() {
+    if (quizIdx + 1 < quizQueue.length) {
+      setQuizIdx((i) => i + 1);
+      resetQuizInput();
+    } else {
+      // batch done — next batch or requeue/result
+      const nextBatch = batchIndex + 1;
+      const start = nextBatch * BATCH_SIZE;
+      if (quizCards && start < quizCards.length) {
+        startLearnPhase(nextBatch, quizCards);
+      } else {
+        finishAllBatches();
+      }
+    }
+  }
+
+  function finishAllBatches() {
+    const missed = missedCards.current;
+    if (missed.length > 0) {
+      // one final quiz-only pass for missed cards
+      missedCards.current = [];
+      const questions = buildQuizQuestions(missed);
+      setQuizQueue(questions);
+      setQuizIdx(0);
+      resetQuizInput();
+      setPhase('requeue');
+    } else {
+      showResult();
+    }
+  }
+
+  function advanceRequeue() {
+    if (quizIdx + 1 < quizQueue.length) {
+      setQuizIdx((i) => i + 1);
+      resetQuizInput();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    const total = firstAttempt.current.size;
+    let correct = 0;
+    firstAttempt.current.forEach((v) => { if (v) correct++; });
+    setScore({ correct, total });
+    setPhase('result');
+  }
+
+  function restartSession() {
+    if (!cards?.length) return;
+    missedCards.current = [];
+    firstAttempt.current = new Map();
+    setScore(null);
+    setQuizCards(buildQuizCards(cards));
+  }
+
+  // ── Progress bar ─────────────────────────────────────────────────────────
+  const totalCards = quizCards?.length ?? 0;
+  const doneCards = firstAttempt.current.size;
+  const progress = totalCards > 0 ? doneCards / totalCards : 0;
+
+  // ── Render helpers ────────────────────────────────────────────────────────
+  const outerCls = "w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col min-h-[520px]";
+
+  function renderHeader() {
+    return (
+      <div className="px-6 pt-8 pb-2 shrink-0">
         <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gray-300 rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-pink-400 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -86,137 +274,306 @@ export function FlashcardStudyView({
           </p>
         )}
       </div>
+    );
+  }
 
-      <div className="flex-1 flex flex-col px-6 pb-6 pt-2">
-        {loading || !cards ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin" />
-            <p className="text-sm text-gray-500">Loading cards…</p>
-          </div>
-        ) : total === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
-            No cards in this deck.
-          </div>
-        ) : !card ? (
-          <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
-            Card not available.
-          </div>
-        ) : (
-          <>
-            <div className="h-5 flex items-center justify-center mb-3">
-              {card.isNew ? (
-                <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-amber-500">
-                  NEW CARD
-                </p>
-              ) : null}
-            </div>
+  // ── Loading (Convex data not yet ready) ──────────────────────────────────
+  if (loading) {
+    return (
+      <div className={outerCls}>
+        {renderHeader()}
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
+          <div className="w-8 h-8 border-2 border-gray-200 border-t-pink-400 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500">Loading cards…</p>
+        </div>
+      </div>
+    );
+  }
 
-            <button
-              type="button"
-              onClick={() => setFlipped((f) => !f)}
-              className="relative mx-auto w-full max-w-sm aspect-4/5 max-h-[280px] cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded-2xl"
-              style={{ perspective: '1000px' }}
+  // ── No cards ──────────────────────────────────────────────────────────────
+  if (!quizCards || quizCards.length === 0) {
+    return (
+      <div className={outerCls}>
+        {renderHeader()}
+        <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
+          No cards in this deck.
+        </div>
+      </div>
+    );
+  }
+
+  // ── Learn phase ───────────────────────────────────────────────────────────
+  if (phase === 'learn') {
+    const card = currentLearnCard();
+    const batchCards = currentBatchCards();
+    const batchTotal = batchCards.length;
+
+    if (!card) return null;
+
+    return (
+      <div className={outerCls}>
+        {renderHeader()}
+        <div className="flex-1 flex flex-col px-6 pb-6 pt-2">
+          <div className="h-5 flex items-center justify-center mb-3">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-amber-500">
+              NEW CARD
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setLearnFlipped((f) => !f);
+              setLearnSeen(true);
+            }}
+            className="relative mx-auto w-full max-w-sm aspect-4/5 max-h-[280px] cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded-2xl"
+            style={{ perspective: '1000px' }}
+          >
+            <div
+              className="relative w-full h-full transition-transform duration-500 rounded-2xl border border-gray-200 bg-white shadow-sm group-hover:shadow-md"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: learnFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              }}
             >
               <div
-                className="relative w-full h-full transition-transform duration-500 rounded-2xl border border-gray-200 bg-white shadow-sm group-hover:shadow-md"
-                style={{
-                  transformStyle: 'preserve-3d',
-                  transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                }}
+                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
+                style={{ backfaceVisibility: 'hidden' }}
               >
-                <div
-                  className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
-                  style={{ backfaceVisibility: 'hidden' }}
-                >
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-gray-800 leading-snug">{card.front}</p>
-                    {peek && !flipped && (
-                      <p className="mt-4 text-xs text-gray-400 leading-relaxed border-t border-dashed border-gray-200 pt-3">
-                        {card.back}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div
-                  className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                  }}
-                >
-                  <p className="text-center text-lg font-medium text-gray-700 leading-snug">
-                    {card.back}
-                  </p>
-                </div>
+                <p className="text-lg font-semibold text-gray-800 leading-snug text-center">{card.front}</p>
               </div>
-            </button>
-
-            <p className="text-center text-sm text-gray-500 mt-5">
-              Click card or press{' '}
-              <kbd className="px-2 py-0.5 rounded-md border border-gray-200 bg-gray-50 text-xs font-mono text-gray-600">
-                SPACE
-              </kbd>{' '}
-              to flip
-            </p>
-
-            <p className="text-center text-[11px] text-gray-400 mt-1">
-              <kbd className="px-1.5 py-0.5 rounded border border-gray-100 bg-gray-50 font-mono text-[10px]">←</kbd>{' '}
-              <kbd className="px-1.5 py-0.5 rounded border border-gray-100 bg-gray-50 font-mono text-[10px]">→</kbd>{' '}
-              previous / next ·{' '}
-              <kbd className="px-1.5 py-0.5 rounded border border-gray-100 bg-gray-50 font-mono text-[10px]">Esc</kbd>{' '}
-              exit
-            </p>
-
-            <div className="mt-auto flex items-center justify-between pt-6">
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setPeek((p) => !p)}
-                  className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                    peek ? 'bg-gray-100 text-gray-700' : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
-                  }`}
-                  aria-label={peek ? 'Hide peek' : 'Peek at answer'}
-                  title="Peek at answer"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toast('Card details and reporting will be available soon.')}
-                  className="p-2 rounded-xl text-gray-300 hover:text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
-                  aria-label="Card info"
-                  title="Info"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </button>
+              <div
+                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
+                <p className="text-center text-lg font-medium text-gray-700 leading-snug">{card.back}</p>
               </div>
-              <span className="text-xs text-gray-400 tabular-nums">
-                {index + 1} / {total}
-              </span>
             </div>
-          </>
-        )}
+          </button>
+
+          <p className="text-center text-sm text-gray-500 mt-5">
+            Click card or press{' '}
+            <kbd className="px-2 py-0.5 rounded-md border border-gray-200 bg-gray-50 text-xs font-mono text-gray-600">
+              SPACE
+            </kbd>{' '}
+            to flip
+          </p>
+
+          {learnSeen && (
+            <div className="mx-auto w-full max-w-sm mt-5">
+              <button
+                type="button"
+                onClick={advanceLearn}
+                className="w-full py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 active:bg-pink-700 text-white text-sm font-semibold shadow-sm transition-all duration-150 cursor-pointer"
+              >
+                {learnIdx + 1 < batchTotal ? 'Next Card →' : 'Start Quiz →'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // ── Quiz / Requeue phase ──────────────────────────────────────────────────
+  if (phase === 'quiz' || phase === 'requeue') {
+    const q = quizQueue[quizIdx];
+    if (!q) return null;
+    const isLastInQueue = quizIdx + 1 >= quizQueue.length;
+    const advance = phase === 'requeue' ? advanceRequeue : advanceQuiz;
+
+    return (
+      <div className={outerCls}>
+        {renderHeader()}
+
+        {phase === 'requeue' && (
+          <div className="px-6 pt-3 pb-0 flex justify-center">
+            <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-pink-400">
+              Review round
+            </span>
+          </div>
+        )}
+
+        <div className="flex-1 flex flex-row gap-0 divide-x divide-gray-100 min-h-0">
+          {/* Left — card front */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
+            <div className="w-full max-w-xs rounded-2xl border border-gray-200 bg-gray-50 p-6 flex items-center justify-center min-h-[180px]">
+              <p className="text-center text-lg font-semibold text-gray-800 leading-snug">{q.card.front}</p>
+            </div>
+            <p className="mt-3 text-[10px] text-gray-400 uppercase tracking-widest">Question</p>
+          </div>
+
+          {/* Right — answer area */}
+          <div className="flex-1 flex flex-col justify-between px-6 py-6 gap-4">
+            {answerState === 'idle' && q.type === 'mc' && (
+              <>
+                <div className="flex flex-col gap-2">
+                  {q.options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setSelectedOption(opt)}
+                      className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all cursor-pointer ${
+                        selectedOption === opt
+                          ? 'border-pink-400 bg-pink-50 text-pink-700 font-medium'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    Skip
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleMCSubmit}
+                    disabled={!selectedOption}
+                    className="flex-1 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </>
+            )}
+
+            {answerState === 'idle' && q.type === 'free_text' && (
+              <>
+                <textarea
+                  value={freeText}
+                  onChange={(e) => setFreeText(e.target.value)}
+                  placeholder="Type your answer…"
+                  rows={4}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    Skip
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleFreeTextSubmit}
+                    disabled={!freeText.trim()}
+                    className="flex-1 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </>
+            )}
+
+            {answerState === 'self_mark' && (
+              <>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Your answer</p>
+                  <p className="text-sm text-gray-700">{freeText}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-3 mb-1">Correct answer</p>
+                  <p className="text-sm font-medium text-gray-800">{q.card.back}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelfMark(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    Missed it
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelfMark(true)}
+                    className="flex-1 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </>
+            )}
+
+            {(answerState === 'answered' || answerState === 'skipped') && (
+              <>
+                <div className={`rounded-xl border px-4 py-3 ${
+                  answerState === 'skipped'
+                    ? 'border-gray-200 bg-gray-50'
+                    : wasCorrect
+                    ? 'border-green-200 bg-green-50'
+                    : 'border-red-100 bg-red-50'
+                }`}>
+                  {answerState === 'skipped' ? (
+                    <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Correct answer</p>
+                  ) : wasCorrect ? (
+                    <p className="text-[10px] uppercase tracking-widest text-green-500 mb-1">Correct!</p>
+                  ) : (
+                    <p className="text-[10px] uppercase tracking-widest text-red-400 mb-1">Incorrect</p>
+                  )}
+                  <p className="text-sm font-medium text-gray-800">{q.card.back}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={advance}
+                  className="w-full py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition-colors cursor-pointer"
+                >
+                  {isLastInQueue ? 'Finish' : 'Continue →'}
+                </button>
+              </>
+            )}
+
+            <div className="text-right">
+              <span className="text-xs text-gray-400 tabular-nums">{quizIdx + 1} / {quizQueue.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Result screen ─────────────────────────────────────────────────────────
+  if (phase === 'result' && score) {
+    const pct = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+    const message =
+      pct === 100 ? 'Perfect score! You nailed it.' :
+      pct >= 80 ? 'Great work! Almost there.' :
+      pct >= 50 ? 'Good effort. Keep practising!' :
+      'Keep going — you\'ll get there!';
+
+    return (
+      <div className={outerCls}>
+        {renderHeader()}
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 py-10">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-6xl font-bold text-gray-900 tabular-nums">{pct}%</span>
+            <span className="text-sm text-gray-500">{score.correct} / {score.total} correct on first attempt</span>
+          </div>
+
+          <div className="w-full max-w-xs h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-pink-400 rounded-full transition-all duration-700"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+
+          <p className="text-sm text-gray-600 text-center">{message}</p>
+
+          <button
+            type="button"
+            onClick={restartSession}
+            className="px-8 py-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer"
+          >
+            Study again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
