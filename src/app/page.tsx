@@ -81,7 +81,14 @@ export default function Home() {
         {/* ── App Preview ── */}
         <div className="mt-8 relative w-full group">
           <div className="absolute -inset-1 bg-linear-to-r from-pink-200 to-purple-200 rounded-[24px] blur-xl opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-          <div className="relative bg-transparent border border-gray-200 shadow-2xl rounded-[20px] overflow-hidden backdrop-blur-sm aspect-video" />
+          <div className="relative bg-white border border-white/40 shadow-2xl rounded-[20px] overflow-hidden backdrop-blur-sm aspect-video flex items-center justify-center">
+            <img
+              src="/assets/webapp_preview_screenshot.png"
+              alt="Papermind Webapp Preview"
+              className="w-full h-full object-cover rounded-[18px]"
+            />
+            <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
+          </div>
         </div>
 
         {/* ── Trust Bar ── */}
