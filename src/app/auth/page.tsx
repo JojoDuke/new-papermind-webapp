@@ -332,59 +332,56 @@ export default function AuthPage() {
       </div>
 
       {/* Right Side - Visual/Branding */}
-      <div className="hidden lg:flex lg:flex-1 bg-linear-to-br from-pink-500 via-purple-500 to-indigo-600 items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
-        
-        <div className="relative z-10 text-white max-w-lg">
-          <div className="mb-8">
-            {/* Paige the fox placeholder - you can replace this with an actual image later */}
-            <div className="w-32 h-32 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/30">
-              <span className="text-6xl">🦊</span>
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden" style={{ backgroundColor: '#f3f0ff' }}>
+        {/* Subtle decorative circles */}
+        <div className="absolute top-[-60px] right-[-60px] w-72 h-72 rounded-full" style={{ backgroundColor: '#e9e3ff' }}></div>
+        <div className="absolute bottom-[-80px] right-[-40px] w-96 h-96 rounded-full" style={{ backgroundColor: '#ede8ff' }}></div>
+
+        {/* Fox image — fills the entire panel */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://i.ibb.co/rKHCYgKJ/fox-Grad.png"
+          alt="Paige the Fox"
+          className="absolute bottom-0 left-0 object-contain object-bottom"
+          style={{ height: '100%', width: '100%' }}
+        />
+
+        {/* Overlay content */}
+        <div className="relative z-10 flex flex-col justify-between w-full h-full p-10">
+          {/* Top: Badge + Heading */}
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-full px-4 py-1.5 text-xs font-semibold text-purple-600 tracking-wide shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+              AI Study Assistant
             </div>
-            <h2 className="text-4xl font-bold mb-4 text-center">Meet Paige!</h2>
-            <p className="text-xl text-white/90 text-center mb-8">
-              Your friendly AI study companion
+            <h2 className="text-4xl font-extrabold leading-tight mb-2" style={{ color: '#3b1d8a' }}>
+              Meet Paige! 🎓
+            </h2>
+            <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#5c4a8a' }}>
+              Your friendly AI companion who makes studying smarter, not harder.
             </p>
           </div>
-          
-          <div className="space-y-6 backdrop-blur-sm bg-white/10 p-8 rounded-2xl border border-white/20">
-            <div className="flex items-start">
-              <div className="shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">Personalized Quizzes</h3>
-                <p className="text-white/80 text-sm">AI-generated questions tailored to your study materials</p>
-              </div>
+
+          {/* Bottom: Feature cards + quote */}
+          <div>
+            <div className="space-y-3 mb-6">
+              {[
+                { icon: '✦', title: 'Personalized Quizzes', desc: 'Questions tailored to your materials' },
+                { icon: '◈', title: 'Track Progress', desc: 'Spot weak areas and improve fast' },
+                { icon: '◉', title: 'Ace Any Exam', desc: 'SAT, WAEC, GRE, CFA & more' },
+              ].map(({ icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-3 bg-white/75 backdrop-blur-sm border border-purple-100 rounded-xl px-4 py-3 shadow-sm">
+                  <span className="text-base mt-0.5 shrink-0" style={{ color: '#FF5392' }}>{icon}</span>
+                  <div>
+                    <p className="font-semibold text-sm" style={{ color: '#3b1d8a' }}>{title}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#7c6aa0' }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            
-            <div className="flex items-start">
-              <div className="shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">Track Your Progress</h3>
-                <p className="text-white/80 text-sm">Monitor weak spots and improve over time</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">Ace Your Exams</h3>
-                <p className="text-white/80 text-sm">Prepare for SAT, WAEC, GRE, CFA, and more</p>
-              </div>
-            </div>
+            <p className="text-xs italic" style={{ color: '#9b8bbf' }}>
+              "Thousands of students already acing their exams."
+            </p>
           </div>
         </div>
       </div>
