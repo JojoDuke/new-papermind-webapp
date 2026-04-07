@@ -349,47 +349,44 @@ export default function AuthPage() {
         <div className="relative z-10 flex flex-col justify-between w-full h-full p-10">
 
           {/* Top — headline */}
-          <div className="max-w-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF5392' }}>
-              Papermind
-            </p>
-            <h2 className="text-[2.6rem] font-bold leading-[1.15] mb-4" style={{ color: '#1e0a4a', fontFamily: 'Georgia, serif' }}>
+          <div className="w-full bg-white/60 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/80 shadow-sm">
+            <h2 className="text-[2.2rem] font-bold leading-[1.2] mb-3" style={{ color: '#1e0a4a', fontFamily: 'Georgia, serif' }}>
               The fastest way to pass your next exam.
             </h2>
-            <p className="text-sm leading-relaxed" style={{ color: '#5c4a8a' }}>
-              Upload your notes, slides, or textbooks — and get flashcards, quizzes, and full mock exams in seconds.
+            <p className="text-sm leading-relaxed" style={{ color: '#3d2d6e' }}>
+              Upload your notes, slides, or textbooks — get flashcards, quizzes, and full mock exams in seconds.
             </p>
           </div>
 
           {/* Bottom — stats row + testimonial */}
           <div>
             {/* Stats */}
-            <div className="flex gap-6 mb-6">
+            <div className="flex gap-6 mb-5 bg-white/60 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/80 shadow-sm w-fit">
               {[
-                { value: '2 min', label: 'avg. to first quiz' },
-                { value: '50+', label: 'exam types covered' },
+                { value: '2 min', label: 'to first quiz' },
+                { value: '50+', label: 'exam types' },
                 { value: '10k+', label: 'study sessions' },
-              ].map(({ value, label }) => (
-                <div key={label}>
-                  <p className="text-2xl font-bold" style={{ color: '#1e0a4a' }}>{value}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#8b78b8' }}>{label}</p>
+              ].map(({ value, label }, i, arr) => (
+                <div key={label} className="flex items-center gap-6">
+                  <div>
+                    <p className="text-2xl font-bold" style={{ color: '#1e0a4a' }}>{value}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#6b55a0' }}>{label}</p>
+                  </div>
+                  {i < arr.length - 1 && <div className="w-px h-8 self-center" style={{ backgroundColor: '#d0c5f0' }}></div>}
                 </div>
               ))}
             </div>
 
-            {/* Divider */}
-            <div className="w-full h-px mb-5" style={{ backgroundColor: '#d8cff5' }}></div>
-
             {/* Testimonial */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-4 border border-purple-100 shadow-sm max-w-sm">
-              <p className="text-sm leading-relaxed mb-3" style={{ color: '#3b2a70' }}>
+            <div className="bg-white/60 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/80 shadow-sm max-w-sm">
+              <p className="text-sm leading-relaxed mb-3" style={{ color: '#2a1a55' }}>
                 "I uploaded my anatomy textbook and had 200 flashcards ready in 2 minutes. Passed my USMLE Step 1 on the first try."
               </p>
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs font-semibold text-pink-600">SK</div>
+                <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs font-semibold text-pink-600 shrink-0">SK</div>
                 <div>
                   <p className="text-xs font-semibold" style={{ color: '#1e0a4a' }}>Sarah K.</p>
-                  <p className="text-xs" style={{ color: '#9b88c0' }}>Medical student</p>
+                  <p className="text-xs" style={{ color: '#7a65aa' }}>Medical student</p>
                 </div>
               </div>
             </div>
