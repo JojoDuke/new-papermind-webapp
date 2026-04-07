@@ -332,56 +332,67 @@ export default function AuthPage() {
       </div>
 
       {/* Right Side - Visual/Branding */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden" style={{ backgroundColor: '#f3f0ff' }}>
-        {/* Subtle decorative circles */}
-        <div className="absolute top-[-60px] right-[-60px] w-72 h-72 rounded-full" style={{ backgroundColor: '#e9e3ff' }}></div>
-        <div className="absolute bottom-[-80px] right-[-40px] w-96 h-96 rounded-full" style={{ backgroundColor: '#ede8ff' }}></div>
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden" style={{ backgroundColor: '#f0ecff' }}>
+        {/* Subtle background shape */}
+        <div className="absolute bottom-0 right-0 w-3/4 h-3/4 rounded-tl-full opacity-40" style={{ backgroundColor: '#e4dcff' }}></div>
 
-        {/* Fox image — fills the entire panel */}
+        {/* Fox image — fills the panel */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://i.ibb.co/rKHCYgKJ/fox-Grad.png"
-          alt="Paige the Fox"
-          className="absolute bottom-0 left-0 object-contain object-bottom"
+          alt="Study mascot"
+          className="absolute bottom-0 left-0 object-contain object-bottom pointer-events-none select-none"
           style={{ height: '100%', width: '100%' }}
         />
 
         {/* Overlay content */}
         <div className="relative z-10 flex flex-col justify-between w-full h-full p-10">
-          {/* Top: Badge + Heading */}
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-full px-4 py-1.5 text-xs font-semibold text-purple-600 tracking-wide shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-              AI Study Assistant
-            </div>
-            <h2 className="text-4xl font-extrabold leading-tight mb-2" style={{ color: '#3b1d8a' }}>
-              Meet Paige! 🎓
+
+          {/* Top — headline */}
+          <div className="max-w-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF5392' }}>
+              Papermind
+            </p>
+            <h2 className="text-[2.6rem] font-bold leading-[1.15] mb-4" style={{ color: '#1e0a4a', fontFamily: 'Georgia, serif' }}>
+              The fastest way to pass your next exam.
             </h2>
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#5c4a8a' }}>
-              Your friendly AI companion who makes studying smarter, not harder.
+            <p className="text-sm leading-relaxed" style={{ color: '#5c4a8a' }}>
+              Upload your notes, slides, or textbooks — and get flashcards, quizzes, and full mock exams in seconds.
             </p>
           </div>
 
-          {/* Bottom: Feature cards + quote */}
+          {/* Bottom — stats row + testimonial */}
           <div>
-            <div className="space-y-3 mb-6">
+            {/* Stats */}
+            <div className="flex gap-6 mb-6">
               {[
-                { icon: '✦', title: 'Personalized Quizzes', desc: 'Questions tailored to your materials' },
-                { icon: '◈', title: 'Track Progress', desc: 'Spot weak areas and improve fast' },
-                { icon: '◉', title: 'Ace Any Exam', desc: 'SAT, WAEC, GRE, CFA & more' },
-              ].map(({ icon, title, desc }) => (
-                <div key={title} className="flex items-start gap-3 bg-white/75 backdrop-blur-sm border border-purple-100 rounded-xl px-4 py-3 shadow-sm">
-                  <span className="text-base mt-0.5 shrink-0" style={{ color: '#FF5392' }}>{icon}</span>
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: '#3b1d8a' }}>{title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: '#7c6aa0' }}>{desc}</p>
-                  </div>
+                { value: '2 min', label: 'avg. to first quiz' },
+                { value: '50+', label: 'exam types covered' },
+                { value: '10k+', label: 'study sessions' },
+              ].map(({ value, label }) => (
+                <div key={label}>
+                  <p className="text-2xl font-bold" style={{ color: '#1e0a4a' }}>{value}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#8b78b8' }}>{label}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs italic" style={{ color: '#9b8bbf' }}>
-              "Thousands of students already acing their exams."
-            </p>
+
+            {/* Divider */}
+            <div className="w-full h-px mb-5" style={{ backgroundColor: '#d8cff5' }}></div>
+
+            {/* Testimonial */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-4 border border-purple-100 shadow-sm max-w-sm">
+              <p className="text-sm leading-relaxed mb-3" style={{ color: '#3b2a70' }}>
+                "I uploaded my anatomy textbook and had 200 flashcards ready in 2 minutes. Passed my USMLE Step 1 on the first try."
+              </p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs font-semibold text-pink-600">SK</div>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: '#1e0a4a' }}>Sarah K.</p>
+                  <p className="text-xs" style={{ color: '#9b88c0' }}>Medical student</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
