@@ -147,6 +147,7 @@ export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyV
   // result
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundTooltipOpen, setSoundTooltipOpen] = useState(false);
 
   // ── Space key → flip card during learn phase ─────────────────────────────
   useEffect(() => {
@@ -342,8 +343,12 @@ export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyV
             </div>
           </div>
 
-          {/* Sound toggle */}
-          <div className="relative group shrink-0">
+          {/* Sound toggle — explicit hover state (avoids CSS group-hover conflicts / sticky tooltips) */}
+          <div
+            className="relative shrink-0"
+            onMouseEnter={() => setSoundTooltipOpen(true)}
+            onMouseLeave={() => setSoundTooltipOpen(false)}
+          >
             <button
               type="button"
               onClick={() => setSoundEnabled((v) => !v)}
@@ -366,8 +371,12 @@ export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyV
               )}
             </button>
 
-            {/* Tooltip */}
-            <div className="pointer-events-none absolute right-0 top-full mt-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            <div
+              role="tooltip"
+              className={`pointer-events-none absolute right-0 top-full mt-2 z-10 transition-opacity duration-150 ${
+                soundTooltipOpen ? 'opacity-100' : 'opacity-0 invisible'
+              }`}
+            >
               <div className="relative bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
                 <span className="block font-medium">
                   {soundEnabled ? 'Sound is on' : 'Sound is off'}
@@ -375,7 +384,6 @@ export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyV
                 <span className="block text-gray-400 mt-0.5">
                   {soundEnabled ? 'Click to mute feedback sounds' : 'Click to enable feedback sounds'}
                 </span>
-                {/* Arrow */}
                 <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-900 rotate-45" />
               </div>
             </div>

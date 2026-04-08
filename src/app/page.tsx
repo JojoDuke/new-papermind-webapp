@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { DemoWidget } from '@/components/DemoWidget';
+import { FeatureTabSelector } from '@/components/FeatureTabSelector';
 
 const testimonials = [
   {
@@ -78,16 +80,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── App Preview ── */}
+        {/* ── Live Demo ── */}
         <div className="mt-8 relative w-full group">
-          <div className="absolute -inset-1 bg-linear-to-r from-pink-200 to-purple-200 rounded-[24px] blur-xl opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-          <div className="relative bg-white border border-white/40 shadow-2xl rounded-[20px] overflow-hidden backdrop-blur-sm aspect-video flex items-center justify-center">
-            <img
-              src="/assets/webapp_preview_screenshot.png"
-              alt="Papermind Webapp Preview"
-              className="w-full h-full object-cover rounded-[18px]"
-            />
-            <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
+          <div className="absolute -inset-1 bg-linear-to-r from-pink-200 to-purple-200 rounded-[28px] blur-xl opacity-20 group-hover:opacity-35 transition duration-1000 group-hover:duration-200" />
+          <div className="relative">
+            <DemoWidget />
           </div>
         </div>
 
@@ -137,6 +134,8 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Features</p>
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Everything you need to ace your exams</h2>
             <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Upload your material once. Papermind handles the rest.</p>
+
+            <FeatureTabSelector />
           </div>
 
           {/* Bento grid */}
@@ -155,7 +154,7 @@ export default function Home() {
                 <p className="text-gray-500 font-sans leading-relaxed">Upload lecture slides, textbooks, or revision notes — Papermind reads your material and instantly builds a complete set of flashcards, quizzes, and a mock exam. No manual work, no copy-pasting.</p>
               </div>
               <div className="mt-auto flex flex-wrap gap-2">
-                {['Flashcards', 'Quizzes', 'Mock Exams', 'Summaries'].map(tag => (
+                {['Flashcards', 'Quizzes', 'Mock Exams'].map(tag => (
                   <span key={tag} className="text-xs font-medium bg-pink-50 text-[#FF5392] px-3 py-1 rounded-full">{tag}</span>
                 ))}
               </div>
