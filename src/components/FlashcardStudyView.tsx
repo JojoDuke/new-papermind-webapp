@@ -47,6 +47,8 @@ type FlashcardStudyViewProps = {
   cards: FlashcardStudyCard[] | undefined;
   loading: boolean;
   deckName?: string;
+  /** No outer drop shadow (e.g. landing demo) */
+  flatChrome?: boolean;
 };
 
 function playSuccessSound(higher = false) {
@@ -111,7 +113,7 @@ function buildQuizCards(cards: FlashcardStudyCard[]): QuizCard[] {
   });
 }
 
-export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyViewProps) {
+export function FlashcardStudyView({ cards, loading, deckName, flatChrome }: FlashcardStudyViewProps) {
   // ── Build quiz cards instantly from the deck (no API call) ───────────────
   const [quizCards, setQuizCards] = useState<QuizCard[] | null>(null);
   const builtRef = useRef(false);
@@ -328,7 +330,13 @@ export function FlashcardStudyView({ cards, loading, deckName }: FlashcardStudyV
   const progress = totalCards > 0 ? doneCards / totalCards : 0;
 
   // ── Render helpers ────────────────────────────────────────────────────────
-  const outerCls = "w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col min-h-[520px]";
+  const outerCls = [
+    'w-full bg-white rounded-3xl border overflow-hidden flex flex-col min-h-[520px]',
+    flatChrome ? 'border-[2.5px] border-gray-200' : 'border-gray-100',
+    flatChrome ? '' : 'shadow-xl',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   function renderHeader() {
     return (

@@ -81,11 +81,8 @@ export default function Home() {
         </div>
 
         {/* ── Live Demo ── */}
-        <div className="mt-8 relative w-full group">
-          <div className="absolute -inset-1 bg-linear-to-r from-pink-200 to-purple-200 rounded-[28px] blur-xl opacity-20 group-hover:opacity-35 transition duration-1000 group-hover:duration-200" />
-          <div className="relative">
-            <DemoWidget />
-          </div>
+        <div className="mt-8 w-full">
+          <DemoWidget />
         </div>
 
         {/* ── Trust Bar ── */}
@@ -130,19 +127,19 @@ export default function Home() {
 
         {/* ── Features ── */}
         <section id="features" className="mt-32 text-left">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Features</p>
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Everything you need to ace your exams</h2>
             <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Upload your material once. Papermind handles the rest.</p>
-
-            <FeatureTabSelector />
           </div>
 
+          <FeatureTabSelector />
+
           {/* Bento grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-16">
 
             {/* Large card — Upload & Generate */}
-            <div className="md:col-span-2 bg-white rounded-[20px] border border-gray-100 shadow-sm p-8 flex flex-col gap-6 overflow-hidden relative group hover:shadow-md transition-shadow">
+            <div className="md:col-span-2 bg-white rounded-[20px] border-[2.5px] border-gray-200 p-8 flex flex-col gap-6 overflow-hidden relative group">
               <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF5392" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
@@ -162,7 +159,7 @@ export default function Home() {
             </div>
 
             {/* AI Quiz Mode */}
-            <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-8 flex flex-col gap-4 relative group hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-8 flex flex-col gap-4 relative group">
               <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -175,7 +172,7 @@ export default function Home() {
             </div>
 
             {/* Mock Exams */}
-            <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-8 flex flex-col gap-4 relative group hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-8 flex flex-col gap-4 relative group">
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -188,7 +185,7 @@ export default function Home() {
             </div>
 
             {/* Progress Tracking */}
-            <div className="md:col-span-2 bg-white rounded-[20px] border border-gray-100 shadow-sm p-8 flex flex-col gap-4 relative group hover:shadow-md transition-shadow">
+            <div className="md:col-span-2 bg-white rounded-[20px] border-[2.5px] border-gray-200 p-8 flex flex-col gap-4 relative group">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
@@ -262,7 +259,7 @@ export default function Home() {
                 ),
               },
             ].map(({ step, color, bg, title, desc, icon }) => (
-              <div key={step} className="flex flex-col gap-5">
+              <div key={step} className="flex flex-col gap-5 rounded-[20px] border-[2.5px] border-gray-200 bg-white p-6 md:p-8">
                 <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center`}>
                   {icon}
                 </div>
@@ -278,7 +275,7 @@ export default function Home() {
 
         {/* ── Stats ── */}
         <section className="mt-32">
-          <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm px-8 py-12">
+          <div className="bg-white rounded-[24px] border-[2.5px] border-gray-200 px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 gap-8 md:gap-0">
               {[
                 { value: '10,000+', label: 'Students worldwide', color: 'text-[#FF5392]' },
@@ -304,7 +301,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {testimonials.map((t) => (
-              <div key={t.handle} className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+              <div key={t.handle} className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-6 flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center text-xs font-bold font-sans`}>
                     {t.initials}
@@ -334,7 +331,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
 
             {/* Free */}
-            <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-8 flex flex-col gap-6">
+            <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-8 flex flex-col gap-6">
               <div>
                 <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Free</p>
                 <p className="text-5xl font-black font-serif text-gray-900">£0</p>
@@ -353,13 +350,13 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] border border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
+              <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
                 Get started free
               </Link>
             </div>
 
             {/* Pro */}
-            <div className="bg-gray-900 rounded-[20px] p-8 flex flex-col gap-6 relative overflow-hidden">
+            <div className="bg-gray-900 rounded-[20px] border-[2.5px] border-gray-700 p-8 flex flex-col gap-6 relative overflow-hidden">
               <div className="absolute top-4 right-4">
                 <span className="text-xs font-semibold bg-[#FF5392] text-white px-3 py-1 rounded-full font-sans">Most popular</span>
               </div>
@@ -399,11 +396,7 @@ export default function Home() {
 
         {/* ── Final CTA ── */}
         <section className="mt-32 mb-8">
-          <div className="relative bg-gray-900 rounded-[24px] overflow-hidden px-8 py-20 text-center">
-            {/* Background glow blobs */}
-            <div className="absolute -top-20 -left-20 w-72 h-72 bg-pink-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
-
+          <div className="relative bg-gray-900 rounded-[24px] border-[2.5px] border-gray-700 overflow-hidden px-8 py-20 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-4 relative z-10">Get started today</p>
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-white mb-4 relative z-10">
               Ace your next exam — starting now

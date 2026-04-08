@@ -51,6 +51,14 @@ h1, h2, h3, h4, h5, h6 {
       inset 0px 1px 1px 0px rgba(255, 255, 255, 0.4);
   }
 
+  /** Flat chrome: same gradient, no outer/inset glow (landing tabs, strict borders) */
+  .pink-glowing-button.flat-chrome {
+    box-shadow: none;
+  }
+  .pink-glowing-button.flat-chrome:hover {
+    box-shadow: none;
+  }
+
   .blurred-border {
     position: absolute;
     inset: 0;

@@ -136,7 +136,7 @@ export function DemoWidget() {
             Back
           </button>
         </div>
-        <FlashcardStudyView cards={cards} loading={false} documentName={fileName ?? undefined} />
+        <FlashcardStudyView cards={cards} loading={false} deckName={fileName ?? undefined} flatChrome />
       </div>
     );
   }
@@ -144,7 +144,7 @@ export function DemoWidget() {
   // ── Generating ────────────────────────────────────────────────────────────
   if (phase === 'generating') {
     return (
-      <div className="w-full rounded-[20px] bg-white border border-gray-100 shadow-xl overflow-hidden">
+      <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
         <div className="flex flex-col items-center justify-center gap-5 py-20 px-8">
           <div className="relative">
             <div className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center">
@@ -175,7 +175,7 @@ export function DemoWidget() {
   // ── Idle: locked (demo already used) ─────────────────────────────────────
   if (!lockReady) {
     return (
-      <div className="w-full rounded-[20px] bg-white border border-gray-100 shadow-xl overflow-hidden min-h-[320px] flex items-center justify-center">
+      <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden min-h-[320px] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-gray-200 border-t-pink-400 rounded-full animate-spin" />
       </div>
     );
@@ -183,7 +183,7 @@ export function DemoWidget() {
 
   if (demoLocked && phase === 'idle') {
     return (
-      <div className="w-full rounded-[20px] bg-white border border-gray-100 shadow-xl overflow-hidden">
+      <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
         <div className="px-8 pt-8 pb-3 border-b border-gray-50">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#FF5392]">Live Demo</span>
@@ -196,7 +196,7 @@ export function DemoWidget() {
         <div className="p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/auth"
-            className="pink-glowing-button group relative rounded-[10px] flex items-center gap-2 text-white font-medium text-sm px-6 py-3 shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
+            className="pink-glowing-button group relative rounded-[10px] flex items-center gap-2 text-white font-medium text-sm px-6 py-3 transition-all active:scale-95 outline-none focus:outline-none"
           >
             <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
               <span className="blurred-border absolute inset-0 z-20" />
@@ -213,7 +213,7 @@ export function DemoWidget() {
 
   // ── Idle / Upload ─────────────────────────────────────────────────────────
   return (
-    <div className="w-full rounded-[20px] bg-white border border-gray-100 shadow-xl overflow-hidden">
+    <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
       <div className="px-8 pt-8 pb-3 border-b border-gray-50">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-semibold uppercase tracking-widest text-[#FF5392]">Live Demo</span>
@@ -243,7 +243,7 @@ export function DemoWidget() {
             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
           />
 
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${dragging ? 'bg-pink-100' : 'bg-white border border-gray-100 shadow-sm'}`}>
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${dragging ? 'bg-pink-100' : 'bg-white border-[2.5px] border-gray-200'}`}>
             <svg className={`w-7 h-7 transition-colors ${dragging ? 'text-pink-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
