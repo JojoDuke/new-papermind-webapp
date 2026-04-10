@@ -75,7 +75,7 @@ export default function Home() {
                 <path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z" />
                 <path d="M20.054 15.987H3.946" />
               </svg>
-              <span className="relative z-30">Start Studying — It&apos;s free</span>
+              <span className="relative z-30">Get started</span>
             </Link>
           </div>
         </div>
@@ -325,27 +325,28 @@ export default function Home() {
           <div className="text-center mb-16">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Pricing</p>
             <h2 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Simple, transparent pricing</h2>
-            <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Freemium: start free, upgrade when you need more power.</p>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Two plans. Pick what fits how you study.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-3xl mx-auto items-stretch">
 
-            {/* Free */}
+            {/* Starter */}
             <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-7 md:p-8 flex flex-col gap-6 min-h-full">
               <div>
-                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Free</p>
+                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Starter</p>
                 <div className="flex items-end gap-1">
-                  <p className="text-5xl font-black font-serif text-gray-900">$0</p>
+                  <p className="text-5xl font-black font-serif text-gray-900">$12</p>
                   <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
                 </div>
-                <p className="text-sm text-gray-400 font-sans mt-1">Forever free · no card required</p>
+                <p className="text-sm text-gray-400 font-sans mt-1">Cancel anytime</p>
               </div>
               <ul className="flex flex-col gap-3 flex-1">
                 {[
-                  '3 document uploads per month',
-                  'Flashcards with starter deck sizes',
-                  'Basic quiz mode',
-                  'Core study views & tools',
+                  'Solid monthly upload limits',
+                  'Flashcards & quizzes from your docs',
+                  'Medium & large flashcard decks',
+                  'Progress tracking & analytics',
+                  'Standard AI processing',
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600 font-sans">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -354,30 +355,31 @@ export default function Home() {
                 ))}
               </ul>
               <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
-                Get started free
+                Start with Starter
               </Link>
             </div>
 
-            {/* Plus — highlighted */}
+            {/* Pro — highlighted */}
             <div className="bg-gray-900 rounded-[20px] border-[2.5px] border-gray-700 p-7 md:p-8 flex flex-col gap-6 relative overflow-hidden min-h-full">
               <div className="absolute top-4 right-4">
                 <span className="text-xs font-semibold bg-[#FF5392] text-white px-3 py-1 rounded-full font-sans">Most popular</span>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Plus</p>
+                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Pro</p>
                 <div className="flex items-end gap-1">
-                  <p className="text-5xl font-black font-serif text-white">$19</p>
+                  <p className="text-5xl font-black font-serif text-white">$29</p>
                   <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
                 </div>
-                <p className="text-sm text-gray-400 font-sans mt-1">Cancel anytime</p>
+                <p className="text-sm text-gray-400 font-sans mt-1">For exams & heavy prep</p>
               </div>
               <ul className="flex flex-col gap-3 flex-1">
                 {[
-                  'Higher monthly upload limits',
-                  'Medium & large flashcard decks',
+                  'Everything in Starter',
+                  'Highest monthly limits',
+                  'Mock exams & full practice tests',
                   'Adaptive AI quiz mode',
-                  'Progress tracking & analytics',
-                  'Standard AI processing',
+                  'Priority AI processing',
+                  'Large documents & long page ranges',
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-gray-300 font-sans">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF5392" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -389,36 +391,7 @@ export default function Home() {
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
-                <span className="relative z-30">Start Plus — 7 days free</span>
-              </Link>
-            </div>
-
-            {/* Pro */}
-            <div className="bg-white rounded-[20px] border-[2.5px] border-gray-900 p-7 md:p-8 flex flex-col gap-6 min-h-full shadow-sm">
-              <div>
-                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Pro</p>
-                <div className="flex items-end gap-1">
-                  <p className="text-5xl font-black font-serif text-gray-900">$39</p>
-                  <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
-                </div>
-                <p className="text-sm text-gray-400 font-sans mt-1">For power users & certifications</p>
-              </div>
-              <ul className="flex flex-col gap-3 flex-1">
-                {[
-                  'Everything in Plus',
-                  'Highest monthly limits',
-                  'Mock exams & full practice tests',
-                  'Priority AI processing',
-                  'Large documents & long page ranges',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600 font-sans">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] bg-gray-900 text-white font-medium text-sm font-sans hover:bg-gray-800 transition-all">
-                Start Pro
+                <span className="relative z-30">Start with Pro</span>
               </Link>
             </div>
 
@@ -443,9 +416,9 @@ export default function Home() {
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
-                <span className="relative z-30">Start Studying — It&apos;s free</span>
+                <span className="relative z-30">Get started</span>
               </Link>
-              <p className="text-sm text-gray-500 font-sans">No credit card required &nbsp;·&nbsp; Cancel anytime</p>
+              <p className="text-sm text-gray-500 font-sans">Plans from $12/mo &nbsp;·&nbsp; Cancel anytime</p>
             </div>
           </div>
         </section>

@@ -190,7 +190,7 @@ export function DemoWidget() {
           </div>
           <h3 className="text-xl font-bold font-serif text-gray-900">Thanks for trying Papermind</h3>
           <p className="text-sm text-gray-400 mt-1 font-sans">
-            You&apos;ve already used your free on-page demo. Sign up to upload unlimited study material and keep your decks.
+            You&apos;ve already used your on-page demo. Sign up to upload your own material and keep your decks.
           </p>
         </div>
         <div className="p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -201,7 +201,7 @@ export function DemoWidget() {
             <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
               <span className="blurred-border absolute inset-0 z-20" />
             </span>
-            <span className="relative z-30">Create a free account</span>
+            <span className="relative z-30">Create an account</span>
           </Link>
           <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 font-medium">
             I already have an account
@@ -220,7 +220,7 @@ export function DemoWidget() {
           <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
         </div>
         <h3 className="text-xl font-bold font-serif text-gray-900">Try it with your own PDF</h3>
-        <p className="text-sm text-gray-400 mt-1 font-sans">One free try on this page — no sign-up needed.</p>
+        <p className="text-sm text-gray-400 mt-1 font-sans">One try on this page — no sign-up needed.</p>
       </div>
 
       <div className="p-8">
