@@ -1,0 +1,96 @@
+import Link from 'next/link';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
+
+export default function PricingPage() {
+  return (
+    <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 relative overflow-x-hidden">
+      <Navbar />
+      <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-16 md:py-24 text-center">
+        <section className="text-left">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Pricing</p>
+            <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Simple, transparent pricing</h1>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Two plans. Pick what fits how you study.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-3xl mx-auto items-stretch">
+
+            {/* Starter */}
+            <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-7 md:p-8 flex flex-col gap-6 min-h-full">
+              <div>
+                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Starter</p>
+                <div className="flex items-end gap-1">
+                  <p className="text-5xl font-black font-serif text-gray-900">$12</p>
+                  <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                </div>
+                <p className="text-sm text-gray-400 font-sans mt-1">Cancel anytime</p>
+              </div>
+              <ul className="flex flex-col gap-3 flex-1">
+                {[
+                  'Solid monthly upload limits',
+                  'Flashcards & quizzes from your docs',
+                  'Medium & large flashcard decks',
+                  'Progress tracking & analytics',
+                  'Standard AI processing',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600 font-sans">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
+                Start with Starter
+              </Link>
+            </div>
+
+            {/* Pro — highlighted */}
+            <div className="bg-gray-900 rounded-[20px] border-[2.5px] border-gray-700 p-7 md:p-8 flex flex-col gap-6 relative overflow-hidden min-h-full">
+              <div className="absolute top-4 right-4">
+                <span className="text-xs font-semibold bg-[#FF5392] text-white px-3 py-1 rounded-full font-sans">Most popular</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Pro</p>
+                <div className="flex items-end gap-1">
+                  <p className="text-5xl font-black font-serif text-white">$29</p>
+                  <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                </div>
+                <p className="text-sm text-gray-400 font-sans mt-1">For exams & heavy prep</p>
+              </div>
+              <ul className="flex flex-col gap-3 flex-1">
+                {[
+                  'Everything in Starter',
+                  'Highest monthly limits',
+                  'Mock exams & full practice tests',
+                  'Adaptive AI quiz mode',
+                  'Priority AI processing',
+                  'Large documents & long page ranges',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-gray-300 font-sans">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF5392" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth" className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
+                <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
+                  <span className="blurred-border absolute inset-0 z-20" />
+                </span>
+                <span className="relative z-30">Start with Pro</span>
+              </Link>
+            </div>
+
+          </div>
+
+          <p className="text-center mt-12 text-sm text-gray-500 font-sans">
+            <Link href="/" className="text-[#FF5392] hover:underline font-medium">
+              ← Back to home
+            </Link>
+          </p>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+}
