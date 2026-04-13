@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
@@ -23,11 +23,21 @@ export default function AuthPage() {
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
   const router = useRouter();
+  const postAuthRedirected = useRef(false);
 
-  // Redirect to dashboard if already authenticated (handles OAuth callback)
+  function checkoutEntryPath(): string {
+    if (typeof window === 'undefined') {
+      return '/checkout?plan=pro';
+    }
+    const p = new URLSearchParams(window.location.search).get('plan');
+    return p === 'starter' ? '/checkout?plan=starter' : '/checkout?plan=pro';
+  }
+
+  // After login or signup, continue to card-upfront trial checkout (OAuth callback included)
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
+    if (isAuthenticated && !postAuthRedirected.current) {
+      postAuthRedirected.current = true;
+      router.replace(checkoutEntryPath());
     }
   }, [isAuthenticated, router]);
 
@@ -68,9 +78,6 @@ export default function AuthPage() {
           name: formData.name,
           flow: 'signUp'
         });
-        
-        // Success - redirect to dashboard
-        router.push('/dashboard');
       } else {
         // Login flow
         await signIn('password', {
@@ -78,13 +85,11 @@ export default function AuthPage() {
           password: formData.password,
           flow: 'signIn'
         });
-        
-        // Success - redirect to dashboard
-        router.push('/dashboard');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -92,8 +97,13 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      await signIn('google', { 
-        redirectTo: '/dashboard'
+      if (typeof window !== 'undefined') {
+        const p = new URLSearchParams(window.location.search).get('plan');
+        const plan = p === 'starter' ? 'starter' : 'pro';
+        sessionStorage.setItem('pm_checkout_plan', plan);
+      }
+      await signIn('google', {
+        redirectTo: '/checkout',
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';

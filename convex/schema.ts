@@ -35,4 +35,17 @@ export default defineSchema({
     order: v.number(),
     isNew: v.boolean(),
   }).index("by_deck", ["deckId"]),
+
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    status: v.string(),
+    trialEndMs: v.optional(v.number()),
+    currentPeriodEndMs: v.optional(v.number()),
+    priceId: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_stripe_customer", ["stripeCustomerId"]),
 });

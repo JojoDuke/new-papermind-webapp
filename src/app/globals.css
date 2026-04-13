@@ -39,6 +39,8 @@ h1, h2, h3, h4, h5, h6 {
   }
   .pink-glowing-button {
     background: linear-gradient(180deg, #FF7DB4 0%, #FF5392 100%);
+    border: none;
+    overflow: hidden;
     box-shadow: 
       0px 4px 15px 0px rgba(255, 83, 146, 0.3),
       inset 0px 1px 1px 0px rgba(255, 255, 255, 0.3);
@@ -64,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
     inset: 0;
     z-index: 20;
     padding: 1px;
-    border-radius: inherit;
+    border-radius: 10px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);

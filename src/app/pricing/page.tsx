@@ -40,7 +40,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
+              <Link href="/auth?plan=starter" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
                 Start with Starter
               </Link>
             </div>
@@ -73,7 +73,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth" className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
+              <Link href="/auth?plan=pro" className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>

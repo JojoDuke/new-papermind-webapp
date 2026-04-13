@@ -75,7 +75,7 @@ export default function Home() {
                 <path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z" />
                 <path d="M20.054 15.987H3.946" />
               </svg>
-              <span className="relative z-30">Get started</span>
+              <span className="relative z-30">Start Studying - 7 day free trial</span>
             </Link>
           </div>
         </div>
@@ -330,7 +330,7 @@ export default function Home() {
             <p className="text-lg text-gray-400 font-sans mb-10 max-w-lg mx-auto relative z-10">
               Join thousands of students already using Papermind to study smarter and pass faster.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+            <div className="flex justify-center relative z-10">
               <Link
                 href="/auth"
                 className="pink-glowing-button group relative rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[12px_28px] shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
@@ -338,14 +338,8 @@ export default function Home() {
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
-                <span className="relative z-30">Get started</span>
+                <span className="relative z-30">Start Studying - 7 day free trial</span>
               </Link>
-              <p className="text-sm text-gray-500 font-sans">
-                <Link href="/pricing" className="text-gray-400 hover:text-white transition-colors">
-                  Plans from $12/mo
-                </Link>
-                &nbsp;·&nbsp; Cancel anytime
-              </p>
             </div>
           </div>
         </section>

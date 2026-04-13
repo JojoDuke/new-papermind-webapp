@@ -39,6 +39,35 @@ export default function DashboardPage() {
   const deleteDocument = useMutation(api.documents.deleteDocument);
   const generateStubDeck = useMutation(api.flashcards.generateStubDeck);
   const authToken = useAuthToken();
+  const checkoutSynced = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !authToken || checkoutSynced.current) {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') !== 'success') {
+      return;
+    }
+    const sessionId = params.get('session_id');
+    checkoutSynced.current = true;
+    if (!sessionId) {
+      router.replace('/dashboard');
+      return;
+    }
+    fetch('/api/stripe/verify-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ sessionId }),
+    })
+      .catch(() => {})
+      .finally(() => {
+        router.replace('/dashboard');
+      });
+  }, [authToken, router]);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
