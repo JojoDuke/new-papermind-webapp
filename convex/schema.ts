@@ -38,8 +38,8 @@ export default defineSchema({
 
   subscriptions: defineTable({
     userId: v.id("users"),
-    stripeCustomerId: v.string(),
-    stripeSubscriptionId: v.string(),
+    polarCustomerId: v.string(),
+    polarSubscriptionId: v.string(),
     status: v.string(),
     trialEndMs: v.optional(v.number()),
     currentPeriodEndMs: v.optional(v.number()),
@@ -47,5 +47,5 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_stripe_customer", ["stripeCustomerId"]),
+    .index("by_polar_customer", ["polarCustomerId"]),
 });

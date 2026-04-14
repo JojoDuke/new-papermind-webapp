@@ -8,21 +8,32 @@ import { useAuthToken } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import type { BillingPlan } from '@/lib/billing';
-import { TRIAL_DAYS } from '@/lib/billing';
+import type { BillingInterval, BillingPlan } from '@/lib/billing';
+import {
+  LIST_PRICE_MONTHLY_USD,
+  TRIAL_DAYS,
+  YEARLY_SAVINGS_PERCENT,
+  effectiveMonthlyWhenYearly,
+  formatUsd,
+} from '@/lib/billing';
 
-const PLANS: { id: BillingPlan; name: string; price: string; blurb: string }[] = [
+const PLAN_META: {
+  id: BillingPlan;
+  name: string;
+  blurbMonthly: string;
+  blurbYearly: string;
+}[] = [
   {
     id: 'starter',
     name: 'Starter',
-    price: '$12/mo',
-    blurb: 'After your trial — solid limits for regular study weeks.',
+    blurbMonthly: 'After your trial — solid limits for regular study weeks.',
+    blurbYearly: 'After your trial — same limits, best value for a full school year.',
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: '$29/mo',
-    blurb: 'After your trial — highest limits, mock exams, priority AI.',
+    blurbMonthly: 'After your trial — highest limits, mock exams, priority AI.',
+    blurbYearly: 'After your trial — full power for serious exam seasons.',
   },
 ];
 
@@ -32,20 +43,29 @@ function CheckoutContent() {
   const authToken = useAuthToken();
   const hasAccess = useQuery(api.subscriptions.hasPaidAccess);
   const [plan, setPlan] = useState<BillingPlan>('pro');
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const q = searchParams.get('plan');
-    if (q === 'starter' || q === 'pro') {
-      setPlan(q);
-      return;
+    const qPlan = searchParams.get('plan');
+    const qInterval = searchParams.get('interval');
+    if (qPlan === 'starter' || qPlan === 'pro') {
+      setPlan(qPlan);
+    }
+    if (qInterval === 'monthly' || qInterval === 'yearly') {
+      setBillingInterval(qInterval);
     }
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('pm_checkout_plan');
-      if (stored === 'starter' || stored === 'pro') {
-        setPlan(stored);
+      const storedPlan = sessionStorage.getItem('pm_checkout_plan');
+      if (storedPlan === 'starter' || storedPlan === 'pro') {
+        setPlan(storedPlan);
         sessionStorage.removeItem('pm_checkout_plan');
+      }
+      const storedInterval = sessionStorage.getItem('pm_checkout_interval');
+      if (storedInterval === 'monthly' || storedInterval === 'yearly') {
+        setBillingInterval(storedInterval);
+        sessionStorage.removeItem('pm_checkout_interval');
       }
     }
   }, [searchParams]);
@@ -77,13 +97,13 @@ function CheckoutContent() {
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/stripe/checkout', {
+      const res = await fetch('/api/polar/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, interval: billingInterval }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -150,25 +170,75 @@ function CheckoutContent() {
             </p>
           )}
 
-          <div className="space-y-3 mb-6">
-            {PLANS.map((p) => (
+          <div className="mb-5">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Billing</p>
+            <div className="flex rounded-xl border border-gray-200 bg-white p-1 gap-1">
               <button
-                key={p.id}
                 type="button"
-                onClick={() => setPlan(p.id)}
-                className={`w-full text-left rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                  plan === p.id
-                    ? 'border-[#FF5392] bg-pink-50/80'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                onClick={() => setBillingInterval('monthly')}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all cursor-pointer ${
+                  billingInterval === 'monthly'
+                    ? 'bg-pink-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-gray-900">{p.name}</span>
-                  <span className="text-gray-700 font-medium">{p.price}</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">{p.blurb}</p>
+                Monthly
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => setBillingInterval('yearly')}
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all cursor-pointer flex flex-col items-center justify-center leading-tight sm:flex-row sm:gap-1.5 ${
+                  billingInterval === 'yearly'
+                    ? 'bg-pink-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span>Yearly</span>
+                <span
+                  className={`text-[10px] sm:text-xs font-semibold ${
+                    billingInterval === 'yearly' ? 'text-pink-100' : 'text-emerald-600'
+                  }`}
+                >
+                  Save {YEARLY_SAVINGS_PERCENT}%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            {PLAN_META.map((p) => {
+              const monthly = LIST_PRICE_MONTHLY_USD[p.id];
+              const priceLine =
+                billingInterval === 'monthly'
+                  ? `${formatUsd(monthly)}/mo`
+                  : `${formatUsd(effectiveMonthlyWhenYearly(p.id))}/mo`;
+              const sub = billingInterval === 'yearly' ? 'Billed Annually' : undefined;
+              const blurb =
+                billingInterval === 'yearly' ? p.blurbYearly : p.blurbMonthly;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPlan(p.id)}
+                  className={`w-full text-left rounded-xl border-2 p-4 transition-all cursor-pointer ${
+                    plan === p.id
+                      ? 'border-[#FF5392] bg-pink-50/80'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-semibold text-gray-900">{p.name}</span>
+                    <div className="text-right shrink-0">
+                      <span className="text-gray-900 font-semibold block tabular-nums">{priceLine}</span>
+                      {sub && (
+                        <span className="text-xs text-emerald-600 font-medium block mt-1">{sub}</span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{blurb}</p>
+                </button>
+              );
+            })}
           </div>
 
           {error && (
@@ -193,7 +263,7 @@ function CheckoutContent() {
           </button>
 
           <p className="text-xs text-gray-400 mt-4 text-center">
-            Secured by Stripe. Cancel anytime before the trial ends and you won&apos;t be charged.
+            Secured by Polar. Cancel anytime before the trial ends and you won&apos;t be charged.
           </p>
         </div>
       </div>

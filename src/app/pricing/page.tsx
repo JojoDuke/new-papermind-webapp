@@ -1,17 +1,66 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import {
+  LIST_PRICE_MONTHLY_USD,
+  YEARLY_SAVINGS_PERCENT,
+  effectiveMonthlyWhenYearly,
+  formatUsd,
+} from '@/lib/billing';
+import type { BillingInterval } from '@/lib/billing';
 
 export default function PricingPage() {
+  const [billing, setBilling] = useState<BillingInterval>('monthly');
+
+  const authHref = (plan: 'starter' | 'pro') =>
+    `/auth?plan=${plan}&interval=${billing}`;
+
   return (
     <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 relative overflow-x-hidden">
       <Navbar />
       <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-16 md:py-24 text-center">
         <section className="text-left">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Pricing</p>
             <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Simple, transparent pricing</h1>
             <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Two plans. Pick what fits how you study.</p>
+          </div>
+
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 gap-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setBilling('monthly')}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                  billing === 'monthly'
+                    ? 'bg-gray-900 text-white shadow'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                onClick={() => setBilling('yearly')}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                  billing === 'yearly'
+                    ? 'bg-gray-900 text-white shadow'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Yearly
+                <span
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    billing === 'yearly' ? 'bg-emerald-500/30 text-emerald-100' : 'bg-emerald-100 text-emerald-700'
+                  }`}
+                >
+                  Save {YEARLY_SAVINGS_PERCENT}%
+                </span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-3xl mx-auto items-stretch">
@@ -20,11 +69,27 @@ export default function PricingPage() {
             <div className="bg-white rounded-[20px] border-[2.5px] border-gray-200 p-7 md:p-8 flex flex-col gap-6 min-h-full">
               <div>
                 <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Starter</p>
-                <div className="flex items-end gap-1">
-                  <p className="text-5xl font-black font-serif text-gray-900">$12</p>
-                  <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                <div className="flex items-end gap-1 flex-wrap">
+                  {billing === 'monthly' ? (
+                    <>
+                      <p className="text-5xl font-black font-serif text-gray-900">
+                        {formatUsd(LIST_PRICE_MONTHLY_USD.starter)}
+                      </p>
+                      <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-5xl font-black font-serif text-gray-900">
+                        {formatUsd(effectiveMonthlyWhenYearly('starter'))}
+                      </p>
+                      <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                    </>
+                  )}
                 </div>
-                <p className="text-sm text-gray-400 font-sans mt-1">Cancel anytime</p>
+                {billing === 'yearly' && (
+                  <p className="text-sm text-emerald-600 font-semibold font-sans mt-1">Billed Annually</p>
+                )}
+                <p className="text-sm text-gray-400 font-sans mt-2">Cancel anytime</p>
               </div>
               <ul className="flex flex-col gap-3 flex-1">
                 {[
@@ -40,7 +105,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth?plan=starter" className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
+              <Link href={authHref('starter')} className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
                 Start with Starter
               </Link>
             </div>
@@ -52,11 +117,27 @@ export default function PricingPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Pro</p>
-                <div className="flex items-end gap-1">
-                  <p className="text-5xl font-black font-serif text-white">$29</p>
-                  <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                <div className="flex items-end gap-1 flex-wrap">
+                  {billing === 'monthly' ? (
+                    <>
+                      <p className="text-5xl font-black font-serif text-white">
+                        {formatUsd(LIST_PRICE_MONTHLY_USD.pro)}
+                      </p>
+                      <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-5xl font-black font-serif text-white">
+                        {formatUsd(effectiveMonthlyWhenYearly('pro'))}
+                      </p>
+                      <p className="text-gray-400 font-sans text-sm mb-2">/month</p>
+                    </>
+                  )}
                 </div>
-                <p className="text-sm text-gray-400 font-sans mt-1">For exams & heavy prep</p>
+                {billing === 'yearly' && (
+                  <p className="text-sm text-emerald-400 font-semibold font-sans mt-1">Billed Annually</p>
+                )}
+                <p className="text-sm text-gray-400 font-sans mt-2">For exams & heavy prep</p>
               </div>
               <ul className="flex flex-col gap-3 flex-1">
                 {[
@@ -73,7 +154,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth?plan=pro" className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
+              <Link href={authHref('pro')} className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>

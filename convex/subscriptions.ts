@@ -34,19 +34,19 @@ export const hasPaidAccess = query({
   },
 });
 
-export const syncFromStripe = mutation({
+export const syncFromPolar = mutation({
   args: {
     secret: v.string(),
     userId: v.id("users"),
-    stripeCustomerId: v.string(),
-    stripeSubscriptionId: v.string(),
+    polarCustomerId: v.string(),
+    polarSubscriptionId: v.string(),
     status: v.string(),
     trialEndMs: v.optional(v.number()),
     currentPeriodEndMs: v.optional(v.number()),
     priceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    if (args.secret !== process.env.STRIPE_SYNC_SECRET) {
+    if (args.secret !== process.env.POLAR_SYNC_SECRET) {
       throw new Error("Unauthorized");
     }
     const now = Date.now();
@@ -57,8 +57,8 @@ export const syncFromStripe = mutation({
 
     const row = {
       userId: args.userId,
-      stripeCustomerId: args.stripeCustomerId,
-      stripeSubscriptionId: args.stripeSubscriptionId,
+      polarCustomerId: args.polarCustomerId,
+      polarSubscriptionId: args.polarSubscriptionId,
       status: args.status,
       trialEndMs: args.trialEndMs,
       currentPeriodEndMs: args.currentPeriodEndMs,

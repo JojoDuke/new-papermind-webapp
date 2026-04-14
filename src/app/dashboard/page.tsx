@@ -49,19 +49,20 @@ export default function DashboardPage() {
     if (params.get('checkout') !== 'success') {
       return;
     }
-    const sessionId = params.get('session_id');
+    const checkoutId =
+      params.get('checkout_id') ?? params.get('session_id');
     checkoutSynced.current = true;
-    if (!sessionId) {
+    if (!checkoutId) {
       router.replace('/dashboard');
       return;
     }
-    fetch('/api/stripe/verify-session', {
+    fetch('/api/polar/verify-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ sessionId }),
+      body: JSON.stringify({ checkoutId }),
     })
       .catch(() => {})
       .finally(() => {

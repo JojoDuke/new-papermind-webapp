@@ -27,10 +27,12 @@ export default function AuthPage() {
 
   function checkoutEntryPath(): string {
     if (typeof window === 'undefined') {
-      return '/checkout?plan=pro';
+      return '/checkout?plan=pro&interval=monthly';
     }
-    const p = new URLSearchParams(window.location.search).get('plan');
-    return p === 'starter' ? '/checkout?plan=starter' : '/checkout?plan=pro';
+    const q = new URLSearchParams(window.location.search);
+    const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
+    const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
+    return `/checkout?plan=${plan}&interval=${interval}`;
   }
 
   // After login or signup, continue to card-upfront trial checkout (OAuth callback included)
@@ -98,9 +100,11 @@ export default function AuthPage() {
     setError('');
     try {
       if (typeof window !== 'undefined') {
-        const p = new URLSearchParams(window.location.search).get('plan');
-        const plan = p === 'starter' ? 'starter' : 'pro';
+        const q = new URLSearchParams(window.location.search);
+        const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
+        const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
         sessionStorage.setItem('pm_checkout_plan', plan);
+        sessionStorage.setItem('pm_checkout_interval', interval);
       }
       await signIn('google', {
         redirectTo: '/checkout',
