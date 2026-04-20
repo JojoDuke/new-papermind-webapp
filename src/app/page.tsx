@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { DemoWidget } from '@/components/DemoWidget';
 import { FeatureTabSelector } from '@/components/FeatureTabSelector';
+import { LandingCTAButton } from '@/components/LandingCTAButton';
 
 const testimonials = [
   {
@@ -64,8 +64,8 @@ export default function Home() {
             From university finals to professional certifications, create AI-powered flashcards, quizzes, and mock exams, ready in seconds.
           </p>
           <div className="flex justify-center mb-16">
-            <Link
-              href="/auth"
+            <LandingCTAButton
+              eventName="hero_cta_clicked"
               className="pink-glowing-button group relative rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
             >
               <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
@@ -76,7 +76,7 @@ export default function Home() {
                 <path d="M20.054 15.987H3.946" />
               </svg>
               <span className="relative z-30">Start Studying - 7 day free trial</span>
-            </Link>
+            </LandingCTAButton>
           </div>
         </div>
 
@@ -331,15 +331,15 @@ export default function Home() {
               Join thousands of students already using Papermind to study smarter and pass faster.
             </p>
             <div className="flex justify-center relative z-10">
-              <Link
-                href="/auth"
+              <LandingCTAButton
+                eventName="bottom_cta_clicked"
                 className="pink-glowing-button group relative rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[12px_28px] shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
               >
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
                 <span className="relative z-30">Start Studying - 7 day free trial</span>
-              </Link>
+              </LandingCTAButton>
             </div>
           </div>
         </section>

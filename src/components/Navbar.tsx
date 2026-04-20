@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import posthog from 'posthog-js';
 
 export function Navbar() {
   return (
@@ -33,12 +34,17 @@ export function Navbar() {
 
         {/* CTA Buttons */}
         <div className="flex items-center gap-4 font-sans relative z-10">
-          <Link href="/auth" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-4 py-2">
+          <Link
+            href="/auth"
+            className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-4 py-2"
+            onClick={() => posthog.capture("navbar_sign_in_clicked")}
+          >
             Sign In
           </Link>
           <Link
             href="/auth"
             className="bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95 font-sans"
+            onClick={() => posthog.capture("navbar_start_studying_clicked")}
           >
             Start Studying
           </Link>

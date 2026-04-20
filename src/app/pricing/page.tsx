@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import {
@@ -33,7 +34,7 @@ export default function PricingPage() {
             <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 gap-1 shadow-sm">
               <button
                 type="button"
-                onClick={() => setBilling('monthly')}
+                onClick={() => { setBilling('monthly'); posthog.capture('pricing_billing_toggle', { interval: 'monthly' }); }}
                 className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   billing === 'monthly'
                     ? 'bg-gray-900 text-white shadow'
@@ -44,7 +45,7 @@ export default function PricingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setBilling('yearly')}
+                onClick={() => { setBilling('yearly'); posthog.capture('pricing_billing_toggle', { interval: 'yearly' }); }}
                 className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
                   billing === 'yearly'
                     ? 'bg-gray-900 text-white shadow'
@@ -105,7 +106,11 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={authHref('starter')} className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all">
+              <Link
+                href={authHref('starter')}
+                className="mt-auto w-full text-center py-3 rounded-[10px] border-[2.5px] border-gray-200 text-gray-700 font-medium text-sm font-sans hover:border-gray-300 hover:bg-gray-50 transition-all"
+                onClick={() => posthog.capture('pricing_plan_selected', { plan: 'starter', interval: billing })}
+              >
                 Start with Starter
               </Link>
             </div>
@@ -154,7 +159,11 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={authHref('pro')} className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none">
+              <Link
+                href={authHref('pro')}
+                className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white font-medium text-sm font-sans transition-all active:scale-95 outline-none focus:outline-none"
+                onClick={() => posthog.capture('pricing_plan_selected', { plan: 'pro', interval: billing })}
+              >
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
