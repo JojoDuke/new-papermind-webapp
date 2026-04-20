@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, PT_Serif } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
+import { PostHogProvider } from "@/providers/PostHogProvider";
+import { PostHogPageView } from "@/components/PostHogPageView";
+import { Suspense } from "react";
 
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta-sans",
@@ -31,11 +34,16 @@ export default function RootLayout({
         className={`${jakartaSans.variable} ${ptSerif.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ConvexClientProvider>
-          <div className="relative min-h-screen">
-            {children}
-          </div>
-        </ConvexClientProvider>
+        <PostHogProvider>
+          <ConvexClientProvider>
+            <Suspense fallback={null}>
+              <PostHogPageView />
+            </Suspense>
+            <div className="relative min-h-screen">
+              {children}
+            </div>
+          </ConvexClientProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
