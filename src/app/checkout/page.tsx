@@ -47,6 +47,17 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Load Polar embed script from CDN once on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (document.getElementById('polar-embed-script')) return;
+    const script = document.createElement('script');
+    script.id = 'polar-embed-script';
+    script.src =
+      'https://cdn.jsdelivr.net/npm/@polar-sh/checkout@latest/dist/embed.global.js';
+    document.head.appendChild(script);
+  }, []);
+
   useEffect(() => {
     const qPlan = searchParams.get('plan');
     const qInterval = searchParams.get('interval');
@@ -105,18 +116,50 @@ function CheckoutContent() {
         },
         body: JSON.stringify({ plan, interval: billingInterval }),
       });
-      const data = await res.json().catch(() => ({}));
+      const raw = await res.text();
+      let data: { error?: string; url?: string } = {};
+      try {
+        data = raw ? (JSON.parse(raw) as { error?: string; url?: string }) : {};
+      } catch {
+        data = {};
+      }
       if (!res.ok) {
-        throw new Error(typeof data.error === 'string' ? data.error : 'Could not start checkout');
+        const detail =
+          typeof data.error === 'string'
+            ? data.error
+            : raw?.trim()
+              ? raw.slice(0, 400)
+              : `Request failed (${res.status})`;
+        throw new Error(detail);
       }
-      if (data.url && typeof data.url === 'string') {
+      if (!data.url || typeof data.url !== 'string') {
+        throw new Error('No checkout URL returned');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const PolarEmbed = (window as any).PolarEmbedCheckout as
+        | {
+            create: (
+              url: string,
+              opts: { theme?: string; onLoaded?: () => void }
+            ) => Promise<{ addEventListener: (event: string, cb: () => void) => void }>;
+          }
+        | undefined;
+
+      if (PolarEmbed) {
+        const checkout = await PolarEmbed.create(data.url, {
+          theme: 'light',
+          onLoaded: () => setLoading(false),
+        });
+        // If the user closes the modal without paying, re-enable the button
+        checkout.addEventListener('close', () => setLoading(false));
+        // On success Polar automatically redirects to our successUrl — no action needed
+      } else {
+        // CDN script not yet loaded — fall back to full-page redirect
         window.location.href = data.url;
-        return;
       }
-      throw new Error('No checkout URL returned');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
       setLoading(false);
     }
   };
@@ -255,7 +298,7 @@ function CheckoutContent() {
             {loading ? (
               <span className="inline-flex items-center gap-2">
                 <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Redirecting to secure checkout…
+                Opening checkout…
               </span>
             ) : (
               'Continue to secure payment'
