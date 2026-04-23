@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, PT_Serif } from "next/font/google";
 import "./globals.css";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 import { PostHogPageView } from "@/components/PostHogPageView";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   description: "Transform your study materials into interactive quizzes with the power of AI. Upload PDFs, generate personalized quizzes, and master your subjects faster.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -34,16 +35,18 @@ export default function RootLayout({
         className={`${jakartaSans.variable} ${ptSerif.variable} antialiased`}
         suppressHydrationWarning
       >
-        <PostHogProvider>
-          <ConvexClientProvider>
-            <Suspense fallback={null}>
-              <PostHogPageView />
-            </Suspense>
-            <div className="relative min-h-screen">
-              {children}
-            </div>
-          </ConvexClientProvider>
-        </PostHogProvider>
+        <ConvexAuthNextjsServerProvider>
+          <PostHogProvider>
+            <ConvexClientProvider>
+              <Suspense fallback={null}>
+                <PostHogPageView />
+              </Suspense>
+              <div className="relative min-h-screen">
+                {children}
+              </div>
+            </ConvexClientProvider>
+          </PostHogProvider>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );
