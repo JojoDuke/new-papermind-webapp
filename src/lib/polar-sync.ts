@@ -50,7 +50,7 @@ export async function syncPolarSubscriptionToConvex(
   sub: PolarSubscriptionPayload,
   convexUserIdOverride?: string
 ) {
-  const secret = process.env.POLAR_SYNC_SECRET;
+  const secret = process.env.POLAR_SYNC_SECRET?.trim();
   if (!secret) {
     throw new Error("POLAR_SYNC_SECRET is not configured");
   }

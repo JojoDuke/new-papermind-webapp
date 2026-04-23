@@ -47,8 +47,17 @@ export const syncFromPolar = mutation({
     priceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    if (args.secret !== process.env.POLAR_SYNC_SECRET) {
-      throw new Error("Unauthorized");
+    const expected = process.env.POLAR_SYNC_SECRET?.trim();
+    const received = args.secret?.trim();
+    if (!expected) {
+      throw new Error(
+        "POLAR_SYNC_SECRET is not set on this Convex deployment. Add it in Dashboard → Settings → Environment Variables (use the same value as on Vercel)."
+      );
+    }
+    if (received !== expected) {
+      throw new Error(
+        "POLAR_SYNC_SECRET mismatch: the value on Convex must exactly match POLAR_SYNC_SECRET on Vercel (and .env.local for dev)."
+      );
     }
     const now = Date.now();
     const existing = await ctx.db
