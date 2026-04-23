@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
 
     const checkout = await polar.checkouts.create({
       products: [productId],
-      successUrl: `${origin}/dashboard?checkout=success&checkout_id={CHECKOUT_ID}`,
+      successUrl: `${origin}/checkout/success?checkout_id={CHECKOUT_ID}`,
       returnUrl: `${origin}/checkout?canceled=1&plan=${plan}&interval=${interval}`,
       embedOrigin: origin,
       externalCustomerId: user._id,

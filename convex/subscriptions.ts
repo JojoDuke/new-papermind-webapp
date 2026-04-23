@@ -30,7 +30,8 @@ export const hasPaidAccess = query({
     if (!sub) {
       return false;
     }
-    return sub.status === "trialing" || sub.status === "active";
+    const s = String(sub.status).toLowerCase();
+    return s === "trialing" || s === "active";
   },
 });
 
