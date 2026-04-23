@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth } from 'convex/react';
-import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,8 +20,7 @@ export default function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const { signIn } = useAuthActions();
-  const { isAuthenticated } = useConvexAuth();
-  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const postAuthRedirected = useRef(false);
 
   function checkoutEntryPath(): string {
@@ -35,13 +33,14 @@ export default function AuthPage() {
     return `/checkout?plan=${plan}&interval=${interval}`;
   }
 
-  // After login or signup, continue to card-upfront trial checkout (OAuth callback included)
+  // After login or signup, continue to card-upfront trial checkout.
+  // Full page navigation keeps Convex Auth cookies and RSC layout in sync; client-only
+  // router.replace can leave checkout thinking the user is signed out (bounce /auth ↔ /checkout).
   useEffect(() => {
-    if (isAuthenticated && !postAuthRedirected.current) {
-      postAuthRedirected.current = true;
-      router.replace(checkoutEntryPath());
-    }
-  }, [isAuthenticated, router]);
+    if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
+    postAuthRedirected.current = true;
+    window.location.assign(checkoutEntryPath());
+  }, [isAuthenticated, authLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -107,7 +106,10 @@ export default function AuthPage() {
         sessionStorage.setItem('pm_checkout_interval', interval);
       }
       await signIn('google', {
-        redirectTo: '/checkout',
+        redirectTo:
+          typeof window !== 'undefined'
+            ? `${window.location.origin}/checkout`
+            : '/checkout',
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';

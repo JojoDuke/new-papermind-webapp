@@ -106,7 +106,7 @@ function CheckoutContent() {
     setLoggingOut(true);
     try {
       await signOut();
-      router.replace('/auth');
+      window.location.assign('/auth');
     } finally {
       setLoggingOut(false);
     }
