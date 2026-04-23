@@ -4,6 +4,17 @@ import type { Id } from "../../convex/_generated/dataModel";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
+function toMillis(d: unknown): number | undefined {
+  if (d == null) return undefined;
+  if (d instanceof Date) return d.getTime();
+  if (typeof d === "number" && !Number.isNaN(d)) return d;
+  if (typeof d === "string") {
+    const t = new Date(d).getTime();
+    return Number.isNaN(t) ? undefined : t;
+  }
+  return undefined;
+}
+
 /**
  * Minimal subscription shape from Polar webhooks / API (avoids duplicate @polar-sh/sdk type versions).
  */
@@ -50,9 +61,10 @@ export async function syncPolarSubscriptionToConvex(
     return;
   }
 
-  const trialEndMs = sub.trialEnd ? sub.trialEnd.getTime() : undefined;
-  const currentPeriodEndMs = sub.currentPeriodEnd.getTime();
-  const priceId = sub.productId;
+  const trialEndMs = toMillis(sub.trialEnd);
+  const currentPeriodEndMs = toMillis(sub.currentPeriodEnd);
+  const raw = sub as unknown as { product?: { id?: string } };
+  const priceId = sub.productId || raw.product?.id || "";
 
   const convex = new ConvexHttpClient(convexUrl);
   await convex.mutation(api.subscriptions.syncFromPolar, {
