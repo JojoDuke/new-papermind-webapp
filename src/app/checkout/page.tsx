@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuthToken } from '@convex-dev/auth/react';
+import { useAuthActions, useAuthToken } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -40,11 +40,13 @@ const PLAN_META: {
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { signOut } = useAuthActions();
   const authToken = useAuthToken();
   const hasAccess = useQuery(api.subscriptions.hasPaidAccess);
   const [plan, setPlan] = useState<BillingPlan>('pro');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState('');
 
   // Load Polar embed script from CDN once on mount
@@ -99,6 +101,16 @@ function CheckoutContent() {
       year: 'numeric',
     });
   }, []);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await signOut();
+      router.replace('/auth');
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   const startCheckout = async () => {
     setError('');
@@ -180,15 +192,25 @@ function CheckoutContent() {
     <div className="min-h-screen flex flex-col lg:flex-row">
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-gray-50">
         <div className="w-full max-w-md">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-8 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Home
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+            <Link
+              href="/"
+              className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
+            </Link>
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              disabled={loggingOut}
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50 transition-colors cursor-pointer"
+            >
+              {loggingOut ? 'Signing out…' : 'Log out'}
+            </button>
+          </div>
 
           <div className="flex items-center gap-3 mb-6">
             <Image src="/logos-icons/pmIcon.png" alt="" width={40} height={40} className="w-10 h-10" />
