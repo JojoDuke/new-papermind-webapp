@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, PT_Serif } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { AdminNewUserNotify } from "@/components/AdminNewUserNotify";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 import { PostHogPageView } from "@/components/PostHogPageView";
@@ -38,6 +39,7 @@ export default async function RootLayout({
         <ConvexAuthNextjsServerProvider>
           <PostHogProvider>
             <ConvexClientProvider>
+              <AdminNewUserNotify />
               <Suspense fallback={null}>
                 <PostHogPageView />
               </Suspense>
