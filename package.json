@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:resend": "node scripts/test-resend.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.50",

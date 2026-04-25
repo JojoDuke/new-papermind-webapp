@@ -32,7 +32,7 @@ export const send = internalAction({
     const apiKey = process.env.RESEND_API_KEY;
     const to = process.env.NEW_USER_NOTIFY_TO;
     const from =
-      process.env.RESEND_FROM ?? "Papermind <onboarding@resend.dev>";
+      process.env.RESEND_FROM ?? "Papermind <hello@usepapermind.app>";
 
     if (!apiKey || !to) {
       console.error(
