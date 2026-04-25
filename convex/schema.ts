@@ -48,4 +48,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_polar_customer", ["polarCustomerId"]),
+
+  newUserAdminNotified: defineTable({
+    userId: v.id("users"),
+  }).index("by_user", ["userId"]),
 });
