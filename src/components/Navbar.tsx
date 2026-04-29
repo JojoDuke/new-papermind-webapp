@@ -25,10 +25,17 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-8 font-sans absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-
-
+          <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+            About
+          </Link>
+          <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+            Blog
+          </Link>
           <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             Pricing
+          </Link>
+          <Link href="/company" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+            Company
           </Link>
         </div>
 
