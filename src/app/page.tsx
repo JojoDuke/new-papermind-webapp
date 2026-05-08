@@ -74,7 +74,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="text-left">
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 font-serif tracking-tight leading-[1.05]">
-                The Fastest Way to Pass Your Next Exam
+                The <span className="text-[#FF5392]">Fastest</span> Way to Pass Your Next Exam
               </h1>
               <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl font-sans leading-relaxed">
                 From university finals to professional certifications, create AI-powered flashcards, quizzes, and mock exams, ready in seconds.
