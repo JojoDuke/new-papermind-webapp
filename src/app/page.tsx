@@ -73,16 +73,11 @@ export default function Home() {
         <section className="pt-4 md:pt-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="text-left">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-4">
-                AI-powered study platform
-              </p>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 font-serif tracking-tight leading-[1.05]">
-                Smarter study.
-                <br />
-                <span className="text-[#FF5392]">Better results.</span>
+                The Fastest Way to Pass Your Next Exam
               </h1>
               <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl font-sans leading-relaxed">
-                Generate flashcards, quizzes, and mock exams from your PDFs in seconds — then study with an adaptive system that targets your weak spots.
+                From university finals to professional certifications, create AI-powered flashcards, quizzes, and mock exams, ready in seconds.
               </p>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
