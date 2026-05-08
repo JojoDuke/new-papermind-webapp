@@ -49,39 +49,78 @@ const testimonials = [
   },
 ];
 
+const trustItems = [
+  { type: 'img', src: '/trust-logos/oxford.svg', alt: 'University of Oxford', height: 'h-7' },
+  { type: 'img', src: '/trust-logos/cambridge.svg', alt: 'University of Cambridge', height: 'h-9' },
+  { type: 'img', src: '/trust-logos/mit.svg', alt: 'MIT', height: 'h-6' },
+  { type: 'img', src: '/trust-logos/imperial.svg', alt: 'Imperial College London', height: 'h-7' },
+  { type: 'img', src: '/trust-logos/usmle.png', alt: 'USMLE', height: 'h-10' },
+  { type: 'img', src: '/trust-logos/cfa.svg', alt: 'CFA Institute', height: 'h-8' },
+  { type: 'img', src: '/trust-logos/acca.svg', alt: 'ACCA', height: 'h-8' },
+  { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
+] as Array<
+  | { type: 'img'; src: string; alt: string; height: string }
+  | { type: 'txt'; name: string; style: string }
+>;
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 relative overflow-x-hidden">
       <Navbar />
-      <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-16 text-center">
+      <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-10 md:py-16">
 
         {/* ── Hero ── */}
-        <div className="text-center max-w-4xl mx-auto pt-8">
-          <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 font-serif tracking-tight">
-            The Fastest Way to Pass Your Next Exam
-          </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto font-sans leading-relaxed">
-            From university finals to professional certifications, create AI-powered flashcards, quizzes, and mock exams, ready in seconds.
-          </p>
-          <div className="flex justify-center mb-16">
-            <LandingCTAButton
-              eventName="hero_cta_clicked"
-              className="pink-glowing-button group relative rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
-            >
-              <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
-                <span className="blurred-border absolute inset-0 z-20" />
-              </span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-laptop pointer-events-none z-30" aria-hidden="true">
-                <path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z" />
-                <path d="M20.054 15.987H3.946" />
-              </svg>
-              <span className="relative z-30">Start Studying - 7 day free trial</span>
-            </LandingCTAButton>
+        <section className="pt-4 md:pt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
+            <div className="text-left">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-4">
+                AI-powered study platform
+              </p>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 font-serif tracking-tight leading-[1.05]">
+                Smarter study.
+                <br />
+                <span className="text-[#FF5392]">Better results.</span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl font-sans leading-relaxed">
+                Generate flashcards, quizzes, and mock exams from your PDFs in seconds — then study with an adaptive system that targets your weak spots.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <LandingCTAButton
+                  eventName="hero_cta_clicked"
+                  className="pink-glowing-button group relative rounded-[10px] flex items-center gap-[6px] w-fit text-white font-medium text-[16px] tracking-[-0.13px] p-[10px_20px] shadow-lg transition-all active:scale-95 outline-none focus:outline-none"
+                >
+                  <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
+                    <span className="blurred-border absolute inset-0 z-20" />
+                  </span>
+                  <span className="relative z-30">Get started for free</span>
+                </LandingCTAButton>
+
+                <a
+                  href="#features"
+                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-2 py-2"
+                >
+                  See how it works
+                </a>
+              </div>
+            </div>
+
+            <div className="relative w-full">
+              <div className="absolute -inset-2 bg-linear-to-r from-pink-200 to-purple-200 rounded-[26px] blur-2xl opacity-25" />
+              <div className="relative bg-white border border-white/40 shadow-2xl rounded-[22px] overflow-hidden backdrop-blur-sm aspect-[16/10]">
+                <img
+                  src="/assets/webapp_preview_screenshot.png"
+                  alt="Papermind Webapp Preview"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent pointer-events-none" />
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* ── Live Demo ── */}
-        <div className="mt-8 w-full">
+        <div className="mt-10 w-full">
           <DemoWidget />
         </div>
 
@@ -93,34 +132,28 @@ export default function Home() {
           <div className="relative w-full overflow-hidden">
             <div className="absolute left-0 top-0 h-full w-24 bg-linear-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 h-full w-24 bg-linear-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
-            <div className="flex animate-marquee items-center gap-16 w-max">
-              {([
-                { type: 'img', src: '/trust-logos/oxford.svg',   alt: 'University of Oxford',    height: 'h-7'  },
-                { type: 'img', src: '/trust-logos/cambridge.svg',alt: 'University of Cambridge',  height: 'h-9'  },
-                { type: 'img', src: '/trust-logos/mit.svg',      alt: 'MIT',                      height: 'h-6'  },
-                { type: 'img', src: '/trust-logos/imperial.svg', alt: 'Imperial College London',  height: 'h-7'  },
-                { type: 'img', src: '/trust-logos/usmle.png',   alt: 'USMLE',                    height: 'h-10' },
-                { type: 'img', src: '/trust-logos/cfa.svg',      alt: 'CFA Institute',            height: 'h-8'  },
-                { type: 'img', src: '/trust-logos/acca.svg',     alt: 'ACCA',                     height: 'h-8'  },
-                { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
-                { type: 'img', src: '/trust-logos/oxford.svg',   alt: 'University of Oxford',    height: 'h-7'  },
-                { type: 'img', src: '/trust-logos/cambridge.svg',alt: 'University of Cambridge',  height: 'h-9'  },
-                { type: 'img', src: '/trust-logos/mit.svg',      alt: 'MIT',                      height: 'h-6'  },
-                { type: 'img', src: '/trust-logos/imperial.svg', alt: 'Imperial College London',  height: 'h-7'  },
-                { type: 'img', src: '/trust-logos/usmle.png',   alt: 'USMLE',                    height: 'h-10' },
-                { type: 'img', src: '/trust-logos/cfa.svg',      alt: 'CFA Institute',            height: 'h-8'  },
-                { type: 'img', src: '/trust-logos/acca.svg',     alt: 'ACCA',                     height: 'h-8'  },
-                { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
-              ] as Array<
-                | { type: 'img'; src: string; alt: string; height: string }
-                | { type: 'txt'; name: string; style: string }
-              >).map((item, i) =>
-                item.type === 'img' ? (
-                  <img key={i} src={item.src} alt={item.alt} className={`${item.height} w-auto object-contain select-none grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500`} />
-                ) : (
-                  <span key={i} className={`text-gray-300 hover:text-blue-500 whitespace-nowrap select-none transition-colors duration-500 ${item.style}`}>{item.name}</span>
-                )
-              )}
+            <div className="marquee-track">
+              {[0, 1].map((dup) => (
+                <div key={dup} className="marquee-group" aria-hidden={dup === 1}>
+                  {trustItems.map((item, i) =>
+                    item.type === 'img' ? (
+                      <img
+                        key={`${dup}-${i}`}
+                        src={item.src}
+                        alt={item.alt}
+                        className={`${item.height} w-auto object-contain select-none grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500`}
+                      />
+                    ) : (
+                      <span
+                        key={`${dup}-${i}`}
+                        className={`text-gray-300 hover:text-blue-500 whitespace-nowrap select-none transition-colors duration-500 ${item.style}`}
+                      >
+                        {item.name}
+                      </span>
+                    )
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

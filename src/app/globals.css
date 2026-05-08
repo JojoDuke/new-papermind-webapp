@@ -31,6 +31,19 @@ h1, h2, h3, h4, h5, h6 {
   .animate-marquee {
     animation: marquee 28s linear infinite;
   }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+  .marquee-group {
+    display: flex;
+    align-items: center;
+    gap: 4rem; /* matches Tailwind gap-16 */
+    flex-shrink: 0;
+  }
   .font-serif {
     font-family: var(--font-pt-serif), Georgia, serif;
   }

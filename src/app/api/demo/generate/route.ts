@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import 'pdf-parse/worker';
 import { flashcardAuthorAgent, flashcardSchema } from '../../../../../backend/mastra/agents/flashcard-author';
 import {
   dedupeCardsByFront,
@@ -13,10 +14,45 @@ const MAX_BATCH_CHARS = 10_000;
 
 const DEMO_COOKIE = 'papermind_demo_used';
 
-export async function POST(req: NextRequest) {
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ error: 'OpenAI API key is not configured' }, { status: 503 });
+function buildFallbackCards(text: string) {
+  const lines = text
+    .split(/\r?\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .slice(0, 50);
+
+  const cards: { front: string; back: string }[] = [];
+
+  for (const line of lines) {
+    if (cards.length >= TARGET_CARDS) break;
+
+    const colon = line.indexOf(':');
+    if (colon > 0 && colon < 80) {
+      const left = line.slice(0, colon).trim();
+      const right = line.slice(colon + 1).trim();
+      if (left && right) {
+        cards.push({
+          front: `What is ${left}?`,
+          back: right,
+        });
+        continue;
+      }
+    }
+
+    // Otherwise, turn a short line into a “key idea” card.
+    const back = line.length > 300 ? `${line.slice(0, 297)}…` : line;
+    const words = back.split(/\s+/).slice(0, 8).join(' ');
+    cards.push({
+      front: `Key idea: ${words}${back.split(/\s+/).length > 8 ? '…' : ''}`,
+      back,
+    });
   }
+
+  return dedupeCardsByFront(cards).slice(0, TARGET_CARDS);
+}
+
+export async function POST(req: NextRequest) {
+  const hasOpenAiKey = Boolean(process.env.OPENAI_API_KEY);
 
   if (req.cookies.get(DEMO_COOKIE)?.value === '1') {
     return NextResponse.json(
@@ -58,6 +94,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // If the deployment isn't configured with an LLM key, still let the demo run by
+    // generating a small set of simple, deterministic cards from extracted text.
+    if (!hasOpenAiKey) {
+      const cards = buildFallbackCards(text);
+      if (cards.length === 0) {
+        return NextResponse.json({ error: 'Could not generate cards from this document.' }, { status: 422 });
+      }
+
+      const res = NextResponse.json({
+        cards,
+        warning: 'Demo is running in limited mode (AI key not configured).',
+      });
+      res.cookies.set(DEMO_COOKIE, '1', {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365 * 10,
+        secure: process.env.NODE_ENV === 'production',
+      });
+      return res;
+    }
+
     const { MDocument } = await import('@mastra/rag');
     const doc = MDocument.fromText(text, { source: 'demo-pdf' });
     const ragChunks = await doc.chunk({ strategy: 'recursive', maxSize: 512, overlap: 50, separators: ['\n\n', '\n', ' '] });
