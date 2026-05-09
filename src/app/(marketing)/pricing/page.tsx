@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import posthog from 'posthog-js';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { Navbar } from '@/components/marketing/Navbar';
+import { Footer } from '@/components/marketing/Footer';
 import {
   LIST_PRICE_MONTHLY_USD,
   YEARLY_SAVINGS_PERCENT,
@@ -17,7 +17,7 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingInterval>('monthly');
 
   const authHref = (plan: 'starter' | 'pro') =>
-    `/auth?plan=${plan}&interval=${billing}`;
+    `/sign-up?plan=${plan}&interval=${billing}`;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 relative overflow-x-hidden">

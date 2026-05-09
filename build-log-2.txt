@@ -1,0 +1,76 @@
+﻿
+> new-papermind-webapp@0.1.0 build
+> next build --webpack
+
+node.exe : ΓÜá Warning: 
+Next.js inferred your 
+workspace root, but it may 
+not be correct.
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (ΓÜá  
+   Warning: Ne...not be    
+ correct.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+ We detected multiple 
+lockfiles and selected the 
+directory of C:\Users\Jojo\
+package-lock.json as the 
+root directory.
+ To silence this warning, 
+set 
+`outputFileTracingRoot` in 
+your Next.js config, or 
+consider removing one of 
+the lockfiles if it's not 
+needed.
+   See https://nextjs.org/d
+ocs/app/api-reference/confi
+g/next-config-js/output#cav
+eats for more information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\Jojo\Desktop\
+new-papermind-webapp\packag
+e-lock.json
+
+Γû▓ Next.js 16.2.4 (webpack)
+- Environments: .env.local
+
+ΓÜá The "middleware" file 
+convention is deprecated. 
+Please use "proxy" 
+instead. Learn more: https:
+//nextjs.org/docs/messages/
+middleware-to-proxy
+  Creating an optimized production build ...
+Failed to compile.
+
+./src/app/pricing/page.tsx
+Module not found: Can't 
+resolve 
+'@/components/Navbar'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+./src/app/pricing/page.tsx
+Module not found: Can't 
+resolve 
+'@/components/Footer'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+
+> Build failed because of 
+webpack errors

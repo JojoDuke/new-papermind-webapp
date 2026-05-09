@@ -3,16 +3,16 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { useState, useEffect } from 'react';
-import { api } from '../../../../../convex/_generated/api';
-import { Id } from '../../../../../convex/_generated/dataModel';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { FlashcardStudyView } from '@/components/FlashcardStudyView';
+import { api } from '../../../../../../convex/_generated/api';
+import { ProtectedRoute } from '@/components/app/ProtectedRoute';
+import { FlashcardStudyView } from '@/components/app/FlashcardStudyView';
 import Link from 'next/link';
+import type { Id } from '../../../../../../convex/_generated/dataModel';
 
 export default function FlashcardDeckPage() {
   const params = useParams();
   const router = useRouter();
-  const deckId = params.deckId as Id<'flashcardDecks'>;
+  const deckId = params?.deckId as Id<'flashcardDecks'>;
   const [quitOpen, setQuitOpen] = useState(false);
 
   const data = useQuery(api.flashcards.getDeckWithCards, { deckId });

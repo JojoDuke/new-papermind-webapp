@@ -20,8 +20,8 @@ export function DashboardSidebar() {
   const isHome = pathname === '/dashboard';
 
   const isStudyDecks =
-    pathname.startsWith('/dashboard/study-decks') ||
-    pathname.startsWith('/dashboard/flashcards');
+    pathname?.startsWith('/dashboard/study-decks') ||
+    pathname?.startsWith('/dashboard/flashcards');
 
   return (
     <aside

@@ -1,8 +1,8 @@
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
-import { DemoWidget } from '@/components/DemoWidget';
-import { FeatureTabSelector } from '@/components/FeatureTabSelector';
-import { LandingCTAButton } from '@/components/LandingCTAButton';
+import { Navbar } from '@/components/marketing/Navbar';
+import { Footer } from '@/components/marketing/Footer';
+import { DemoWidget } from '@/components/marketing/DemoWidget';
+import { FeatureTabSelector } from '@/components/marketing/FeatureTabSelector';
+import { LandingCTAButton } from '@/components/marketing/LandingCTAButton';
 
 const testimonials = [
   {

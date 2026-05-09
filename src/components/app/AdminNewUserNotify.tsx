@@ -2,7 +2,7 @@
 
 import { useConvexAuth, useMutation } from "convex/react";
 import { useEffect, useRef } from "react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 /** One shot after the session is ready: triggers admin email for very new accounts. */
 export function AdminNewUserNotify() {

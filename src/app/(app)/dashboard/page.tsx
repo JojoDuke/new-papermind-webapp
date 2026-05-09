@@ -1,13 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
+import { api } from '../../../../convex/_generated/api';
+import { Id } from '../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
-import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { DashboardSidebar } from '@/components/app/DashboardSidebar';
 import { useAuthToken } from '@convex-dev/auth/react';
 
 export default function DashboardPage() {

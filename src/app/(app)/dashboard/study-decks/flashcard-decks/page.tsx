@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { DashboardSidebar } from '@/components/DashboardSidebar';
-import { StudyDeckCard } from '@/components/StudyDeckCard';
+import { api } from '../../../../../../convex/_generated/api';
+import { ProtectedRoute } from '@/components/app/ProtectedRoute';
+import { DashboardSidebar } from '@/components/app/DashboardSidebar';
+import { StudyDeckCard } from '@/components/app/StudyDeckCard';
 import toast from 'react-hot-toast';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../convex/_generated/dataModel';
 
 export default function AllFlashcardDecksPage() {
   const flashcardDecks = useQuery(api.flashcards.listMyFlashcardDecks);

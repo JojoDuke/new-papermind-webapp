@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthActions, useAuthToken } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { api } from '../../../../convex/_generated/api';
+import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import type { BillingInterval, BillingPlan } from '@/lib/billing';
 import {
   LIST_PRICE_MONTHLY_USD,
@@ -61,8 +61,8 @@ function CheckoutContent() {
   }, []);
 
   useEffect(() => {
-    const qPlan = searchParams.get('plan');
-    const qInterval = searchParams.get('interval');
+    const qPlan = searchParams?.get('plan');
+    const qInterval = searchParams?.get('interval');
     if (qPlan === 'starter' || qPlan === 'pro') {
       setPlan(qPlan);
     }
@@ -89,7 +89,7 @@ function CheckoutContent() {
     }
   }, [hasAccess, router]);
 
-  const canceled = searchParams.get('canceled') === '1';
+  const canceled = searchParams?.get('canceled') === '1';
 
   const trialEndsOnLabel = useMemo(() => {
     const end = new Date();

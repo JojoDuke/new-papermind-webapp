@@ -337,12 +337,12 @@ export default function AuthPage() {
           {/* Footer text */}
           <div className="mt-8 text-center text-sm text-gray-600">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
+            <Link
+              href="/sign-up"
               className="text-pink-600 hover:text-pink-700 font-semibold cursor-pointer"
             >
-              {isLogin ? 'Sign up' : 'Sign in'}
-            </button>
+              Sign up
+            </Link>
           </div>
         </div>
       </div>

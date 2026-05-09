@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthToken } from "@convex-dev/auth/react";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/components/app/ProtectedRoute";
 
 const VERIFY_ATTEMPTS = 15;
 const VERIFY_INTERVAL_MS = 1500;
@@ -20,8 +20,8 @@ function CheckoutSuccessInner() {
     if (ran.current) return;
 
     const checkoutId =
-      searchParams.get("checkout_id")?.trim() ??
-      searchParams.get("session_id")?.trim();
+      searchParams?.get("checkout_id")?.trim() ??
+      searchParams?.get("session_id")?.trim();
 
     if (!checkoutId) {
       setError("Missing checkout confirmation. Start again from checkout.");

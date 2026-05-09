@@ -3,7 +3,7 @@
 import { useConvexAuth, useQuery } from 'convex/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, ReactNode } from 'react';
-import { api } from '../../convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 
 interface ProtectedRouteProps {
   children: ReactNode;

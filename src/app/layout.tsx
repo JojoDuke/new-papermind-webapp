@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, PT_Serif } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { AdminNewUserNotify } from "@/components/AdminNewUserNotify";
+import { AdminNewUserNotify } from "@/components/app/AdminNewUserNotify";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 import { PostHogProvider } from "@/providers/PostHogProvider";
-import { PostHogPageView } from "@/components/PostHogPageView";
+import { PostHogPageView } from "@/components/marketing/PostHogPageView";
 import { Suspense } from "react";
 
 const jakartaSans = Plus_Jakarta_Sans({

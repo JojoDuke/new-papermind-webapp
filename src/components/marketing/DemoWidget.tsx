@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { FlashcardStudyView, type FlashcardStudyCard } from './FlashcardStudyView';
+import { FlashcardStudyView, type FlashcardStudyCard } from '@/components/app/FlashcardStudyView';
 
 /** Mirrors server cookie so the UI can hide upload before any request. */
 export const LANDING_DEMO_STORAGE_KEY = 'papermind_landing_demo_used';
