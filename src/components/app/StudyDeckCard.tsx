@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import type { Id } from '../../convex/_generated/dataModel';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 export type StudyDeckCardProps = {
   deckId: Id<'flashcardDecks'>;
