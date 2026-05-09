@@ -12,7 +12,7 @@ export const metadata = {
 const FEATURED_POST = {
   slug: 'how-to-study-smarter-not-harder',
   category: 'Study Science',
-  categoryColor: 'bg-pink-100 text-pink-600',
+  categoryColor: 'bg-pink-50 text-[#FF5392]',
   title: 'How to Study Smarter, Not Harder: The Science Behind Active Recall',
   excerpt:
     "Passive re-reading gives you a false sense of confidence. Here's why active recall — the core of Papermind's flashcard engine — is the only revision method proven to stick.",
@@ -25,10 +25,10 @@ const POSTS = [
   {
     slug: 'spaced-repetition-explained',
     category: 'Study Science',
-    categoryColor: 'bg-purple-100 text-purple-600',
+    categoryColor: 'bg-purple-50 text-purple-600',
     title: 'Spaced Repetition Explained: Why Timing Is Everything',
     excerpt:
-      'Forget cramming the night before. Spaced repetition schedules your reviews at the exact moment you are about to forget — boosting retention by up to 200%.',
+      'Forget cramming the night before. Spaced repetition schedules your reviews at the exact moment you are about to forget.',
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'May 3, 2026',
     readTime: '5 min read',
@@ -36,10 +36,10 @@ const POSTS = [
   {
     slug: 'ace-your-usmle-with-ai',
     category: 'Exam Prep',
-    categoryColor: 'bg-blue-100 text-blue-600',
+    categoryColor: 'bg-blue-50 text-blue-600',
     title: 'How to Ace the USMLE Step 1 Using AI-Generated Flashcards',
     excerpt:
-      'Medical students who used AI-generated question banks alongside lecture PDFs reported a 40% reduction in prep time. Here is the exact workflow.',
+      'Medical students reported a 40% reduction in prep time. Here is the exact workflow.',
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'Apr 27, 2026',
     readTime: '8 min read',
@@ -47,10 +47,10 @@ const POSTS = [
   {
     slug: 'the-forgetting-curve',
     category: 'Study Science',
-    categoryColor: 'bg-purple-100 text-purple-600',
+    categoryColor: 'bg-purple-50 text-purple-600',
     title: "Ebbinghaus's Forgetting Curve — and How to Beat It",
     excerpt:
-      "Within 24 hours you forget up to 70% of what you learned. Ebbinghaus discovered it in 1885. We built a product to solve it in 2024.",
+      "Within 24 hours you forget up to 70% of what you learned. We built a product to solve it.",
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'Apr 19, 2026',
     readTime: '4 min read',
@@ -58,10 +58,10 @@ const POSTS = [
   {
     slug: 'cfa-study-guide',
     category: 'Exam Prep',
-    categoryColor: 'bg-blue-100 text-blue-600',
-    title: 'The Ultimate CFA Level 1 Study Guide for Working Professionals',
+    categoryColor: 'bg-blue-50 text-blue-600',
+    title: 'The Ultimate CFA Level 1 Study Guide for Professionals',
     excerpt:
-      'Studying for the CFA while holding down a full-time job is brutal. This guide shows you how to compress 300 hours of prep into a focused, repeatable routine.',
+      'How to compress 300 hours of prep into a focused, repeatable routine.',
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'Apr 11, 2026',
     readTime: '10 min read',
@@ -69,10 +69,10 @@ const POSTS = [
   {
     slug: 'mock-exams-vs-flashcards',
     category: 'Product',
-    categoryColor: 'bg-emerald-100 text-emerald-600',
-    title: 'Mock Exams vs. Flashcards: When to Use Each (and When to Use Both)',
+    categoryColor: 'bg-emerald-50 text-emerald-600',
+    title: 'Mock Exams vs. Flashcards: When to Use Each',
     excerpt:
-      "Flashcards build knowledge. Mock exams test application under pressure. Here's how to sequence them so each method amplifies the other.",
+      "Flashcards build knowledge. Mock exams test application under pressure.",
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'Apr 4, 2026',
     readTime: '6 min read',
@@ -80,10 +80,10 @@ const POSTS = [
   {
     slug: 'ai-pdf-to-flashcards',
     category: 'Product',
-    categoryColor: 'bg-emerald-100 text-emerald-600',
-    title: 'Inside Papermind: How We Turn Any PDF into a Full Study Session',
+    categoryColor: 'bg-emerald-50 text-emerald-600',
+    title: 'Inside Papermind: PDF to Full Study Session',
     excerpt:
-      "A technical deep-dive into how Papermind's AI reads your academic documents, extracts key concepts, and builds a personalised deck in under 30 seconds.",
+      "A technical deep-dive into how Papermind's AI reads your academic documents.",
     author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
     date: 'Mar 28, 2026',
     readTime: '7 min read',
@@ -230,4 +230,5 @@ export default function BlogPage() {
     </div>
   );
 }
+
 
