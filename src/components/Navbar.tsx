@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import posthog from 'posthog-js';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -16,6 +18,11 @@ export function Navbar() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [mobileOpen]);
+
+  const navigateToBlog = () => {
+    posthog.capture("navbar_blog_clicked");
+    router.push('/blog');
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md font-sans">
@@ -40,7 +47,10 @@ export function Navbar() {
           <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             About
           </Link>
-          <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+          <Link 
+          href="/blog" 
+          onClick={navigateToBlog}
+          className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
             Blog
           </Link>
           <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
