@@ -1,5 +1,5 @@
 import { Agent } from "@mastra/core/agent";
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 
 export const distractorSchema = z.object({
@@ -11,7 +11,7 @@ export const distractorSchema = z.object({
 export const distractorAgent = new Agent({
   id: "distractor-agent",
   name: "distractor-agent",
-  model: openai("gpt-4o-mini") as any,
+  model: anthropic("claude-haiku-4-5-20251001") as any,
   instructions: `
 You are a quiz distractor generator. Given a flashcard question and its correct answer,
 generate exactly 2 plausible-but-wrong alternative answers (distractors).

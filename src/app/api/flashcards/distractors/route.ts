@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { distractorAgent, distractorSchema } from "../../../../../backend/mastra/agents/distractor-agent";
 
 export async function POST(req: NextRequest) {
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 503 });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "Anthropic API key not configured" }, { status: 503 });
   }
 
   let body: { cards: { front: string; back: string }[] };

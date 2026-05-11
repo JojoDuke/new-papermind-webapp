@@ -52,7 +52,7 @@ function buildFallbackCards(text: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const hasOpenAiKey = Boolean(process.env.OPENAI_API_KEY);
+  const hasAiKey = Boolean(process.env.ANTHROPIC_API_KEY);
 
   if (req.cookies.get(DEMO_COOKIE)?.value === '1') {
     return NextResponse.json(
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   try {
     // If the deployment isn't configured with an LLM key, still let the demo run by
     // generating a small set of simple, deterministic cards from extracted text.
-    if (!hasOpenAiKey) {
+    if (!hasAiKey) {
       const cards = buildFallbackCards(text);
       if (cards.length === 0) {
         return NextResponse.json({ error: 'Could not generate cards from this document.' }, { status: 422 });

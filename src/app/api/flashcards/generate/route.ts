@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Run the Mastra workflow ──────────────────────────────────────────────────
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
-      { error: "OpenAI API key is not configured on the server." },
+      { error: "Anthropic API key is not configured on the server." },
       { status: 503 }
     );
   }

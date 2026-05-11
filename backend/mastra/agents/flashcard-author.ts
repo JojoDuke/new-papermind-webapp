@@ -1,5 +1,5 @@
 import { Agent } from "@mastra/core/agent";
-import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 
 export const flashcardSchema = z.object({
@@ -17,7 +17,7 @@ export type FlashcardDeck = z.infer<typeof flashcardSchema>;
 export const flashcardAuthorAgent = new Agent({
   id: "flashcard-author",
   name: "flashcard-author",
-  model: openai("gpt-4o-mini") as any,
+  model: anthropic("claude-haiku-4-5-20251001") as any,
   instructions: `
 You are an expert study-card author. Given a passage of text you produce clear,
 concise flashcards that follow these quality rules:
