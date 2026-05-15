@@ -5,6 +5,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, ReactNode } from 'react';
 import { api } from '../../../convex/_generated/api';
 
+/** Local dev only: set `NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION=true` in `.env.local` and restart `npm run dev`. Never set on Vercel. */
+function devBypassSubscription(): boolean {
+  return (
+    process.env.NODE_ENV === 'development' &&
+    process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true'
+  );
+}
+
 interface ProtectedRouteProps {
   children: ReactNode;
   redirectTo?: string;
@@ -14,16 +22,17 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({
   children,
-  redirectTo = '/auth',
+  redirectTo = '/sign-in',
   requireSubscription = true,
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [allowPaywallSyncReturn, setAllowPaywallSyncReturn] = useState(false);
+  const bypassSubscription = devBypassSubscription();
   const hasPaidAccess = useQuery(
     api.subscriptions.hasPaidAccess,
-    requireSubscription ? {} : 'skip'
+    requireSubscription && !bypassSubscription ? {} : 'skip'
   );
   const subRedirected = useRef(false);
 
@@ -48,7 +57,7 @@ export function ProtectedRoute({
   }, [isAuthenticated, isLoading, router, redirectTo]);
 
   useEffect(() => {
-    if (!requireSubscription || !isAuthenticated || isLoading) {
+    if (!requireSubscription || bypassSubscription || !isAuthenticated || isLoading) {
       return;
     }
     if (hasPaidAccess === undefined) {
@@ -63,6 +72,7 @@ export function ProtectedRoute({
     }
   }, [
     requireSubscription,
+    bypassSubscription,
     isAuthenticated,
     isLoading,
     hasPaidAccess,
@@ -84,7 +94,11 @@ export function ProtectedRoute({
     return null;
   }
 
-  if (requireSubscription && hasPaidAccess === undefined) {
+  if (
+    requireSubscription &&
+    !bypassSubscription &&
+    hasPaidAccess === undefined
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
@@ -94,6 +108,7 @@ export function ProtectedRoute({
 
   if (
     requireSubscription &&
+    !bypassSubscription &&
     hasPaidAccess === false &&
     !allowPaywallSyncReturn
   ) {

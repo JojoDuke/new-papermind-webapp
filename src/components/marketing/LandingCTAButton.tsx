@@ -12,7 +12,7 @@ interface LandingCTAButtonProps {
 export function LandingCTAButton({ eventName, className, children }: LandingCTAButtonProps) {
   return (
     <Link
-      href="/auth"
+      href="/sign-up"
       className={className}
       onClick={() => posthog.capture(eventName)}
     >

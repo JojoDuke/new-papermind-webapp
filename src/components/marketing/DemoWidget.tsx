@@ -195,7 +195,7 @@ export function DemoWidget() {
         </div>
         <div className="p-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href="/auth"
+            href="/sign-up"
             className="pink-glowing-button group relative rounded-[10px] flex items-center gap-2 text-white font-medium text-sm px-6 py-3 transition-all active:scale-95 outline-none focus:outline-none"
           >
             <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">

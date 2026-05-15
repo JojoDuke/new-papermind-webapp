@@ -106,7 +106,7 @@ function CheckoutContent() {
     setLoggingOut(true);
     try {
       await signOut();
-      window.location.assign('/auth');
+      window.location.assign('/sign-in');
     } finally {
       setLoggingOut(false);
     }

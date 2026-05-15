@@ -105,11 +105,9 @@ export default function AuthPage() {
         sessionStorage.setItem('pm_checkout_plan', plan);
         sessionStorage.setItem('pm_checkout_interval', interval);
       }
+      // Path-only: Convex Auth prefixes with SITE_URL. Absolute localhost + prod SITE_URL throws Invalid redirectTo.
       await signIn('google', {
-        redirectTo:
-          typeof window !== 'undefined'
-            ? `${window.location.origin}/checkout`
-            : '/checkout',
+        redirectTo: checkoutEntryPath(),
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';
