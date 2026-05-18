@@ -394,22 +394,36 @@ export default function DashboardPage() {
         ) : (
           /* ── Home view ── */
           <main className="flex-1 overflow-y-auto p-8 min-w-0">
-            <div className="w-full max-w-xl lg:max-w-2xl mr-auto text-left">
-              <header className="mb-6">
+            {/* Top bar: welcome left, icons far right — full width */}
+            <header className="flex items-center justify-between mb-6">
+              <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
                   Welcome back, {welcomeName} 👋
                 </h1>
                 <p className="text-sm text-gray-500">
                   Upload a document here to generate study material from it
                 </p>
-              </header>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                {/* Notifications bell */}
+                <button className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </button>
+                {/* User profile circle */}
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer select-none shrink-0">
+                  {(user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase()}
+                </div>
+              </div>
+            </header>
 
-              {/* File Upload Area */}
+            {/* File Upload Area */}
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-10 text-left transition-colors ${
+                className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center transition-colors ${
                   isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
                 }`}
               >
@@ -424,7 +438,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleClickUpload}
                   disabled={isUploading}
-                  className="bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium px-6 py-3 rounded-lg transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploading ? 'Uploading...' : 'click to upload'}
                 </button>
@@ -432,7 +446,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
 
                 {/* Supported File Types */}
-                <div className="flex flex-wrap items-center gap-6 text-sm">
+                <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
                   <span className="text-gray-700">Supported Files:</span>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -536,7 +550,6 @@ export default function DashboardPage() {
                 </div>
               )}
 
-            </div>
           </main>
         )}
       </div>
