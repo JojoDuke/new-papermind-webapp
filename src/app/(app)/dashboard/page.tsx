@@ -26,6 +26,9 @@ export default function DashboardPage() {
   const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifTab, setNotifTab] = useState<'unread' | 'all'>('unread');
+  const notifRef = useRef<HTMLDivElement>(null);
   const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
@@ -81,6 +84,18 @@ export default function DashboardPage() {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [openMenuId]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showNotifications]);
 
   const handleDelete = async () => {
     if (!confirmDeleteId) return;
@@ -406,11 +421,66 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 {/* Notifications bell */}
-                <button className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-700">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                </button>
+                <div ref={notifRef} className="relative">
+                  <div className="group relative">
+                    <button
+                      onClick={() => setShowNotifications((v) => !v)}
+                      className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                      </svg>
+                    </button>
+                    {/* Tooltip */}
+                    {!showNotifications && (
+                      <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded-md bg-gray-800 text-white text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                        Notifications
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Notifications panel */}
+                  {showNotifications && (
+                    <div className="absolute right-0 top-11 z-50 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                      {/* Header */}
+                      <div className="px-4 pt-4 pb-3">
+                        <span className="text-sm font-bold text-gray-900">Notifications</span>
+                      </div>
+
+                      {/* Tabs */}
+                      <div className="flex gap-2 px-4 pb-3">
+                        {(['unread', 'all'] as const).map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setNotifTab(tab)}
+                            className={`flex-1 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer capitalize ${
+                              notifTab === tab
+                                ? 'border-pink-400 text-pink-600 bg-pink-50'
+                                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                          >
+                            {tab === 'unread' ? 'Unread' : 'All'}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="h-px bg-gray-100" />
+
+                      {/* Empty state */}
+                      <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                        <p className="text-sm font-semibold text-gray-700 mb-1">
+                          {notifTab === 'unread' ? 'Nothing New Here' : 'No notifications yet'}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {notifTab === 'unread'
+                            ? "You're all caught up!"
+                            : 'Notifications will appear here when there is activity.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* User profile circle */}
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer select-none shrink-0">
                   {(user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase()}
@@ -460,7 +530,7 @@ export default function DashboardPage() {
               {/* Documents Section */}
               {(isUploading || (documents && documents.length > 0)) && (
                 <div className="mt-10">
-                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Your Documents</h2>
+                  <h2 className="text-sm font-semibold text-gray-900 mb-4">Your Documents</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
                     {/* Uploading skeleton card */}
@@ -549,6 +619,50 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+
+              {/* Continue Studying */}
+              <div className="mt-10">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4">Continue Studying</h2>
+                <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
+                  <svg className="w-8 h-8 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-600">No decks in progress</p>
+                  <p className="text-xs text-gray-400">Generate flashcards from a document to start studying.</p>
+                </div>
+              </div>
+
+              {/* Study Tools */}
+              <div className="mt-10 mb-8">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4">Study Tools</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div
+                    onClick={() => router.push('/dashboard/study-decks/flashcard-decks')}
+                    className="bg-white border border-gray-100 hover:border-pink-200 rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center shrink-0 transition-colors">
+                      <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Flashcard Decks</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Review all your generated decks</p>
+                    </div>
+                  </div>
+                  <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4 opacity-50 cursor-not-allowed">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Practice Quizzes <span className="text-[10px] font-medium text-purple-400 bg-purple-50 px-1.5 py-0.5 rounded-full ml-1">Soon</span></p>
+                      <p className="text-xs text-gray-400 mt-0.5">Test yourself with AI-generated quizzes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
           </main>
         )}
