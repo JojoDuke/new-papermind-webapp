@@ -29,6 +29,10 @@ export default function DashboardPage() {
   const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
+  const welcomeName =
+    user?.name?.trim().split(/\s+/)[0] ||
+    user?.email?.split('@')[0] ||
+    'there';
   const documents = useQuery(api.documents.listDocuments);
   const selectedDoc = useQuery(
     api.documents.getDocument,
@@ -389,22 +393,23 @@ export default function DashboardPage() {
 
         ) : (
           /* ── Home view ── */
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-4xl mx-auto">
-              {/* Welcome Greeting */}
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-12">
-                Welcome {user?.name || 'there'}
-              </h1>
-
-              {/* Subtitle */}
-              <p className="text-gray-500 -mt-8 mb-8">Click or drag and drop a document here to generate flashcards and quizzes from it</p>
+          <main className="flex-1 overflow-y-auto p-8 min-w-0">
+            <div className="w-full max-w-xl lg:max-w-2xl mr-auto text-left">
+              <header className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
+                  Welcome back, {welcomeName} 👋
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Upload a document here to generate study material from it
+                </p>
+              </header>
 
               {/* File Upload Area */}
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+                className={`border-2 border-dashed rounded-xl p-10 text-left transition-colors ${
                   isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
                 }`}
               >
@@ -424,10 +429,10 @@ export default function DashboardPage() {
                   {isUploading ? 'Uploading...' : 'click to upload'}
                 </button>
 
-                <p className="text-gray-500 mb-8">or drag & drop files here</p>
+                <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
 
                 {/* Supported File Types */}
-                <div className="flex flex-wrap justify-center items-center gap-6 text-sm">
+                <div className="flex flex-wrap items-center gap-6 text-sm">
                   <span className="text-gray-700">Supported Files:</span>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

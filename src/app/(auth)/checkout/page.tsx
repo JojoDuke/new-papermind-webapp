@@ -337,13 +337,63 @@ function CheckoutContent() {
         className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center p-10"
         style={{ backgroundColor: '#f0ecff' }}
       >
-        <div className="max-w-sm text-center">
-          <p className="text-lg font-serif font-bold mb-2" style={{ color: '#1e0a4a' }}>
-            Why we ask for a card
-          </p>
-          <p className="text-sm leading-relaxed" style={{ color: '#3d2d6e' }}>
-            It keeps accounts fair and lets us focus on students who are serious about studying — without showing ads or selling your data.
-          </p>
+        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 px-8 py-8 w-full max-w-sm">
+          <h2 className="text-2xl font-bold font-serif mb-7" style={{ color: '#1e0a4a' }}>
+            How your trial works
+          </h2>
+
+          <div className="relative">
+            {/* Vertical connector line */}
+            <div
+              className="absolute left-[19px] top-6 bottom-6 w-0.5"
+              style={{ backgroundColor: '#2a1a55' }}
+            />
+
+            <div className="space-y-7">
+              {/* Step 1 — Today */}
+              <div className="flex gap-4 items-start relative">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10" style={{ backgroundColor: '#2a1a55' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div className="pt-1.5">
+                  <p className="font-bold text-gray-900">Today</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Get full access to all plan features — no charge.</p>
+                </div>
+              </div>
+
+              {/* Step 2 — Day 5 */}
+              <div className="flex gap-4 items-start relative">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10" style={{ backgroundColor: '#2a1a55' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <div className="pt-1.5">
+                  <p className="font-bold text-gray-900">Day 5</p>
+                  <p className="text-sm text-gray-500 mt-0.5">We send you a reminder when your trial is about to end.</p>
+                </div>
+              </div>
+
+              {/* Step 3 — Day 7 */}
+              <div className="flex gap-4 items-start relative">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10" style={{ backgroundColor: '#2a1a55' }}>
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div className="pt-1.5">
+                  <p className="font-bold text-gray-900">Day 7</p>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    You will be charged on{' '}
+                    <span className="font-medium text-gray-700">{trialEndsOnLabel}</span>
+                    . Cancel any time before.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

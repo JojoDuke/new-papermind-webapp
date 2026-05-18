@@ -63,7 +63,7 @@ export default function StudyDecksPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-12 max-w-5xl">
-              <section id="flashcard-decks">
+              <section id="flashcard-decks" className="scroll-mt-24">
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h2 className="text-base font-semibold text-gray-800">Flashcard Decks</h2>
                   <Link
@@ -95,7 +95,7 @@ export default function StudyDecksPage() {
                 )}
               </section>
 
-              <section id="quiz-decks">
+              <section id="quiz-decks" className="scroll-mt-24">
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h2 className="text-base font-semibold text-gray-800">Quiz Decks</h2>
                   <Link
@@ -107,6 +107,20 @@ export default function StudyDecksPage() {
                 </div>
                 <div className="rounded-2xl bg-gray-200 px-6 py-10 text-center text-sm text-gray-600 max-w-2xl">
                   No quiz decks have been generated yet.
+                </div>
+              </section>
+
+              <section id="study-guides" className="scroll-mt-24">
+                <h2 className="text-base font-semibold text-gray-800 mb-4">Study Guides</h2>
+                <div className="rounded-2xl bg-gray-200 px-6 py-10 text-center text-sm text-gray-600 max-w-2xl">
+                  Study guides will appear here once available.
+                </div>
+              </section>
+
+              <section id="mock-exams" className="scroll-mt-24">
+                <h2 className="text-base font-semibold text-gray-800 mb-4">Mock Exams</h2>
+                <div className="rounded-2xl bg-gray-200 px-6 py-10 text-center text-sm text-gray-600 max-w-2xl">
+                  Mock exams will appear here once available.
                 </div>
               </section>
             </div>

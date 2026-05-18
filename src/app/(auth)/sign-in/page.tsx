@@ -39,7 +39,10 @@ export default function AuthPage() {
   useEffect(() => {
     if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
     postAuthRedirected.current = true;
-    window.location.assign(checkoutEntryPath());
+    const devBypass =
+      process.env.NODE_ENV === 'development' &&
+      process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
+    window.location.assign(devBypass ? '/dashboard' : checkoutEntryPath());
   }, [isAuthenticated, authLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,16 +101,18 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      if (typeof window !== 'undefined') {
+      const devBypass =
+        process.env.NODE_ENV === 'development' &&
+        process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
+      if (!devBypass && typeof window !== 'undefined') {
         const q = new URLSearchParams(window.location.search);
         const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
         const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
         sessionStorage.setItem('pm_checkout_plan', plan);
         sessionStorage.setItem('pm_checkout_interval', interval);
       }
-      // Path-only: Convex Auth prefixes with SITE_URL. Absolute localhost + prod SITE_URL throws Invalid redirectTo.
       await signIn('google', {
-        redirectTo: checkoutEntryPath(),
+        redirectTo: devBypass ? '/dashboard' : checkoutEntryPath(),
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';
