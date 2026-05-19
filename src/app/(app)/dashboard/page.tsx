@@ -33,6 +33,16 @@ export default function DashboardPage() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuthActions();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDarkMode]);
   const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
@@ -436,6 +446,23 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
+                {/* Dark / light mode toggle */}
+                <button
+                  onClick={() => setIsDarkMode((v) => !v)}
+                  className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
+                  title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {isDarkMode ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                  )}
+                </button>
+
                 {/* Notifications bell */}
                 <div ref={notifRef} className="relative">
                   <div className="group relative">
@@ -567,7 +594,8 @@ export default function DashboardPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center transition-colors ${
+              tabIndex={-1}
+              className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center outline-none focus:outline-none ${
                 isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
               }`}
             >
@@ -680,7 +708,7 @@ export default function DashboardPage() {
                               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                               <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                             </svg>
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white tracking-widest">PDF</span>
+                            <span className="absolute bottom-2.5 left-1/2 -translate-x-1/2 text-[7px] font-bold text-white tracking-wide">PDF</span>
                           </div>
                           <div className="w-full text-center">
                             <p className="text-xs font-medium text-gray-700 truncate w-full" title={doc.name}>
@@ -706,19 +734,19 @@ export default function DashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                   <p className="text-sm font-medium text-gray-600">No decks in progress</p>
-                  <p className="text-xs text-gray-400">Generate flashcards from a document to start studying.</p>
+                  <p className="text-xs text-gray-400">Generate study materials from a document to get started.</p>
                 </div>
               </div>
 
               {/* Study Tools */}
               <div className="mt-10">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">Study Tools</h2>
-                <div className="flex flex-wrap gap-5">
+                <div className="grid grid-cols-4 gap-2">
 
                   {/* Flashcards */}
                   <div
                     onClick={() => router.push('/dashboard/study-decks/flashcard-decks')}
-                    className="bg-pink-50 border border-pink-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-pink-300 transition-all group"
+                    className="bg-pink-50 border border-pink-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-pink-300 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -732,7 +760,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Quizzes */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -745,7 +773,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Study Guides */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-blue-300 transition-all group">
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-blue-300 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -758,7 +786,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Mock Exams */}
-                  <div className="bg-purple-50 border border-purple-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group">
+                  <div className="bg-purple-50 border border-purple-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group">
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -811,11 +839,15 @@ export default function DashboardPage() {
                 <div className="h-px bg-gray-100" />
 
                 {/* Motivational card */}
-                <div className="bg-pink-50 border border-pink-100 rounded-xl p-3 flex items-start gap-3">
-                  <span className="text-2xl leading-none">🦊</span>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-900 mb-0.5">You&apos;ve got this!</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">Every card brings you closer to your goal.</p>
+                <div className="bg-pink-50 border border-pink-200 rounded-xl overflow-hidden flex items-end">
+                  <img
+                    src="/assets/foxLeftSidebar.png"
+                    alt="Papermind fox"
+                    className="w-20 h-20 object-contain object-bottom shrink-0 mix-blend-multiply translate-y-2"
+                  />
+                  <div className="flex-1 py-4 pr-4 pl-1">
+                    <p className="text-sm font-bold text-gray-900 mb-1">You&apos;ve got this!</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">Every study session brings you closer to your goal.</p>
                   </div>
                 </div>
               </div>
