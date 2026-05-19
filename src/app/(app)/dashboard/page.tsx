@@ -663,7 +663,7 @@ export default function DashboardPage() {
                     {documents?.map((doc) => (
                       <div
                         key={doc._id}
-                        className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
+                        className="group relative bg-white border border-gray-200 hover:border-pink-300 rounded-xl p-5 flex flex-col items-center gap-3 transition-all"
                       >
                         {/* 3-dot menu */}
                         <div className="absolute top-3 right-3">
