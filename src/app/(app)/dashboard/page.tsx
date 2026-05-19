@@ -9,6 +9,7 @@ import { Id } from '../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
 import { DashboardSidebar } from '@/components/app/DashboardSidebar';
 import { useAuthToken } from '@convex-dev/auth/react';
+import { useAuthActions } from '@convex-dev/auth/react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -29,6 +30,9 @@ export default function DashboardPage() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifTab, setNotifTab] = useState<'unread' | 'all'>('unread');
   const notifRef = useRef<HTMLDivElement>(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const { signOut } = useAuthActions();
   const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
@@ -96,6 +100,18 @@ export default function DashboardPage() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showNotifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showProfileMenu]);
 
   const handleDelete = async () => {
     if (!confirmDeleteId) return;
@@ -482,62 +498,124 @@ export default function DashboardPage() {
                 </div>
 
                 {/* User profile circle */}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer select-none shrink-0">
-                  {(user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase()}
+                <div ref={profileRef} className="relative">
+                  <div className="group relative">
+                    <div
+                      onClick={() => setShowProfileMenu((v) => !v)}
+                      className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer select-none shrink-0"
+                    >
+                      {(user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase()}
+                    </div>
+                    {/* Tooltip */}
+                    {!showProfileMenu && (
+                      <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 rounded-md bg-gray-800 text-white text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        View Profile
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Profile dropdown */}
+                  {showProfileMenu && (
+                    <div className="absolute right-0 top-11 z-50 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2">
+
+                      {/* User info */}
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                          {(user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{user?.name || 'User'}</p>
+                          <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="h-px bg-gray-100 mx-2 my-1" />
+
+                      {/* Settings */}
+                      <button
+                        onClick={() => { setShowProfileMenu(false); router.push('/dashboard/settings'); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Settings
+                      </button>
+
+                      <div className="h-px bg-gray-100 mx-2 my-1" />
+
+                      {/* Sign out */}
+                      <button
+                        onClick={() => signOut()}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign out
+                      </button>
+
+                    </div>
+                  )}
                 </div>
               </div>
             </header>
 
-            {/* File Upload Area */}
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center transition-colors ${
-                  isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
-                }`}
+            {/* File Upload Area — full width */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center transition-colors ${
+                isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => handleFileSelect(e.target.files)}
+                accept=".pdf"
+              />
+
+              <button
+                onClick={handleClickUpload}
+                disabled={isUploading}
+                className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => handleFileSelect(e.target.files)}
-                  accept=".pdf"
-                />
+                {isUploading ? 'Uploading...' : 'click to upload'}
+              </button>
 
-                <button
-                  onClick={handleClickUpload}
-                  disabled={isUploading}
-                  className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUploading ? 'Uploading...' : 'click to upload'}
-                </button>
+              <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
 
-                <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
-
-                {/* Supported File Types */}
-                <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                  <span className="text-gray-700">Supported Files:</span>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-gray-700">PDF</span>
-                  </div>
+              {/* Supported File Types */}
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+                <span className="text-gray-700">Supported Files:</span>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-gray-700">PDF</span>
                 </div>
               </div>
+            </div>
+
+            {/* Two-column layout starts here: left = docs/tools, right = progress */}
+            <div className="flex gap-6 items-stretch mt-10">
+            <div className="flex-1 min-w-0 flex flex-col gap-0">
 
               {/* Documents Section */}
               {(isUploading || (documents && documents.length > 0)) && (
-                <div className="mt-10">
+                <div>
                   <h2 className="text-sm font-semibold text-gray-900 mb-4">Your Documents</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
                     {/* Uploading skeleton card */}
                     {isUploading && uploadingFileName && (
-                      <div className="bg-white border border-pink-100 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm">
-                        <div className="relative w-12 h-14 flex items-center justify-center">
-                          <svg className="w-12 h-14 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="bg-white border border-pink-100 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm">
+                        <div className="relative w-14 h-16 flex items-center justify-center">
+                          <svg className="w-14 h-16 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                             <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                           </svg>
@@ -557,10 +635,10 @@ export default function DashboardPage() {
                     {documents?.map((doc) => (
                       <div
                         key={doc._id}
-                        className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-4 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
+                        className="group relative bg-white border border-gray-100 hover:border-pink-200 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-md transition-all"
                       >
                         {/* 3-dot menu */}
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-3 right-3">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -595,10 +673,10 @@ export default function DashboardPage() {
                         {/* Clickable card body */}
                         <button
                           onClick={() => setSelectedDocId(doc._id)}
-                          className="flex flex-col items-center gap-3 w-full cursor-pointer"
+                          className="flex flex-col items-center gap-3 w-full cursor-pointer pt-2"
                         >
-                          <div className="relative w-12 h-14">
-                            <svg className="w-12 h-14 text-pink-300" fill="currentColor" viewBox="0 0 24 24">
+                          <div className="relative w-14 h-16">
+                            <svg className="w-14 h-16 text-pink-300" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                               <path d="M14 2v6h6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                             </svg>
@@ -633,39 +711,122 @@ export default function DashboardPage() {
               </div>
 
               {/* Study Tools */}
-              <div className="mt-10 mb-8">
+              <div className="mt-10">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">Study Tools</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-wrap gap-5">
+
+                  {/* Flashcards */}
                   <div
                     onClick={() => router.push('/dashboard/study-decks/flashcard-decks')}
-                    className="bg-white border border-gray-100 hover:border-pink-200 rounded-2xl p-5 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all group"
+                    className="bg-pink-50 border border-pink-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-pink-300 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center shrink-0 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Flashcard Decks</p>
-                      <p className="text-xs text-gray-400 mt-0.5">Review all your generated decks</p>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-sm font-semibold text-gray-900">Flashcards</p>
+                      <p className="text-xs text-gray-400">Smart cards<br />that adapt</p>
                     </div>
                   </div>
-                  <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4 opacity-50 cursor-not-allowed">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
-                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+
+                  {/* Quizzes */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                      <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Practice Quizzes <span className="text-[10px] font-medium text-purple-400 bg-purple-50 px-1.5 py-0.5 rounded-full ml-1">Soon</span></p>
-                      <p className="text-xs text-gray-400 mt-0.5">Test yourself with AI-generated quizzes</p>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-sm font-semibold text-gray-900">Quizzes</p>
+                      <p className="text-xs text-gray-400">Test your<br />knowledge</p>
                     </div>
+                  </div>
+
+                  {/* Study Guides */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-blue-300 transition-all group">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-sm font-semibold text-gray-900">Study Guides</p>
+                      <p className="text-xs text-gray-400">AI-generated<br />summaries</p>
+                    </div>
+                  </div>
+
+                  {/* Mock Exams */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-2xl w-36 py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-sm font-semibold text-gray-900">Mock Exams</p>
+                      <p className="text-xs text-gray-400">Realistic practice<br />exams</p>
+                    </div>
+                  </div>
+
+              </div>
+            </div>
+
+            </div>{/* end left column */}
+
+            {/* Progress panel — right column */}
+            <div className="w-64 shrink-0 flex flex-col">
+
+              {/* Your progress */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full">
+                <h2 className="text-sm font-semibold text-gray-900">Your progress</h2>
+
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Overall progress</p>
+                  <p className="text-3xl font-bold text-gray-900 mb-2">0%</p>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-pink-400 rounded-full" style={{ width: '0%' }} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {[
+                    { label: 'Cards mastered', value: '0', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+                    { label: 'Quizzes taken', value: '0', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                    { label: 'Mock exams', value: '0', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+                  ].map(({ label, value, icon }) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                        </svg>
+                        {label}
+                      </div>
+                      <span className="text-xs font-semibold text-gray-700">{value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-px bg-gray-100" />
+
+                {/* Motivational card */}
+                <div className="bg-pink-50 border border-pink-100 rounded-xl p-3 flex items-start gap-3">
+                  <span className="text-2xl leading-none">🦊</span>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-900 mb-0.5">You&apos;ve got this!</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">Every card brings you closer to your goal.</p>
                   </div>
                 </div>
               </div>
 
+            </div>{/* end right column */}
+
+            </div>{/* end two-column wrapper */}
+
           </main>
         )}
+
       </div>
 
       {/* Delete confirmation modal */}
