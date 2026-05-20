@@ -13,6 +13,7 @@ import type * as documents from "../documents.js";
 import type * as flashcards from "../flashcards.js";
 import type * as http from "../http.js";
 import type * as newUserAdminEmail from "../newUserAdminEmail.js";
+import type * as studyGuides from "../studyGuides.js";
 import type * as subscriptions from "../subscriptions.js";
 
 import type {
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   flashcards: typeof flashcards;
   http: typeof http;
   newUserAdminEmail: typeof newUserAdminEmail;
+  studyGuides: typeof studyGuides;
   subscriptions: typeof subscriptions;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

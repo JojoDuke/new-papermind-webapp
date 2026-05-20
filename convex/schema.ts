@@ -49,6 +49,18 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_polar_customer", ["polarCustomerId"]),
 
+  studyGuides: defineTable({
+    userId: v.id("users"),
+    documentId: v.id("documents"),
+    title: v.string(),
+    topic: v.string(),
+    content: v.string(),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_document", ["documentId"]),
+
   newUserAdminNotified: defineTable({
     userId: v.id("users"),
   }).index("by_user", ["userId"]),

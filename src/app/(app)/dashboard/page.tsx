@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { DashboardSidebar } from '@/components/app/DashboardSidebar';
 import { useAuthToken } from '@convex-dev/auth/react';
 import { useAuthActions } from '@convex-dev/auth/react';
+import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export default function DashboardPage() {
   const profileRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuthActions();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [uploadSuccessDocId, setUploadSuccessDocId] = useState<Id<'documents'> | null>(null);
+  const [uploadSuccessDocName, setUploadSuccessDocName] = useState<string>('');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -157,14 +160,26 @@ export default function DashboardPage() {
 
       const { storageId } = await response.json();
       const documentId = await saveDocument({ storageId, name: file.name });
-      toast.success(`"${file.name}" uploaded successfully!`);
 
-      // Fire-and-forget: count pages in the background and store on the document
+      // Fire-and-forget: count pages in the background
       if (authToken) {
         fetch('/api/documents/count-pages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
           body: JSON.stringify({ documentId }),
+        }).catch(() => {/* non-critical, fail silently */});
+      }
+
+      // Show the success modal immediately; study guides generate in the background
+      setUploadSuccessDocName(file.name);
+      setUploadSuccessDocId(documentId);
+
+      // Fire-and-forget: generate study guides
+      if (authToken) {
+        fetch('/api/study-guides/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ documentId, guideCount: 3 }),
         }).catch(() => {/* non-critical, fail silently */});
       }
     } catch (err) {
@@ -612,7 +627,7 @@ export default function DashboardPage() {
                 disabled={isUploading}
                 className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploading ? 'Uploading...' : 'click to upload'}
+                {isUploading ? 'Uploading...' : 'Click to upload'}
               </button>
 
               <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
@@ -663,7 +678,7 @@ export default function DashboardPage() {
                     {documents?.map((doc) => (
                       <div
                         key={doc._id}
-                        className="group relative bg-white border border-gray-200 hover:border-pink-300 rounded-xl p-5 flex flex-col items-center gap-3 transition-all"
+                        className="group relative bg-white border border-gray-200 hover:border-pink-300 rounded-xl p-5 flex flex-col items-center gap-3 transition-colors"
                       >
                         {/* 3-dot menu */}
                         <div className="absolute top-3 right-3">
@@ -729,7 +744,7 @@ export default function DashboardPage() {
               {/* Continue Studying */}
               <div className="mt-10">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">Continue Studying</h2>
-                <div className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
                   <svg className="w-8 h-8 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
@@ -935,6 +950,20 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Upload success modal */}
+      {uploadSuccessDocId && (
+        <UploadSuccessModal
+          documentId={uploadSuccessDocId}
+          documentName={uploadSuccessDocName}
+          onClose={() => setUploadSuccessDocId(null)}
+          onGenerateFlashcards={() => {
+            setUploadSuccessDocId(null);
+            setSelectedDocId(uploadSuccessDocId);
+          }}
+          onGenerateQuizzes={() => setUploadSuccessDocId(null)}
+        />
       )}
     </ProtectedRoute>
   );
