@@ -3,8 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { usePathname } from 'next/navigation';
 
 type NavItem = {
   href: string;
@@ -15,8 +14,6 @@ type NavItem = {
 
 export function DashboardSidebar() {
   const pathname = usePathname() ?? '';
-  const router = useRouter();
-  const { signOut } = useAuthActions();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hash, setHash] = useState('');
 
@@ -31,17 +28,11 @@ export function DashboardSidebar() {
     };
   }, [pathname]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-  };
-
   const myStudyItems: NavItem[] = [
     {
-      href: '/dashboard/study-decks/flashcard-decks',
+      href: '/dashboard/flashcards',
       label: 'Flashcards',
-      isActive: (p) =>
-        p.startsWith('/dashboard/study-decks/flashcard-decks') || p.startsWith('/dashboard/flashcards/'),
+      isActive: (p) => p === '/dashboard/flashcards' || p.startsWith('/dashboard/flashcards/'),
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -49,9 +40,9 @@ export function DashboardSidebar() {
       ),
     },
     {
-      href: '/dashboard/study-decks#quiz-decks',
+      href: '/dashboard/quizzes',
       label: 'Quizzes',
-      isActive: (p, h) => p === '/dashboard/study-decks' && h === '#quiz-decks',
+      isActive: (p) => p.startsWith('/dashboard/quizzes'),
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="9" strokeWidth={2} />
@@ -60,9 +51,9 @@ export function DashboardSidebar() {
       ),
     },
     {
-      href: '/dashboard/study-decks#study-guides',
+      href: '/dashboard/study-guides',
       label: 'Study Guides',
-      isActive: (p, h) => p === '/dashboard/study-decks' && h === '#study-guides',
+      isActive: (p) => p.startsWith('/dashboard/study-guides'),
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -70,9 +61,9 @@ export function DashboardSidebar() {
       ),
     },
     {
-      href: '/dashboard/study-decks#mock-exams',
+      href: '/dashboard/mock-exams',
       label: 'Mock Exams',
-      isActive: (p, h) => p === '/dashboard/study-decks' && h === '#mock-exams',
+      isActive: (p) => p.startsWith('/dashboard/mock-exams'),
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -201,31 +192,6 @@ export function DashboardSidebar() {
         </div>
       )}
 
-      <div className="p-3 border-t border-gray-200 mt-auto">
-        {isSidebarCollapsed ? (
-          <div className="group relative flex justify-center">
-            <button
-              type="button"
-              onClick={handleSignOut}
-              title="Sign Out"
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
-              aria-label="Sign Out"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="w-full px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            Sign Out
-          </button>
-        )}
-      </div>
     </aside>
   );
 }

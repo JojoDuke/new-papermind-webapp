@@ -28,7 +28,7 @@ export function UploadSuccessModal({
 
   const handleGoToLibrary = () => {
     onClose();
-    router.push('/dashboard/study-decks#study-guides');
+    router.push('/dashboard/study-guides');
   };
 
   const handleGenerateMore = () => {
@@ -37,12 +37,12 @@ export function UploadSuccessModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center pb-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-16">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500"
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer"
           aria-label="Close"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,22 +50,15 @@ export function UploadSuccessModal({
           </svg>
         </button>
 
-        {/* Hero illustration */}
-        <div className="flex justify-center pt-8 pb-2 bg-linear-to-b from-pink-50 to-white px-6">
-          <div className="relative">
-            <Image
-              src="/assets/foxGrad.png"
-              alt="Papermind fox"
-              width={120}
-              height={120}
-              className="object-contain"
-            />
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
+        {/* Hero illustration — fox sits above the modal top edge */}
+        <div className="flex justify-center">
+          <Image
+            src="/assets/foxCongrats.png"
+            alt="Papermind fox"
+            width={220}
+            height={220}
+            className="object-contain -mt-24 drop-shadow-xl"
+          />
         </div>
 
         {/* Content */}
@@ -73,10 +66,10 @@ export function UploadSuccessModal({
           {/* Title */}
           <div className="text-center mb-1">
             <span className="text-pink-500 mr-1">✦</span>
-            <span className="text-lg font-bold text-gray-900">Your document has been added!</span>
+            <span className="text-xl font-serif font-bold text-gray-900">Your document has been added!</span>
             <span className="text-pink-500 ml-1">✦</span>
           </div>
-          <p className="text-center text-sm text-gray-500 mb-5">
+          <p className="text-center text-[13px] text-gray-500 mb-5">
             We&apos;ve analysed{' '}
             <span className="font-semibold text-[#e63f6e]">
               {documentName.length > 30 ? documentName.slice(0, 30) + '…' : documentName}
@@ -97,7 +90,7 @@ export function UploadSuccessModal({
             {/* Study Guides */}
             <button
               onClick={handleGoToLibrary}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors group"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors group cursor-pointer"
             >
               <div className="relative">
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
@@ -131,7 +124,7 @@ export function UploadSuccessModal({
             {/* Flashcards */}
             <button
               onClick={handleGenerateMore}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-pink-50 hover:border-pink-200 transition-colors group"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-pink-50 hover:border-pink-200 transition-colors group cursor-pointer"
             >
               <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center group-hover:bg-pink-200 transition-colors">
                 <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,17 +169,14 @@ export function UploadSuccessModal({
           <div className="flex gap-3">
             <button
               onClick={handleGoToLibrary}
-              className="flex-1 py-3 rounded-2xl border-2 border-[#e63f6e] text-[#e63f6e] text-sm font-semibold hover:bg-pink-50 transition-colors"
+              className="flex-1 py-3 rounded-2xl border-2 border-[#e63f6e] text-[#e63f6e] text-sm font-semibold hover:bg-pink-50 transition-colors cursor-pointer"
             >
               Go to My Library
             </button>
             <button
               onClick={handleGenerateMore}
-              className="flex-1 py-3 rounded-2xl bg-[#e63f6e] text-white text-sm font-semibold hover:bg-[#d03560] transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-2xl bg-[#e63f6e] text-white text-sm font-semibold hover:bg-[#d03560] transition-colors cursor-pointer"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
-              </svg>
               Generate More
             </button>
           </div>

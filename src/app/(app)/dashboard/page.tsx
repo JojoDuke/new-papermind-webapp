@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { signOut } = useAuthActions();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [uploadSuccessDocId, setUploadSuccessDocId] = useState<Id<'documents'> | null>(null);
   const [uploadSuccessDocName, setUploadSuccessDocName] = useState<string>('');
@@ -118,6 +119,7 @@ export default function DashboardPage() {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setShowProfileMenu(false);
+        setShowSignOutConfirm(false);
       }
     };
     if (showProfileMenu) {
@@ -588,15 +590,35 @@ export default function DashboardPage() {
                       <div className="h-px bg-gray-100 mx-2 my-1" />
 
                       {/* Sign out */}
-                      <button
-                        onClick={() => signOut()}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Sign out
-                      </button>
+                      {showSignOutConfirm ? (
+                        <div className="px-4 py-3 flex flex-col gap-2">
+                          <p className="text-xs text-gray-600 font-medium">Are you sure you want to sign out?</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowSignOutConfirm(false)}
+                              className="flex-1 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => signOut()}
+                              className="flex-1 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Sign out
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowSignOutConfirm(true)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          Sign out
+                        </button>
+                      )}
 
                     </div>
                   )}
@@ -760,7 +782,7 @@ export default function DashboardPage() {
 
                   {/* Flashcards */}
                   <div
-                    onClick={() => router.push('/dashboard/study-decks/flashcard-decks')}
+                    onClick={() => router.push('/dashboard/flashcards')}
                     className="bg-pink-50 border border-pink-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-pink-300 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
@@ -783,7 +805,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <p className="text-sm font-semibold text-gray-900">Quizzes</p>
-                      <p className="text-xs text-gray-400">Test your<br />knowledge</p>
+                      <p className="text-xs text-gray-400">Generate quizzes<br />to test yourself</p>
                     </div>
                   </div>
 
