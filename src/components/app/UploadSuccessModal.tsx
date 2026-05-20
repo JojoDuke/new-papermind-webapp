@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -22,9 +20,7 @@ export function UploadSuccessModal({
   onGenerateQuizzes,
 }: UploadSuccessModalProps) {
   const router = useRouter();
-  const studyGuides = useQuery(api.studyGuides.listByDocument, { documentId });
-  const guideCount = studyGuides?.length ?? 0;
-  const isLoadingGuides = studyGuides === undefined || guideCount === 0;
+  const studyGuideCount = 3;
 
   const handleGoToLibrary = () => {
     onClose();
@@ -38,7 +34,7 @@ export function UploadSuccessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pb-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-16">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-16 animate-modal-bounce">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -57,6 +53,7 @@ export function UploadSuccessModal({
             alt="Papermind fox"
             width={220}
             height={220}
+            priority
             className="object-contain -mt-24 drop-shadow-xl"
           />
         </div>
@@ -74,15 +71,7 @@ export function UploadSuccessModal({
             <span className="font-semibold text-[#e63f6e]">
               {documentName.length > 30 ? documentName.slice(0, 30) + '…' : documentName}
             </span>{' '}
-            and{' '}
-            {isLoadingGuides ? (
-              <span className="inline-flex items-center gap-1">
-                are creating study guides
-                <span className="w-3 h-3 border-2 border-gray-300 border-t-pink-400 rounded-full animate-spin inline-block" />
-              </span>
-            ) : (
-              <>created {guideCount} study guide{guideCount !== 1 ? 's' : ''} to help you get started.</>
-            )}
+            and created {studyGuideCount} study guides to help you get started.
           </p>
 
           {/* Content type cards */}
@@ -98,26 +87,15 @@ export function UploadSuccessModal({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                {!isLoadingGuides && guideCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {guideCount}
-                  </span>
-                )}
-                {isLoadingGuides && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="w-2.5 h-2.5 border border-gray-400 border-t-green-500 rounded-full animate-spin" />
-                  </span>
-                )}
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {studyGuideCount}
+                </span>
               </div>
               <div className="text-center">
                 <p className="text-xs font-semibold text-gray-700">Study Guides</p>
-                {isLoadingGuides ? (
-                  <p className="text-[10px] text-gray-400 leading-tight">Creating…</p>
-                ) : (
-                  <p className="text-[10px] text-green-600 font-medium leading-tight">
-                    {guideCount} created for you
-                  </p>
-                )}
+                <p className="text-[10px] text-green-600 font-medium leading-tight">
+                  {studyGuideCount} created for you
+                </p>
               </div>
             </button>
 
@@ -140,17 +118,16 @@ export function UploadSuccessModal({
             {/* Quizzes */}
             <button
               onClick={onGenerateQuizzes}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 transition-colors group cursor-not-allowed opacity-70"
-              disabled
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 transition-colors group cursor-pointer"
             >
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                 <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div className="text-center">
                 <p className="text-xs font-semibold text-gray-700">Quizzes</p>
-                <p className="text-[10px] text-purple-400 leading-tight">Coming soon</p>
+                <p className="text-[10px] text-purple-500 font-medium leading-tight">Generate quizzes to test yourself</p>
               </div>
             </button>
           </div>

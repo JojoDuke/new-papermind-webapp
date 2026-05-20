@@ -143,9 +143,20 @@ export default function DashboardPage() {
     }
   };
 
+  const isDuplicateDocument = (fileName: string) =>
+    documents?.some(
+      (doc) => doc.name.trim().toLowerCase() === fileName.trim().toLowerCase()
+    ) ?? false;
+
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
+
+    if (isDuplicateDocument(file.name)) {
+      toast.error('This file is already in your documents.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setIsUploading(true);
     setUploadingFileName(file.name);
@@ -185,7 +196,9 @@ export default function DashboardPage() {
         }).catch(() => {/* non-critical, fail silently */});
       }
     } catch (err) {
-      toast.error("Upload failed. Please try again.");
+      const message =
+        err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      toast.error(message);
       console.error(err);
     } finally {
       setIsUploading(false);
@@ -984,7 +997,10 @@ export default function DashboardPage() {
             setUploadSuccessDocId(null);
             setSelectedDocId(uploadSuccessDocId);
           }}
-          onGenerateQuizzes={() => setUploadSuccessDocId(null)}
+          onGenerateQuizzes={() => {
+            setUploadSuccessDocId(null);
+            router.push('/dashboard/quizzes');
+          }}
         />
       )}
     </ProtectedRoute>

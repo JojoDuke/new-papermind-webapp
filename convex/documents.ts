@@ -20,6 +20,17 @@ export const saveDocument = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
+    const normalizedName = args.name.trim().toLowerCase();
+    const existing = await ctx.db
+      .query("documents")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    if (existing.some((doc) => doc.name.trim().toLowerCase() === normalizedName)) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error("This file is already in your documents.");
+    }
+
     return await ctx.db.insert("documents", {
       userId,
       name: args.name,
