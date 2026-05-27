@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 export type FlashcardStudyCard = {
   _id: string;
@@ -47,6 +50,7 @@ type FlashcardStudyViewProps = {
   cards: FlashcardStudyCard[] | undefined;
   loading: boolean;
   deckName?: string;
+  deckId?: Id<'flashcardDecks'>;
   /** No outer drop shadow (e.g. landing demo) */
   flatChrome?: boolean;
 };
@@ -113,7 +117,9 @@ function buildQuizCards(cards: FlashcardStudyCard[]): QuizCard[] {
   });
 }
 
-export function FlashcardStudyView({ cards, loading, deckName, flatChrome }: FlashcardStudyViewProps) {
+export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrome }: FlashcardStudyViewProps) {
+  const saveSession = useMutation(api.progress.saveFlashcardSession);
+  const sessionSaved = useRef(false);
   // ── Build quiz cards instantly from the deck (no API call) ───────────────
   const [quizCards, setQuizCards] = useState<QuizCard[] | null>(null);
   const builtRef = useRef(false);
@@ -314,10 +320,15 @@ export function FlashcardStudyView({ cards, loading, deckName, flatChrome }: Fla
     firstAttempt.current.forEach((v) => { if (v) correct++; });
     setScore({ correct, total });
     setPhase('result');
+    if (deckId && !sessionSaved.current) {
+      sessionSaved.current = true;
+      saveSession({ deckId, correctCount: correct, totalCount: total }).catch(() => {});
+    }
   }
 
   function restartSession() {
     if (!cards?.length) return;
+    sessionSaved.current = false;
     missedCards.current = [];
     firstAttempt.current = new Map();
     setScore(null);

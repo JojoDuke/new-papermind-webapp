@@ -56,6 +56,21 @@ export const listByDocument = query({
   },
 });
 
+export const countByDocument = query({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return 0;
+
+    const guides = await ctx.db
+      .query("studyGuides")
+      .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
+      .collect();
+
+    return guides.filter((g) => g.userId === userId).length;
+  },
+});
+
 export const listMyStudyGuides = query({
   args: {},
   handler: async (ctx) => {

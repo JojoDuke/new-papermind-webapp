@@ -2,6 +2,8 @@
 
 import { Id } from '../../../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import Image from 'next/image';
 
 interface UploadSuccessModalProps {
@@ -20,7 +22,7 @@ export function UploadSuccessModal({
   onGenerateQuizzes,
 }: UploadSuccessModalProps) {
   const router = useRouter();
-  const studyGuideCount = 3;
+  const studyGuideCount = useQuery(api.studyGuides.countByDocument, { documentId }) ?? 0;
 
   const handleGoToLibrary = () => {
     onClose();
@@ -35,7 +37,6 @@ export function UploadSuccessModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pb-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-16 animate-modal-bounce">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer"
@@ -46,7 +47,6 @@ export function UploadSuccessModal({
           </svg>
         </button>
 
-        {/* Hero illustration — fox sits above the modal top edge */}
         <div className="flex justify-center">
           <Image
             src="/assets/foxCongrats.png"
@@ -58,9 +58,7 @@ export function UploadSuccessModal({
           />
         </div>
 
-        {/* Content */}
         <div className="px-6 pb-6">
-          {/* Title */}
           <div className="text-center mb-1">
             <span className="text-pink-500 mr-1">✦</span>
             <span className="text-xl font-serif font-bold text-gray-900">Your document has been added!</span>
@@ -70,13 +68,13 @@ export function UploadSuccessModal({
             We&apos;ve analysed{' '}
             <span className="font-semibold text-[#e63f6e]">
               {documentName.length > 30 ? documentName.slice(0, 30) + '…' : documentName}
-            </span>{' '}
-            and created {studyGuideCount} study guides to help you get started.
+            </span>
+            {studyGuideCount > 0
+              ? ` and created ${studyGuideCount} study guide${studyGuideCount === 1 ? '' : 's'} to help you get started.`
+              : '. Study guides are being generated — check Study Guides in a moment.'}
           </p>
 
-          {/* Content type cards */}
           <div className="grid grid-cols-3 gap-3 mb-4">
-            {/* Study Guides */}
             <button
               onClick={handleGoToLibrary}
               className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors group cursor-pointer"
@@ -87,19 +85,20 @@ export function UploadSuccessModal({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {studyGuideCount}
-                </span>
+                {studyGuideCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {studyGuideCount}
+                  </span>
+                )}
               </div>
               <div className="text-center">
                 <p className="text-xs font-semibold text-gray-700">Study Guides</p>
                 <p className="text-[10px] text-green-600 font-medium leading-tight">
-                  {studyGuideCount} created for you
+                  {studyGuideCount > 0 ? `${studyGuideCount} ready` : 'Generating…'}
                 </p>
               </div>
             </button>
 
-            {/* Flashcards */}
             <button
               onClick={handleGenerateMore}
               className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-pink-50 hover:border-pink-200 transition-colors group cursor-pointer"
@@ -115,7 +114,6 @@ export function UploadSuccessModal({
               </div>
             </button>
 
-            {/* Quizzes */}
             <button
               onClick={onGenerateQuizzes}
               className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 transition-colors group cursor-pointer"
@@ -127,12 +125,11 @@ export function UploadSuccessModal({
               </div>
               <div className="text-center">
                 <p className="text-xs font-semibold text-gray-700">Quizzes</p>
-                <p className="text-[10px] text-purple-500 font-medium leading-tight">Generate quizzes to test yourself</p>
+                <p className="text-[10px] text-purple-500 font-medium leading-tight">Generate quiz from doc</p>
               </div>
             </button>
           </div>
 
-          {/* Library note */}
           <div className="flex items-center gap-3 bg-pink-50 rounded-2xl px-4 py-3 mb-5">
             <Image src="/assets/foxLeftSidebar.png" alt="" width={32} height={32} className="object-contain shrink-0" />
             <div>
@@ -142,7 +139,6 @@ export function UploadSuccessModal({
             <span className="ml-auto text-pink-300 text-lg">✦</span>
           </div>
 
-          {/* CTA buttons */}
           <div className="flex gap-3">
             <button
               onClick={handleGoToLibrary}

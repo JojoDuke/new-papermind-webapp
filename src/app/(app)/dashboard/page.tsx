@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
+  const [showMockComingSoon, setShowMockComingSoon] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifTab, setNotifTab] = useState<'unread' | 'all'>('unread');
   const notifRef = useRef<HTMLDivElement>(null);
@@ -47,7 +48,7 @@ export default function DashboardPage() {
       root.classList.remove('dark');
     }
   }, [isDarkMode]);
-  const cardCountMap = { low: '10–15', medium: '20–30', high: '40–50' };
+  const cardCountMap = { low: '5', medium: '8', high: '12' };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const user = useQuery(api.auth.currentUser);
   const welcomeName =
@@ -55,6 +56,7 @@ export default function DashboardPage() {
     user?.email?.split('@')[0] ||
     'there';
   const documents = useQuery(api.documents.listDocuments);
+  const progressSummary = useQuery(api.progress.getUserProgressSummary);
   const selectedDoc = useQuery(
     api.documents.getDocument,
     selectedDocId ? { documentId: selectedDocId } : 'skip'
@@ -779,13 +781,41 @@ export default function DashboardPage() {
               {/* Continue Studying */}
               <div className="mt-10">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">Continue Studying</h2>
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
-                  <svg className="w-8 h-8 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <p className="text-sm font-medium text-gray-600">No decks in progress</p>
-                  <p className="text-xs text-gray-400">Generate study materials from a document to get started.</p>
-                </div>
+                {progressSummary && progressSummary.continueStudying.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {progressSummary.continueStudying.map((item) => (
+                      <button
+                        key={`${item.type}-${item.deckId}`}
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            item.type === 'flashcard'
+                              ? `/dashboard/flashcards/${item.deckId}`
+                              : `/dashboard/quizzes/${item.deckId}`
+                          )
+                        }
+                        className="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col gap-2 text-left hover:border-pink-200 transition-all cursor-pointer"
+                      >
+                        <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
+                        <p className="text-xs text-gray-400 capitalize">{item.type === 'flashcard' ? 'Flashcards' : 'Quiz'}</p>
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-pink-400 rounded-full"
+                            style={{ width: `${Math.round(item.progress * 100)}%` }}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
+                    <svg className="w-8 h-8 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <p className="text-sm font-medium text-gray-600">No decks in progress</p>
+                    <p className="text-xs text-gray-400">Generate study materials from a document to get started.</p>
+                  </div>
+                )}
               </div>
 
               {/* Study Tools */}
@@ -810,7 +840,10 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Quizzes */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group">
+                  <div
+                    onClick={() => router.push('/dashboard/quizzes')}
+                    className="bg-amber-50 border border-amber-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -823,7 +856,10 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Study Guides */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-blue-300 transition-all group">
+                  <div
+                    onClick={() => router.push('/dashboard/study-guides')}
+                    className="bg-blue-50 border border-blue-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-blue-300 transition-all group"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -836,7 +872,10 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Mock Exams */}
-                  <div className="bg-purple-50 border border-purple-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group">
+                  <div
+                    onClick={() => setShowMockComingSoon(true)}
+                    className="bg-purple-50 border border-purple-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -862,17 +901,21 @@ export default function DashboardPage() {
 
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Overall progress</p>
-                  <p className="text-3xl font-bold text-gray-900 mb-2">0%</p>
+                  <p className="text-3xl font-bold text-gray-900 mb-2">
+                    {progressSummary?.overallProgress ?? 0}%
+                  </p>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-pink-400 rounded-full" style={{ width: '0%' }} />
+                    <div
+                      className="h-full bg-pink-400 rounded-full transition-all"
+                      style={{ width: `${progressSummary?.overallProgress ?? 0}%` }}
+                    />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   {[
-                    { label: 'Cards mastered', value: '0', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-                    { label: 'Quizzes taken', value: '0', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-                    { label: 'Mock exams', value: '0', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+                    { label: 'Cards mastered', value: String(progressSummary?.cardsMastered ?? 0), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+                    { label: 'Quizzes taken', value: String(progressSummary?.quizzesTaken ?? 0), icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
                   ].map(({ label, value, icon }) => (
                     <div key={label} className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -957,6 +1000,30 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {showMockComingSoon && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowMockComingSoon(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-gray-900 text-center">Mock Exams — Coming Soon</h2>
+            <p className="text-sm text-gray-500 text-center">
+              Full-length practice exams are on the way. Use flashcards and quizzes in the meantime.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowMockComingSoon(false)}
+              className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold transition-colors cursor-pointer"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Upgrade popup */}
       {showUpgradePopup && (
         <div
@@ -999,7 +1066,7 @@ export default function DashboardPage() {
           }}
           onGenerateQuizzes={() => {
             setUploadSuccessDocId(null);
-            router.push('/dashboard/quizzes');
+            router.push(`/dashboard/quizzes?documentId=${uploadSuccessDocId}`);
           }}
         />
       )}

@@ -70,7 +70,7 @@ export default function FlashcardsPage() {
                   deckId={deck._id}
                   title={deck.deckName}
                   cardCount={deck.cardCount}
-                  progress={0}
+                  progress={deck.progress}
                   userInitial={userInitial}
                   onRename={(newName) => handleRename(deck._id, newName)}
                   onDelete={() => handleDelete(deck._id)}

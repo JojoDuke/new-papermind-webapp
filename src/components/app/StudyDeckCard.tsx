@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import type { Id } from '../../../convex/_generated/dataModel';
 
 export type StudyDeckCardProps = {
-  deckId: Id<'flashcardDecks'>;
+  deckId: string;
   title: string;
   cardCount: number;
-  /** 0–1 study progress; placeholder until tracking exists */
+  /** 0–1 study progress */
   progress: number;
   userInitial: string;
+  /** Defaults to flashcards route */
+  studyHref?: string;
+  countLabel?: string;
   onDelete?: () => Promise<void>;
   onRename?: (newName: string) => Promise<void>;
 };
@@ -21,9 +23,12 @@ export function StudyDeckCard({
   cardCount,
   progress,
   userInitial,
+  studyHref,
+  countLabel = 'cards',
   onDelete,
   onRename,
 }: StudyDeckCardProps) {
+  const href = studyHref ?? `/dashboard/flashcards/${deckId}`;
   const pct = Math.round(Math.min(1, Math.max(0, progress)) * 100);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -84,7 +89,7 @@ export function StudyDeckCard({
       <div className="relative group shrink-0 w-[158px] flex flex-col gap-2">
         {/* Thumbnail + progress bar — always a link */}
         <Link
-          href={`/dashboard/flashcards/${deckId}`}
+          href={href}
           className="flex flex-col gap-2 cursor-pointer"
           tabIndex={isRenaming ? -1 : 0}
         >
@@ -134,7 +139,7 @@ export function StudyDeckCard({
           />
         ) : (
           <Link
-            href={`/dashboard/flashcards/${deckId}`}
+            href={href}
             className="text-sm font-medium text-gray-800 leading-tight line-clamp-2 min-h-[2.5rem] px-0.5 cursor-pointer"
           >
             {title}

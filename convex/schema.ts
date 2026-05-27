@@ -61,6 +61,55 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_document", ["documentId"]),
 
+  quizDecks: defineTable({
+    userId: v.id("users"),
+    documentId: v.id("documents"),
+    deckName: v.string(),
+    pageRangeStart: v.number(),
+    pageRangeEnd: v.number(),
+    questionCountPreset: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_document", ["documentId"]),
+
+  quizQuestions: defineTable({
+    deckId: v.id("quizDecks"),
+    question: v.string(),
+    correctAnswer: v.string(),
+    distractor1: v.string(),
+    distractor2: v.string(),
+    order: v.number(),
+  }).index("by_deck", ["deckId"]),
+
+  flashcardDeckProgress: defineTable({
+    userId: v.id("users"),
+    deckId: v.id("flashcardDecks"),
+    cardsMastered: v.number(),
+    totalCards: v.number(),
+    lastScorePercent: v.number(),
+    bestScorePercent: v.number(),
+    lastStudiedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_deck", ["userId", "deckId"]),
+
+  quizDeckProgress: defineTable({
+    userId: v.id("users"),
+    deckId: v.id("quizDecks"),
+    questionsAnswered: v.number(),
+    totalQuestions: v.number(),
+    lastScorePercent: v.number(),
+    bestScorePercent: v.number(),
+    lastStudiedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_deck", ["userId", "deckId"]),
+
   newUserAdminNotified: defineTable({
     userId: v.id("users"),
   }).index("by_user", ["userId"]),

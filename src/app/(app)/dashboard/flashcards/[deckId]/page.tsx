@@ -79,6 +79,7 @@ export default function FlashcardDeckPage() {
               cards={data?.cards}
               loading={loading}
               deckName={data?.deckName}
+              deckId={deckId}
             />
           )}
         </main>

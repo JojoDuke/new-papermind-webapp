@@ -158,6 +158,14 @@ export const listMyFlashcardDecks = query({
         deckName: deck.deckName,
         documentName: doc?.name ?? "Document",
         cardCount: cards.length,
+        progress: await (async () => {
+          const progress = await ctx.db
+            .query("flashcardDeckProgress")
+            .withIndex("by_user_deck", (q) => q.eq("userId", userId).eq("deckId", deck._id))
+            .unique();
+          if (!progress || progress.totalCards === 0) return 0;
+          return progress.bestScorePercent / 100;
+        })(),
       });
     }
 
