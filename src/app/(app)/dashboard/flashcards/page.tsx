@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardSidebar } from '@/components/app/DashboardSidebar';
+import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { StudyDeckCard } from '@/components/app/StudyDeckCard';
 import toast from 'react-hot-toast';
 import type { Id } from '../../../../../convex/_generated/dataModel';
@@ -37,8 +37,7 @@ export default function FlashcardsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <DashboardSidebar />
+      <DashboardAppShell>
         <main className="flex-1 overflow-y-auto p-8">
           <h1 className="text-xl font-bold text-gray-900 mb-8">Flashcards</h1>
 
@@ -79,7 +78,7 @@ export default function FlashcardsPage() {
             </div>
           )}
         </main>
-      </div>
+      </DashboardAppShell>
     </ProtectedRoute>
   );
 }

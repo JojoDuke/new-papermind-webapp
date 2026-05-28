@@ -8,6 +8,7 @@ import { api } from '../../../../convex/_generated/api';
 import { Id } from '../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
 import { DashboardSidebar } from '@/components/app/DashboardSidebar';
+import { PricingModalProvider, openPricingModal } from '@/components/app/pricing-modal-context';
 import { useAuthToken } from '@convex-dev/auth/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
@@ -27,8 +28,6 @@ export default function DashboardPage() {
   const [pageRangeTo, setPageRangeTo] = useState(10);
   const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
-  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
-  const [showMockComingSoon, setShowMockComingSoon] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifTab, setNotifTab] = useState<'unread' | 'all'>('unread');
   const notifRef = useRef<HTMLDivElement>(null);
@@ -298,6 +297,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
+      <PricingModalProvider>
       <div className="flex h-screen bg-gray-50 overflow-hidden">
         <DashboardSidebar />
 
@@ -412,7 +412,12 @@ export default function DashboardPage() {
                         <button
                           key={level}
                           type="button"
-                          onClick={() => isLow ? setCardCount(level) : setShowUpgradePopup(true)}
+                          onClick={() =>
+                            isLow ? setCardCount(level) : openPricingModal({
+                              title: 'Upgrade to unlock',
+                              subtitle: 'Medium and High card counts are available on paid plans.',
+                            })
+                          }
                           className={`py-2 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                             !isLow
                               ? 'bg-gray-50 text-gray-400 border-gray-100 hover:border-pink-200 hover:text-pink-400'
@@ -873,7 +878,12 @@ export default function DashboardPage() {
 
                   {/* Mock Exams */}
                   <div
-                    onClick={() => setShowMockComingSoon(true)}
+                    onClick={() =>
+                      openPricingModal({
+                        title: 'Unlock Mock Exams',
+                        subtitle: 'Full-length practice exams are included on Pro. Choose a plan to get started.',
+                      })
+                    }
                     className="bg-purple-50 border border-purple-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
@@ -1000,60 +1010,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {showMockComingSoon && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onClick={() => setShowMockComingSoon(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-lg font-bold text-gray-900 text-center">Mock Exams — Coming Soon</h2>
-            <p className="text-sm text-gray-500 text-center">
-              Full-length practice exams are on the way. Use flashcards and quizzes in the meantime.
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowMockComingSoon(false)}
-              className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Upgrade popup */}
-      {showUpgradePopup && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onClick={() => setShowUpgradePopup(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 flex flex-col items-center gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-gray-900 text-center">Upgrade to unlock</h2>
-            <p className="text-sm text-gray-500 text-center">
-              Medium and High card counts are available on paid plans. Upgrade to generate more flashcards per session.
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowUpgradePopup(false)}
-              className="w-full py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Upload success modal */}
       {uploadSuccessDocId && (
         <UploadSuccessModal
@@ -1070,6 +1026,7 @@ export default function DashboardPage() {
           }}
         />
       )}
+      </PricingModalProvider>
     </ProtectedRoute>
   );
 }

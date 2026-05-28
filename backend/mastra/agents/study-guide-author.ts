@@ -33,15 +33,16 @@ Each guide must follow this exact markdown structure:
 - **Term or concept**: Brief, precise definition (1–2 sentences)
 (include 4–7 key concepts)
 
-## Core Principles
-2–4 paragraphs explaining the main ideas, how they connect, and why they matter.
+## Key Formula
+Include this section when the topic has a central formula. Put the formula on its own line, then:
+**Where:**
+- **Symbol**: definition (one line per variable)
 
-## Important Details
-- Bullet points of important specifics, formulas, rules, or nuances
-(include 4–8 bullets)
+## Examples
+2–3 worked examples or applied scenarios showing how the concepts are used in practice.
 
 ## Summary
-2–3 sentences summarising what a student should take away from this guide.
+- 3–5 bullet takeaways a student should remember (use markdown list items)
 
 QUALITY RULES:
 - Each guide covers a DISTINCT topic — no overlap between guides

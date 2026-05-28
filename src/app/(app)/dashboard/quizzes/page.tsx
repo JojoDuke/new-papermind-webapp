@@ -5,7 +5,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardSidebar } from '@/components/app/DashboardSidebar';
+import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { openPricingModal } from '@/components/app/pricing-modal-context';
 import { StudyDeckCard } from '@/components/app/StudyDeckCard';
 import { useAuthToken } from '@convex-dev/auth/react';
 import toast from 'react-hot-toast';
@@ -29,8 +30,6 @@ function QuizzesPageContent() {
   const [pageRangeFrom, setPageRangeFrom] = useState(1);
   const [pageRangeTo, setPageRangeTo] = useState(10);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
-
   const selectedDoc = useQuery(
     api.documents.getDocument,
     selectedDocId ? { documentId: selectedDocId } : 'skip'
@@ -113,8 +112,7 @@ function QuizzesPageContent() {
 
   return (
     <ProtectedRoute>
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <DashboardSidebar />
+      <DashboardAppShell>
         <main className="flex-1 overflow-y-auto p-8">
           <div className="flex items-start justify-between gap-4 mb-8">
             <div>
@@ -195,7 +193,12 @@ function QuizzesPageContent() {
                         key={level}
                         type="button"
                         onClick={() =>
-                          level === 'low' ? setQuestionCount(level) : setShowUpgradePopup(true)
+                          level === 'low'
+                            ? setQuestionCount(level)
+                            : openPricingModal({
+                                title: 'Upgrade to unlock',
+                                subtitle: 'Medium and high question counts are available on paid plans.',
+                              })
                         }
                         className={`py-2 rounded-lg text-xs font-medium border cursor-pointer capitalize ${
                           questionCount === level
@@ -258,31 +261,7 @@ function QuizzesPageContent() {
             </div>
           )}
         </main>
-      </div>
-
-      {showUpgradePopup && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={() => setShowUpgradePopup(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-4 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Upgrade to unlock</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Medium and high question counts are available on paid plans.
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowUpgradePopup(false)}
-              className="w-full py-2.5 rounded-xl bg-purple-500 text-white text-sm font-semibold cursor-pointer"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      </DashboardAppShell>
     </ProtectedRoute>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { openPricingModal } from '@/components/app/pricing-modal-context';
 
 type NavItem = {
   href: string;
@@ -153,12 +154,38 @@ export function DashboardSidebar() {
 
         {myStudyItems.map((item) => {
           const active = item.isActive(pathname, hash);
+          const className = `${linkBase} ${active ? linkActive : linkInactive} ${isSidebarCollapsed ? 'justify-center' : ''}`;
+
+          if (item.label === 'Mock Exams') {
+            return (
+              <button
+                key={item.href + item.label}
+                type="button"
+                title={collapsedTip(item.label)}
+                onClick={() =>
+                  openPricingModal({
+                    title: 'Unlock Mock Exams',
+                    subtitle: 'Full-length practice exams are included on Pro. Choose a plan to get started.',
+                  })
+                }
+                className={`${className} w-full cursor-pointer`}
+              >
+                <span className={`shrink-0 ${active ? 'text-pink-600' : 'text-gray-500 group-hover:text-gray-600'}`}>
+                  {item.icon}
+                </span>
+                {!isSidebarCollapsed && (
+                  <span className={`font-medium ${active ? 'text-pink-700' : 'text-gray-900'}`}>{item.label}</span>
+                )}
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href + item.label}
               href={item.href}
               title={collapsedTip(item.label)}
-              className={`${linkBase} ${active ? linkActive : linkInactive} ${isSidebarCollapsed ? 'justify-center' : ''}`}
+              className={className}
             >
               <span className={`shrink-0 ${active ? 'text-pink-600' : 'text-gray-500 group-hover:text-gray-600'}`}>
                 {item.icon}
@@ -179,15 +206,16 @@ export function DashboardSidebar() {
             </div>
             <p className="text-sm font-bold text-gray-900 pr-6">Upgrade to Pro</p>
             <p className="text-xs text-gray-600 mt-1 mb-3 leading-snug">Unlock unlimited content and features.</p>
-            <Link
-              href="/pricing"
-              className="pink-glowing-button group relative block w-full text-center rounded-full text-white text-xs font-semibold py-2.5 shadow-sm transition-all active:scale-[0.98]"
+            <button
+              type="button"
+              onClick={() => openPricingModal()}
+              className="pink-glowing-button group relative block w-full text-center rounded-full text-white text-xs font-semibold py-2.5 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
             >
               <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden>
                 <span className="blurred-border absolute inset-0 z-20 rounded-full" />
               </span>
               <span className="relative z-30">Upgrade now</span>
-            </Link>
+            </button>
           </div>
         </div>
       )}

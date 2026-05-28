@@ -2,9 +2,9 @@
 
 import { Id } from '../../../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import Image from 'next/image';
+
+const EXPECTED_STUDY_GUIDE_COUNT = 3;
 
 interface UploadSuccessModalProps {
   documentId: Id<'documents'>;
@@ -22,7 +22,6 @@ export function UploadSuccessModal({
   onGenerateQuizzes,
 }: UploadSuccessModalProps) {
   const router = useRouter();
-  const studyGuideCount = useQuery(api.studyGuides.countByDocument, { documentId }) ?? 0;
 
   const handleGoToLibrary = () => {
     onClose();
@@ -69,9 +68,7 @@ export function UploadSuccessModal({
             <span className="font-semibold text-[#e63f6e]">
               {documentName.length > 30 ? documentName.slice(0, 30) + '…' : documentName}
             </span>
-            {studyGuideCount > 0
-              ? ` and created ${studyGuideCount} study guide${studyGuideCount === 1 ? '' : 's'} to help you get started.`
-              : '. Study guides are being generated — check Study Guides in a moment.'}
+            {` and created ${EXPECTED_STUDY_GUIDE_COUNT} study guides to help you get started.`}
           </p>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
@@ -85,16 +82,14 @@ export function UploadSuccessModal({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                {studyGuideCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {studyGuideCount}
-                  </span>
-                )}
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {EXPECTED_STUDY_GUIDE_COUNT}
+                </span>
               </div>
               <div className="text-center">
                 <p className="text-xs font-semibold text-gray-700">Study Guides</p>
                 <p className="text-[10px] text-green-600 font-medium leading-tight">
-                  {studyGuideCount > 0 ? `${studyGuideCount} ready` : 'Generating…'}
+                  {EXPECTED_STUDY_GUIDE_COUNT} created for you
                 </p>
               </div>
             </button>
