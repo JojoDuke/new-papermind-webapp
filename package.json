@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:resend": "node scripts/test-resend.mjs",
+    "purge:user": "node scripts/purge-user.mjs",
     "convex:push": "convex dev --once --env-file .env.local",
     "convex:deploy:prod": "convex deploy --yes --env-file .env.local"
   },
