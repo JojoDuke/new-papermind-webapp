@@ -2,20 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { CreateFromDocumentModal } from '@/components/app/CreateFromDocumentModal';
 import toast from 'react-hot-toast';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
 export default function StudyGuidesPage() {
   const router = useRouter();
   const studyGuides = useQuery(api.studyGuides.listMyStudyGuides);
+  const documents = useQuery(api.documents.listDocuments);
   const deleteStudyGuide = useMutation(api.studyGuides.deleteStudyGuide);
   const [openMenuId, setOpenMenuId] = useState<Id<'studyGuides'> | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -35,10 +37,18 @@ export default function StudyGuidesPage() {
     }
   };
 
+  const openCreateModal = () => {
+    if (documents && documents.length === 0) {
+      toast.error('Upload a document on the dashboard first.');
+      return;
+    }
+    setShowCreateModal(true);
+  };
+
   return (
     <ProtectedRoute>
       <DashboardAppShell>
-        <main className="flex-1 overflow-y-auto bg-white p-8 flex flex-col min-h-0">
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-8 flex flex-col min-h-0">
           <div className="flex items-start justify-between gap-4 shrink-0">
             <div>
               <h1 className="text-2xl font-bold font-serif text-gray-900 mb-2">Study Guides</h1>
@@ -46,13 +56,14 @@ export default function StudyGuidesPage() {
                 Comprehensive summaries and explanations to help you understand key topics in depth.
               </p>
             </div>
-            <Link
-              href="/dashboard"
-              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors"
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors cursor-pointer"
             >
               <span className="text-base leading-none">+</span>
               Create from document
-            </Link>
+            </button>
           </div>
 
           {studyGuides === undefined && (
@@ -164,6 +175,13 @@ export default function StudyGuidesPage() {
           )}
 
         </main>
+
+        <CreateFromDocumentModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          mode="study-guide"
+          documents={documents}
+        />
       </DashboardAppShell>
     </ProtectedRoute>
   );

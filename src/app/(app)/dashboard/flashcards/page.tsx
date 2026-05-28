@@ -1,18 +1,35 @@
 'use client';
 
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { CreateFromDocumentModal } from '@/components/app/CreateFromDocumentModal';
 import { StudyDeckCard } from '@/components/app/StudyDeckCard';
 import toast from 'react-hot-toast';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
-export default function FlashcardsPage() {
+function FlashcardsPageContent() {
+  const searchParams = useSearchParams();
   const user = useQuery(api.auth.currentUser);
   const decks = useQuery(api.flashcards.listMyFlashcardDecks);
+  const documents = useQuery(api.documents.listDocuments);
   const renameDeck = useMutation(api.flashcards.renameFlashcardDeck);
   const deleteDeck = useMutation(api.flashcards.deleteFlashcardDeck);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [initialDocumentId, setInitialDocumentId] = useState<Id<'documents'> | null>(null);
+
+  useEffect(() => {
+    const docParam = searchParams?.get('documentId');
+    if (docParam && documents?.some((d) => d._id === docParam)) {
+      setInitialDocumentId(docParam as Id<'documents'>);
+      setShowCreateModal(true);
+    }
+  }, [searchParams, documents]);
 
   const userInitial =
     (user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase();
@@ -35,11 +52,40 @@ export default function FlashcardsPage() {
     }
   };
 
+  const openCreateModal = () => {
+    if (documents && documents.length === 0) {
+      toast.error('Upload a document on the dashboard first.');
+      return;
+    }
+    setInitialDocumentId(null);
+    setShowCreateModal(true);
+  };
+
+  const closeCreateModal = () => {
+    setShowCreateModal(false);
+    setInitialDocumentId(null);
+  };
+
   return (
     <ProtectedRoute>
       <DashboardAppShell>
-        <main className="flex-1 overflow-y-auto p-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-8">Flashcards</h1>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-8 flex flex-col min-h-0">
+          <div className="flex items-start justify-between gap-4 mb-8 shrink-0">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 mb-1">Flashcards</h1>
+              <p className="text-sm text-gray-500">
+                Flashcard decks generated from your documents
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors cursor-pointer"
+            >
+              <span className="text-base leading-none">+</span>
+              Create flashcards from document
+            </button>
+          </div>
 
           {decks === undefined && (
             <div className="flex flex-wrap gap-4">
@@ -50,13 +96,21 @@ export default function FlashcardsPage() {
           )}
 
           {decks && decks.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center gap-2 max-w-md">
-              <svg className="w-10 h-10 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <p className="text-sm font-medium text-gray-600">No flashcard decks yet</p>
-              <p className="text-xs text-gray-400">
-                Upload a document on the dashboard and generate flashcards to get started.
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 min-h-[420px]">
+              <Image
+                src="/assets/foxAsleepEmptyState.png"
+                alt="Sleeping fox — no flashcard decks yet"
+                width={360}
+                height={360}
+                priority
+                className="object-contain w-full max-w-[320px] h-auto mb-6"
+              />
+              <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 mb-3">
+                No flashcard decks yet
+              </h2>
+              <p className="text-sm text-gray-500 font-sans max-w-md leading-relaxed">
+                We haven&apos;t created any flashcards for your documents yet. Upload a document
+                and generate a deck to start studying.
               </p>
             </div>
           )}
@@ -78,7 +132,23 @@ export default function FlashcardsPage() {
             </div>
           )}
         </main>
+
+        <CreateFromDocumentModal
+          isOpen={showCreateModal}
+          onClose={closeCreateModal}
+          mode="flashcard"
+          documents={documents}
+          initialDocumentId={initialDocumentId}
+        />
       </DashboardAppShell>
     </ProtectedRoute>
+  );
+}
+
+export default function FlashcardsPage() {
+  return (
+    <Suspense fallback={null}>
+      <FlashcardsPageContent />
+    </Suspense>
   );
 }

@@ -312,9 +312,9 @@ export default function AuthPage() {
 
             {isLogin && (
               <div className="flex items-center justify-end">
-                <a href="#" className="text-sm text-pink-600 hover:text-pink-700 font-medium">
+                <Link href="/forgot-password" className="text-sm text-pink-600 hover:text-pink-700 font-medium">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             )}
 

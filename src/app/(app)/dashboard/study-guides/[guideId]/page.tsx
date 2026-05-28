@@ -25,7 +25,7 @@ export default function StudyGuideDetailPage() {
       <DashboardAppShell>
         <div className="flex flex-1 min-w-0 relative">
           <main
-            className={`flex-1 overflow-y-auto bg-white p-8 transition-[margin] duration-300 ${
+            className={`flex-1 overflow-y-auto bg-gray-50 p-8 transition-[margin] duration-300 ${
               chatOpen ? 'mr-0 sm:mr-[400px]' : ''
             }`}
           >

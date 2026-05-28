@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
@@ -39,6 +39,12 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [finalScore, setFinalScore] = useState<{ correct: number; total: number } | null>(null);
+
+  const q = questions?.[idx];
+  const options = useMemo(() => {
+    if (!q) return [];
+    return shuffle([q.correctAnswer, q.distractor1, q.distractor2]);
+  }, [idx, q?.correctAnswer, q?.distractor1, q?.distractor2]);
 
   const outerCls =
     'w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col min-h-[520px]';
@@ -79,6 +85,7 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
               setIdx(0);
               setSelected(null);
               setAnswered(false);
+              setWasCorrect(false);
               setCorrectCount(0);
               setFinished(false);
               setFinalScore(null);
@@ -92,8 +99,16 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
     );
   }
 
-  const q = questions[idx];
-  const options = shuffle([q.correctAnswer, q.distractor1, q.distractor2]);
+  if (!q) {
+    return (
+      <div className={outerCls}>
+        <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
+          No questions in this quiz.
+        </div>
+      </div>
+    );
+  }
+
   const progress = (idx + (answered ? 1 : 0)) / questions.length;
 
   const finishQuiz = async (totalCorrect: number) => {
@@ -114,15 +129,16 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
     const correct = selected === q.correctAnswer;
     setWasCorrect(correct);
     setAnswered(true);
-    if (correct) setCorrectCount((c) => c + 1);
   };
 
   const handleNext = async () => {
+    const newCorrectCount = correctCount + (wasCorrect ? 1 : 0);
     const isLast = idx + 1 >= questions.length;
     if (isLast) {
-      await finishQuiz(correctCount);
+      await finishQuiz(newCorrectCount);
       return;
     }
+    setCorrectCount(newCorrectCount);
     setIdx((i) => i + 1);
     setSelected(null);
     setAnswered(false);
@@ -151,30 +167,45 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
         </p>
 
         <div className="flex flex-col gap-2 max-w-md mx-auto w-full">
-          {options.map((opt) => {
-            let cls =
-              'w-full text-left px-4 py-3 rounded-xl border text-sm transition-all cursor-pointer ';
+          {options.map((opt, optionIndex) => {
+            const letter = String.fromCharCode(65 + optionIndex);
+            const isSelected = selected === opt;
+            const isCorrect = opt === q.correctAnswer;
+
+            let buttonCls =
+              'w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl border-2 text-sm transition-colors cursor-pointer min-h-[52px] ';
+            let letterCls =
+              'w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-sm font-semibold border-2 ';
+
             if (!answered) {
-              cls +=
-                selected === opt
-                  ? 'border-purple-400 bg-purple-50 text-purple-700 font-medium'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50';
-            } else if (opt === q.correctAnswer) {
-              cls += 'border-green-300 bg-green-50 text-green-800 font-medium';
-            } else if (opt === selected) {
-              cls += 'border-red-200 bg-red-50 text-red-700';
+              if (isSelected) {
+                buttonCls += 'border-purple-400 bg-purple-50 text-purple-800';
+                letterCls += 'border-purple-400 bg-purple-100 text-purple-700';
+              } else {
+                buttonCls += 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50';
+                letterCls += 'border-gray-200 bg-gray-50 text-gray-500';
+              }
+            } else if (isCorrect) {
+              buttonCls += 'border-green-400 bg-green-50 text-green-800';
+              letterCls += 'border-green-400 bg-green-100 text-green-700';
+            } else if (isSelected) {
+              buttonCls += 'border-red-300 bg-red-50 text-red-700';
+              letterCls += 'border-red-300 bg-red-100 text-red-600';
             } else {
-              cls += 'border-gray-200 bg-white text-gray-500';
+              buttonCls += 'border-gray-200 bg-white text-gray-500';
+              letterCls += 'border-gray-200 bg-gray-50 text-gray-400';
             }
+
             return (
               <button
-                key={opt}
+                key={`${idx}-${letter}`}
                 type="button"
                 disabled={answered}
                 onClick={() => setSelected(opt)}
-                className={cls}
+                className={buttonCls}
               >
-                {opt}
+                <span className={letterCls}>{letter}</span>
+                <span className="flex-1 leading-snug">{opt}</span>
               </button>
             );
           })}
