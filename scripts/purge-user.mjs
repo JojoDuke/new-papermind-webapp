@@ -55,10 +55,34 @@ if (!secret) {
 }
 
 const argsJson = JSON.stringify({ email, secret });
+// Do not pass --env-file to `convex run` — it can block the CLI access token and cause 401.
+// DEV_PURGE_SECRET for the mutation must live on the Convex deployment (`.env.local` is
+// synced when `npx convex dev` runs, or set it in the Convex dashboard).
+const convexCli = resolve(root, "node_modules/convex/bin/main.js");
 const result = spawnSync(
-  "npx",
-  ["convex", "run", "devTools:purgeUserByEmail", argsJson, "--env-file", ".env.local"],
-  { cwd: root, stdio: "inherit", shell: true, env },
+  process.execPath,
+  [convexCli, "run", "devTools:purgeUserByEmail", argsJson],
+  { cwd: root, encoding: "utf8", windowsHide: true },
 );
+
+const out = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+if (result.stdout) process.stdout.write(result.stdout);
+if (result.stderr) process.stderr.write(result.stderr);
+
+if (result.status !== 0) {
+  if (out.includes("MissingAccessToken") || out.includes("401 Unauthorized")) {
+    console.error(`
+Convex CLI is not logged in (separate from "npx convex dev" running).
+
+Fix — pick one:
+  1. Run once:  npx convex login
+     Then retry: npm run purge:user -- ${email}
+
+  2. Convex Dashboard → your deployment → Functions
+     → devTools:purgeUserByEmail → Run:
+     {"email":"${email}","secret":"<DEV_PURGE_SECRET from .env.local>"}
+`);
+  }
+}
 
 process.exit(result.status ?? 1);
