@@ -49,6 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   }
   .marquee-track {
     display: flex;
+    gap: 4rem; /* space between loop copies (e.g. NCLEX → Oxford seam) */
     width: max-content;
     animation: marquee 28s linear infinite;
     will-change: transform;

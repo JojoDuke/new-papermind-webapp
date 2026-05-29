@@ -56,8 +56,8 @@ const trustItems = [
   { type: 'img', src: '/trust-logos/imperial.svg', alt: 'Imperial College London', height: 'h-7' },
   { type: 'img', src: '/trust-logos/usmle.png', alt: 'USMLE', height: 'h-10' },
   { type: 'img', src: '/trust-logos/cfa.svg', alt: 'CFA Institute', height: 'h-8' },
+  { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base px-1' },
   { type: 'img', src: '/trust-logos/acca.svg', alt: 'ACCA', height: 'h-8' },
-  { type: 'txt', name: 'NCLEX', style: 'font-sans font-bold tracking-widest text-base' },
 ] as Array<
   | { type: 'img'; src: string; alt: string; height: string }
   | { type: 'txt'; name: string; style: string }
