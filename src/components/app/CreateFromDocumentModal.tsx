@@ -362,7 +362,7 @@ export function CreateFromDocumentModal({
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[min(90vh,720px)] flex flex-col overflow-hidden"
+        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[min(90dvh,720px)] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">

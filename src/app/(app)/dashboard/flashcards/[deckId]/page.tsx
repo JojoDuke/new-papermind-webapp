@@ -63,7 +63,7 @@ export default function FlashcardDeckPage() {
           </button>
         </header>
 
-        <main className="flex-1 flex flex-col items-center justify-center px-8 py-4 pb-10">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-4 pb-8 sm:pb-10 w-full max-w-lg mx-auto">
           {notFound ? (
             <div className="text-center max-w-sm">
               <p className="text-sm text-gray-600 mb-4">This flashcard set could not be found.</p>

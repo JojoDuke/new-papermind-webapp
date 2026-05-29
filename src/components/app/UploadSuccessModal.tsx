@@ -35,7 +35,7 @@ export function UploadSuccessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pb-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-16 animate-modal-bounce">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-8 sm:mt-16 animate-modal-bounce">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer"
@@ -53,7 +53,7 @@ export function UploadSuccessModal({
             width={220}
             height={220}
             priority
-            className="object-contain -mt-24 drop-shadow-xl"
+            className="object-contain -mt-16 sm:-mt-24 w-[180px] sm:w-[220px] h-auto drop-shadow-xl"
           />
         </div>
 
@@ -71,7 +71,7 @@ export function UploadSuccessModal({
             {` and created ${EXPECTED_STUDY_GUIDE_COUNT} study guides to help you get started.`}
           </p>
 
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <button
               onClick={handleGoToLibrary}
               className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors group cursor-pointer"

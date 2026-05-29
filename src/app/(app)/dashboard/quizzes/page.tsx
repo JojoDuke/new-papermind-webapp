@@ -9,6 +9,7 @@ import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { CreateFromDocumentModal } from '@/components/app/CreateFromDocumentModal';
 import { StudyDeckCard } from '@/components/app/StudyDeckCard';
+import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import toast from 'react-hot-toast';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 
@@ -69,9 +70,9 @@ function QuizzesPageContent() {
   return (
     <ProtectedRoute>
       <DashboardAppShell>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-8 flex flex-col min-h-0">
-          <div className="flex items-start justify-between gap-4 mb-8 shrink-0">
-            <div>
+        <main className={`${dashboardMainClass} bg-gray-50 flex flex-col`}>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 md:mb-8 shrink-0">
+            <div className="min-w-0">
               <h1 className="text-xl font-bold text-gray-900 mb-1">Quizzes</h1>
               <p className="text-sm text-gray-500">
                 Multiple-choice quizzes generated from your documents
@@ -80,7 +81,7 @@ function QuizzesPageContent() {
             <button
               type="button"
               onClick={openCreateModal}
-              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors cursor-pointer"
+              className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors cursor-pointer"
             >
               <span className="text-base leading-none">+</span>
               Create quiz from document

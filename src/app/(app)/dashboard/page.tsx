@@ -11,6 +11,7 @@ import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
 import { useAuthToken } from '@convex-dev/auth/react';
 import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
+import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import { setCheckoutAccessGrace } from '@/lib/checkout-grace';
 
 export default function DashboardPage() {
@@ -265,7 +266,7 @@ export default function DashboardPage() {
       <DashboardAppShell>
         {selectedDocId ? (
           /* ── Generation config view ── */
-          <main className="flex-1 overflow-y-auto p-8">
+          <main className={dashboardMainClass}>
             <button
               onClick={() => { setSelectedDocId(null); setDeckName(''); }}
               className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors cursor-pointer mb-6"
@@ -433,10 +434,9 @@ export default function DashboardPage() {
 
         ) : (
           /* ── Home view ── */
-          <main className="flex-1 overflow-y-auto p-8 min-w-0">
-            {/* Top bar: welcome left, icons far right — full width */}
-            <header className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
+          <main className={`${dashboardMainClass}`}>
+            <header className="mb-5 md:mb-6">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5">
                 Welcome back, {welcomeName} 👋
               </h1>
               <p className="text-sm text-gray-500">
@@ -450,7 +450,7 @@ export default function DashboardPage() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               tabIndex={-1}
-              className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center text-center outline-none focus:outline-none ${
+              className={`border-2 border-dashed rounded-xl p-6 sm:p-10 flex flex-col items-center text-center outline-none focus:outline-none ${
                 isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
               }`}
             >
@@ -485,7 +485,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Two-column layout starts here: left = docs/tools, right = progress */}
-            <div className="flex gap-6 items-stretch mt-10">
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch mt-8 md:mt-10">
             <div className="flex-1 min-w-0 flex flex-col gap-0">
 
               {/* Documents Section */}
@@ -624,12 +624,12 @@ export default function DashboardPage() {
               {/* Study Tools */}
               <div className="mt-10">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">Study Tools</h2>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
 
                   {/* Flashcards */}
                   <div
                     onClick={() => router.push('/dashboard/flashcards')}
-                    className="bg-pink-50 border border-pink-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-pink-300 transition-all group"
+                    className="bg-pink-50 border border-pink-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-pink-300 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -645,7 +645,7 @@ export default function DashboardPage() {
                   {/* Quizzes */}
                   <div
                     onClick={() => router.push('/dashboard/quizzes')}
-                    className="bg-amber-50 border border-amber-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-amber-300 transition-all group"
+                    className="bg-amber-50 border border-amber-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-amber-300 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -661,7 +661,7 @@ export default function DashboardPage() {
                   {/* Study Guides */}
                   <div
                     onClick={() => router.push('/dashboard/study-guides')}
-                    className="bg-green-50 border border-green-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-green-300 transition-all group"
+                    className="bg-green-50 border border-green-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-green-300 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -682,7 +682,7 @@ export default function DashboardPage() {
                         subtitle: 'Full-length practice exams are included on Pro. Choose a plan to get started.',
                       })
                     }
-                    className="bg-purple-50 border border-purple-200 rounded-2xl py-10 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
+                    className="bg-purple-50 border border-purple-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,7 +701,7 @@ export default function DashboardPage() {
             </div>{/* end left column */}
 
             {/* Progress panel — right column */}
-            <div className="w-64 shrink-0 flex flex-col">
+            <div className="w-full lg:w-64 shrink-0 flex flex-col">
 
               {/* Your progress */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full">

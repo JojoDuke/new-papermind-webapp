@@ -342,7 +342,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
 
   // ── Render helpers ────────────────────────────────────────────────────────
   const outerCls = [
-    'w-full bg-white rounded-3xl border overflow-hidden flex flex-col min-h-[520px]',
+    'w-full bg-white rounded-2xl sm:rounded-3xl border overflow-hidden flex flex-col min-h-[min(520px,75dvh)]',
     flatChrome ? 'border-[2.5px] border-gray-200' : 'border-gray-100',
     flatChrome ? '' : 'shadow-xl',
   ]
@@ -351,7 +351,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
 
   function renderHeader() {
     return (
-      <div className="px-6 pt-6 pb-2 shrink-0">
+      <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex flex-1 justify-center pr-3">
             <div className="w-[90%] h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -454,7 +454,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
     return (
       <div className={outerCls}>
         {renderHeader()}
-        <div className="flex-1 flex flex-col px-6 pb-6 pt-2">
+        <div className="flex-1 flex flex-col px-4 sm:px-6 pb-4 sm:pb-6 pt-2">
           <div className="h-5 flex items-center justify-center mb-3">
             <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-amber-500">
               NEW CARD
@@ -528,7 +528,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
         {renderHeader()}
 
         {phase === 'requeue' && (
-          <div className="px-6 pt-3 pb-0 flex justify-center">
+          <div className="px-4 sm:px-6 pt-3 pb-0 flex justify-center">
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-pink-400">
               Review round
             </span>
@@ -537,14 +537,14 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
 
         <div className="flex-1 flex flex-row gap-0 divide-x divide-gray-100 min-h-0">
           {/* Left — card front (same style as learn phase) */}
-          <div className="flex-1 flex flex-col items-center justify-start px-6 py-6">
+          <div className="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 py-4 sm:py-6">
             <div className="w-full max-w-xs aspect-4/5 max-h-[280px] rounded-2xl border border-gray-200 bg-white shadow-sm flex items-center justify-center p-6">
               <p className="text-center text-lg font-semibold text-gray-800 leading-snug">{q.card.front}</p>
             </div>
           </div>
 
           {/* Right — answer area */}
-          <div className="flex-1 flex flex-col justify-between px-6 py-6 gap-4">
+          <div className="flex-1 flex flex-col justify-between px-4 sm:px-6 py-4 sm:py-6 gap-4">
             {answerState === 'idle' && q.type === 'mc' && (
               <>
                 <div className="flex flex-col gap-2">

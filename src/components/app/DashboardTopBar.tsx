@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../../convex/_generated/api';
+import { useDashboardNav } from '@/components/app/dashboard-nav-context';
 
 /** Persistent top-right actions: theme toggle, notifications, profile menu. */
 export function DashboardTopBar() {
   const router = useRouter();
   const { signOut } = useAuthActions();
+  const { openMobileNav } = useDashboardNav();
   const user = useQuery(api.auth.currentUser);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -57,7 +59,19 @@ export function DashboardTopBar() {
   const userInitial = (user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase();
 
   return (
-    <div className="shrink-0 flex justify-end items-center gap-3 px-8 pt-3 pb-1">
+    <div className="shrink-0 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 pt-3 pb-2 border-b border-gray-100 md:border-b-0">
+      <button
+        type="button"
+        onClick={openMobileNav}
+        className="md:hidden flex items-center justify-center w-10 h-10 -ml-1 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
+        aria-label="Open menu"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div className="flex-1 md:hidden" aria-hidden />
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
       {/* Dark / light mode toggle */}
       <button
         onClick={() => setIsDarkMode((v) => !v)}
@@ -94,7 +108,7 @@ export function DashboardTopBar() {
         </div>
 
         {showNotifications && (
-          <div className="absolute right-0 top-11 z-50 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-4 pt-4 pb-3">
               <span className="text-sm font-bold text-gray-900">Notifications</span>
             </div>
@@ -145,7 +159,7 @@ export function DashboardTopBar() {
         </div>
 
         {showProfileMenu && (
-          <div className="absolute right-0 top-11 z-50 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2">
+          <div className="absolute right-0 top-11 z-50 w-[min(16rem,calc(100vw-2rem))] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2">
             <div className="flex items-center gap-3 px-4 py-3">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                 {userInitial}
@@ -205,6 +219,7 @@ export function DashboardTopBar() {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
