@@ -4,7 +4,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { useEffect, useRef } from "react";
 import { api } from "../../../convex/_generated/api";
 
-/** One shot after the session is ready: triggers admin email for very new accounts. */
+/** One shot after the session is ready: triggers admin Telegram alert for very new accounts. */
 export function AdminNewUserNotify() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const notify = useMutation(api.newUserAdminEmail.notifyAdminIfNew);

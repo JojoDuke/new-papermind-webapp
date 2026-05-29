@@ -12,9 +12,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  // New-user admin email: see `newUserAdminEmail.notifyAdminIfNew` (triggered from the client
-  // so it always appears as its own function in Convex logs; the auth `afterUserCreatedOrUpdated`
-  // path is easy to miss or omit from production bundles.)
+  // New-user admin Telegram alert: see `newUserAdminEmail.notifyAdminIfNew` (triggered from the
+  // client so it always appears as its own function in Convex logs; the auth
+  // `afterUserCreatedOrUpdated` path is easy to miss or omit from production bundles.)
 });
 
 export const currentUser = query({

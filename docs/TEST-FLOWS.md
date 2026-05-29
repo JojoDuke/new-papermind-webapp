@@ -39,6 +39,33 @@ npm run dev
 
 ---
 
+## New signup Telegram alert
+
+Admin gets a Telegram message when a brand-new user signs up (within 30 minutes of account creation).
+
+### Setup
+
+1. Create a bot via [@BotFather](https://t.me/BotFather) and copy the bot token.
+2. Get your chat id:
+   - **DM:** Message the bot once, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and read `message.chat.id`.
+   - **Group:** Add the bot to the group, send a message, then read `chat.id` from `getUpdates` (group ids are negative, e.g. `-100...`).
+3. Add to `.env.local` and sync to Convex (`npm run convex:push` or `convex:deploy:prod`):
+   - `TELEGRAM_BOT_TOKEN`
+   - `NEW_USER_TELEGRAM_CHAT_ID`
+4. Smoke test locally:
+   ```bash
+   npm run test:telegram
+   ```
+
+### Verify on signup
+
+1. `npm run purge:user -- you@example.com` (fresh account).
+2. Sign up in prod-like mode (bypass off).
+3. After auth, you should receive a Telegram message like: `1 new user (you@example.com) created an account on Papermind`.
+4. Reload or sign in again — no duplicate message (`already_notified`).
+
+---
+
 ## Flow A — New visitor → paid trial (ideal customer)
 
 **Persona:** First-time student, lands on marketing site, wants Pro trial.
