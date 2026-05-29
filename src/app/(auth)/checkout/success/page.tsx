@@ -5,6 +5,10 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthToken } from "@convex-dev/auth/react";
 import { ProtectedRoute } from "@/components/app/ProtectedRoute";
+import {
+  markCheckoutSuccessNavigation,
+  setCheckoutAccessGrace,
+} from "@/lib/checkout-grace";
 
 const VERIFY_ATTEMPTS = 15;
 const VERIFY_INTERVAL_MS = 1500;
@@ -52,6 +56,8 @@ function CheckoutSuccessInner() {
           };
 
           if (res.ok && data.ok) {
+            setCheckoutAccessGrace();
+            markCheckoutSuccessNavigation();
             window.location.assign("/dashboard");
             return;
           }

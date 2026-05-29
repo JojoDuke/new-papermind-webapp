@@ -8,6 +8,10 @@ import { useAuthActions, useAuthToken } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
+import {
+  consumeCheckoutSuccessNavigation,
+  wasRecentlyPaywalledToCheckout,
+} from '@/lib/checkout-grace';
 import type { BillingInterval, BillingPlan } from '@/lib/billing';
 import {
   LIST_PRICE_MONTHLY_USD,
@@ -84,9 +88,15 @@ function CheckoutContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (hasAccess === true) {
+    if (hasAccess !== true) return;
+    if (consumeCheckoutSuccessNavigation()) {
       router.replace('/dashboard');
+      return;
     }
+    if (wasRecentlyPaywalledToCheckout()) {
+      return;
+    }
+    router.replace('/dashboard');
   }, [hasAccess, router]);
 
   const canceled = searchParams?.get('canceled') === '1';

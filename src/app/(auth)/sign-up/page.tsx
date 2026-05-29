@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { useConvexAuth } from 'convex/react';
+import { useConvexAuth, useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
@@ -21,6 +22,10 @@ export default function AuthPage() {
   
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const hasPaidAccess = useQuery(
+    api.subscriptions.hasPaidAccess,
+    isAuthenticated ? {} : 'skip'
+  );
   const postAuthRedirected = useRef(false);
 
   function checkoutEntryPath(): string {
@@ -38,12 +43,15 @@ export default function AuthPage() {
   // router.replace can leave checkout thinking the user is signed out (bounce /auth ↔ /checkout).
   useEffect(() => {
     if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
+    if (hasPaidAccess === undefined) return;
     postAuthRedirected.current = true;
     const devBypass =
       process.env.NODE_ENV === 'development' &&
       process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
-    window.location.assign(devBypass ? '/dashboard' : checkoutEntryPath());
-  }, [isAuthenticated, authLoading]);
+    window.location.assign(
+      devBypass || hasPaidAccess ? '/dashboard' : checkoutEntryPath()
+    );
+  }, [isAuthenticated, authLoading, hasPaidAccess]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

@@ -11,6 +11,7 @@ import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
 import { useAuthToken } from '@convex-dev/auth/react';
 import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
+import { setCheckoutAccessGrace } from '@/lib/checkout-grace';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -73,6 +74,12 @@ export default function DashboardPage() {
       },
       body: JSON.stringify({ checkoutId }),
     })
+      .then(async (res) => {
+        if (res.ok) {
+          const data = (await res.json()) as { ok?: boolean };
+          if (data.ok) setCheckoutAccessGrace();
+        }
+      })
       .catch(() => {})
       .finally(() => {
         router.replace('/dashboard');

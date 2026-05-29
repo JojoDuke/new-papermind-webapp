@@ -4,6 +4,11 @@ import { useConvexAuth, useQuery } from 'convex/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, ReactNode } from 'react';
 import { api } from '../../../convex/_generated/api';
+import {
+  clearCheckoutAccessGrace,
+  hasCheckoutAccessGrace,
+  markPaywallRedirectToCheckout,
+} from '@/lib/checkout-grace';
 
 /** Local dev only: set `NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION=true` in `.env.local` and restart `npm run dev`. Never set on Vercel. */
 function devBypassSubscription(): boolean {
@@ -29,6 +34,7 @@ export function ProtectedRoute({
   const router = useRouter();
   const pathname = usePathname();
   const [allowPaywallSyncReturn, setAllowPaywallSyncReturn] = useState(false);
+  const [checkoutGrace, setCheckoutGrace] = useState(false);
   const bypassSubscription = devBypassSubscription();
   const hasPaidAccess = useQuery(
     api.subscriptions.hasPaidAccess,
@@ -39,7 +45,13 @@ export function ProtectedRoute({
   // Returning from Polar with ?checkout=success: subscription row may not exist yet.
   // We must render children so /dashboard can run verify-checkout; otherwise we spin forever.
   useLayoutEffect(() => {
-    if (pathname !== '/dashboard' || typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
+      setAllowPaywallSyncReturn(false);
+      setCheckoutGrace(false);
+      return;
+    }
+    setCheckoutGrace(hasCheckoutAccessGrace());
+    if (pathname !== '/dashboard') {
       setAllowPaywallSyncReturn(false);
       return;
     }
@@ -49,6 +61,13 @@ export function ProtectedRoute({
       !!(p.get('checkout_id')?.trim() ?? p.get('session_id')?.trim());
     setAllowPaywallSyncReturn(ok);
   }, [pathname]);
+
+  useEffect(() => {
+    if (hasPaidAccess === true) {
+      clearCheckoutAccessGrace();
+      setCheckoutGrace(false);
+    }
+  }, [hasPaidAccess]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -64,10 +83,11 @@ export function ProtectedRoute({
       return;
     }
     if (!hasPaidAccess && !subRedirected.current) {
-      if (allowPaywallSyncReturn) {
+      if (allowPaywallSyncReturn || checkoutGrace) {
         return;
       }
       subRedirected.current = true;
+      markPaywallRedirectToCheckout();
       router.replace('/checkout');
     }
   }, [
@@ -78,6 +98,7 @@ export function ProtectedRoute({
     hasPaidAccess,
     router,
     allowPaywallSyncReturn,
+    checkoutGrace,
   ]);
 
   // Show loading spinner while checking auth
@@ -110,7 +131,8 @@ export function ProtectedRoute({
     requireSubscription &&
     !bypassSubscription &&
     hasPaidAccess === false &&
-    !allowPaywallSyncReturn
+    !allowPaywallSyncReturn &&
+    !checkoutGrace
   ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
