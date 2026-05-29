@@ -38,6 +38,24 @@ function loadSavedDemo(): SavedDemoPayload | null {
   }
 }
 
+function clearDemoLocal() {
+  try {
+    localStorage.removeItem(LANDING_DEMO_STORAGE_KEY);
+    localStorage.removeItem(LANDING_DEMO_DATA_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+async function resetDemoSession() {
+  clearDemoLocal();
+  try {
+    await fetch('/api/demo/reset', { method: 'POST' });
+  } catch {
+    // ignore — cookie may still block generate until retry
+  }
+}
+
 export function DemoWidget() {
   const [phase, setPhase] = useState<DemoPhase>('idle');
   const [cards, setCards] = useState<FlashcardStudyCard[]>([]);
@@ -50,39 +68,47 @@ export function DemoWidget() {
   const [demoLocked, setDemoLocked] = useState(false);
 
   useEffect(() => {
-    try {
-      const used = localStorage.getItem(LANDING_DEMO_STORAGE_KEY) === '1';
-      if (used) {
-        setDemoLocked(true);
+    let cancelled = false;
+
+    async function hydrate() {
+      try {
+        const used = localStorage.getItem(LANDING_DEMO_STORAGE_KEY) === '1';
+        if (!used) return;
+
         const saved = loadSavedDemo();
         if (saved) {
+          if (cancelled) return;
+          setDemoLocked(true);
           setFileName(saved.fileName);
           setCards(toStudyCards(saved.cards));
           setPhase('studying');
+          return;
         }
+
+        // Used flag without saved cards — stale state; unlock so they can try again.
+        await resetDemoSession();
+        if (cancelled) return;
+        setDemoLocked(false);
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setHydrated(true);
       }
-    } catch {
-      // ignore
-    } finally {
-      setHydrated(true);
     }
+
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function persistDemoSession(name: string, generated: { front: string; back: string }[]) {
     try {
-      localStorage.setItem(LANDING_DEMO_STORAGE_KEY, '1');
       localStorage.setItem(
         LANDING_DEMO_DATA_KEY,
         JSON.stringify({ fileName: name, cards: generated } satisfies SavedDemoPayload)
       );
-    } catch {
-      // ignore
-    }
-  }
-
-  function lockDemoUi() {
-    setDemoLocked(true);
-    try {
+      if (!loadSavedDemo()) return;
       localStorage.setItem(LANDING_DEMO_STORAGE_KEY, '1');
     } catch {
       // ignore
@@ -112,14 +138,18 @@ export function DemoWidget() {
       const data = await res.json();
 
       if (res.status === 403) {
-        lockDemoUi();
         const saved = loadSavedDemo();
         if (saved) {
+          setDemoLocked(true);
           setFileName(saved.fileName);
           setCards(toStudyCards(saved.cards));
           setPhase('studying');
         } else {
-          setError(data.error ?? 'You have already used the free demo.');
+          await resetDemoSession();
+          setDemoLocked(false);
+          setError(
+            'Your demo session expired on this device. Upload a PDF below to try again, or sign up for full access.'
+          );
           setPhase('idle');
         }
         return;
@@ -232,8 +262,10 @@ export function DemoWidget() {
     );
   }
 
-  // ── Idle / Upload (new visitors, or returning without saved deck data) ───
-  const uploadDisabled = demoLocked;
+  // ── Idle / Upload ─────────────────────────────────────────────────────────
+  const hasSavedDeck = cards.length > 0;
+  const uploadDisabled = demoLocked && hasSavedDeck;
+  const staleLocked = demoLocked && !hasSavedDeck;
 
   return (
     <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
@@ -243,12 +275,18 @@ export function DemoWidget() {
           {!uploadDisabled && <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />}
         </div>
         <h3 className="text-xl font-bold font-serif text-gray-900">
-          {uploadDisabled ? 'Your demo deck is ready' : 'Try it with your own PDF'}
+          {staleLocked
+            ? 'Demo session not found'
+            : uploadDisabled
+              ? 'Your demo deck is ready'
+              : 'Try it with your own PDF'}
         </h3>
         <p className="text-sm text-gray-400 mt-1 font-sans">
-          {uploadDisabled
-            ? 'You can keep studying the same PDF below. Create an account to upload new documents.'
-            : 'One try on this page — no sign-up needed.'}
+          {staleLocked
+            ? 'We could not load your saved flashcards on this browser. Try the demo again or create an account.'
+            : uploadDisabled
+              ? 'Open your saved deck below, or sign up to upload new documents.'
+              : 'One try on this page — no sign-up needed.'}
         </p>
       </div>
 
@@ -336,13 +374,29 @@ export function DemoWidget() {
           </div>
         )}
 
-        {uploadDisabled && cards.length > 0 && (
+        {uploadDisabled && hasSavedDeck && (
           <button
             type="button"
             onClick={() => setPhase('studying')}
             className="mt-4 w-full py-3 rounded-xl bg-pink-50 border border-pink-200 text-sm font-semibold text-[#FF5392] hover:bg-pink-100 transition-colors cursor-pointer"
           >
             Continue studying your demo deck
+          </button>
+        )}
+
+        {staleLocked && (
+          <button
+            type="button"
+            onClick={async () => {
+              await resetDemoSession();
+              setDemoLocked(false);
+              setCards([]);
+              setFileName(null);
+              setError(null);
+            }}
+            className="mt-4 w-full py-3 rounded-xl bg-pink-50 border border-pink-200 text-sm font-semibold text-[#FF5392] hover:bg-pink-100 transition-colors cursor-pointer"
+          >
+            Try the demo again
           </button>
         )}
 
