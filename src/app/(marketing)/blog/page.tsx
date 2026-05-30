@@ -21,77 +21,6 @@ const FEATURED_POST = {
   readTime: '6 min read',
 };
 
-const POSTS = [
-  {
-    slug: 'spaced-repetition-explained',
-    category: 'Study Science',
-    categoryColor: 'bg-purple-50 text-purple-600',
-    title: 'Spaced Repetition Explained: Why Timing Is Everything',
-    excerpt:
-      'Forget cramming the night before. Spaced repetition schedules your reviews at the exact moment you are about to forget.',
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'May 3, 2026',
-    readTime: '5 min read',
-  },
-  {
-    slug: 'ace-your-usmle-with-ai',
-    category: 'Exam Prep',
-    categoryColor: 'bg-blue-50 text-blue-600',
-    title: 'How to Ace the USMLE Step 1 Using AI-Generated Flashcards',
-    excerpt:
-      'Medical students reported a 40% reduction in prep time. Here is the exact workflow.',
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'Apr 27, 2026',
-    readTime: '8 min read',
-  },
-  {
-    slug: 'the-forgetting-curve',
-    category: 'Study Science',
-    categoryColor: 'bg-purple-50 text-purple-600',
-    title: "Ebbinghaus's Forgetting Curve — and How to Beat It",
-    excerpt:
-      "Within 24 hours you forget up to 70% of what you learned. We built a product to solve it.",
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'Apr 19, 2026',
-    readTime: '4 min read',
-  },
-  {
-    slug: 'cfa-study-guide',
-    category: 'Exam Prep',
-    categoryColor: 'bg-blue-50 text-blue-600',
-    title: 'The Ultimate CFA Level 1 Study Guide for Professionals',
-    excerpt:
-      'How to compress 300 hours of prep into a focused, repeatable routine.',
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'Apr 11, 2026',
-    readTime: '10 min read',
-  },
-  {
-    slug: 'mock-exams-vs-flashcards',
-    category: 'Product',
-    categoryColor: 'bg-emerald-50 text-emerald-600',
-    title: 'Mock Exams vs. Flashcards: When to Use Each',
-    excerpt:
-      "Flashcards build knowledge. Mock exams test application under pressure.",
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'Apr 4, 2026',
-    readTime: '6 min read',
-  },
-  {
-    slug: 'ai-pdf-to-flashcards',
-    category: 'Product',
-    categoryColor: 'bg-emerald-50 text-emerald-600',
-    title: 'Inside Papermind: PDF to Full Study Session',
-    excerpt:
-      "A technical deep-dive into how Papermind's AI reads your academic documents.",
-    author: { name: 'Papermind Team', initials: 'PM', color: 'bg-pink-100 text-pink-600' },
-    date: 'Mar 28, 2026',
-    readTime: '7 min read',
-  },
-];
-
-const CATEGORIES = ['All', 'Study Science', 'Exam Prep', 'Product'];
-
 export default function BlogPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 relative overflow-x-hidden">
@@ -112,34 +41,11 @@ export default function BlogPage() {
           </p>
         </section>
 
-        {/* ── Category Tabs ── */}
-        <div className="flex justify-center mb-16">
-          <div className="inline-flex overflow-hidden rounded-[10px] border-[2.5px] border-gray-200 bg-white">
-            {CATEGORIES.map((cat, i) => (
-              <button
-                key={cat}
-                type="button"
-                className={`px-6 py-2.5 text-sm font-medium transition-all cursor-pointer ${
-                  i !== 0 ? 'border-l-[2.5px] border-gray-200' : ''
-                } ${
-                  i === 0
-                    ? 'pink-glowing-button flat-chrome text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Post Grid (Bento Style) ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* Featured Post (Large) */}
+        {/* ── Featured Post ── */}
+        <div className="max-w-4xl mx-auto">
           <Link
             href={`/blog/${FEATURED_POST.slug}`}
-            className="md:col-span-2 group relative bg-white rounded-[24px] border-[2.5px] border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300"
+            className="group relative bg-white rounded-[24px] border-[2.5px] border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 block"
           >
             <div className="flex flex-col md:flex-row h-full">
               <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
@@ -174,34 +80,6 @@ export default function BlogPage() {
               </div>
             </div>
           </Link>
-
-          {/* Regular Posts */}
-          {POSTS.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="group bg-white rounded-[24px] border-[2.5px] border-gray-200 p-8 flex flex-col hover:shadow-xl transition-all duration-300"
-            >
-              <span className={`self-start text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-6 ${post.categoryColor}`}>
-                {post.category}
-              </span>
-              <h3 className="text-xl font-bold font-serif text-gray-900 mb-3 leading-snug group-hover:text-[#FF5392] transition-colors">
-                {post.title}
-              </h3>
-              <p className="text-gray-500 text-xs leading-relaxed font-sans mb-8">
-                {post.excerpt}
-              </p>
-              <div className="mt-auto flex items-center gap-3">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${post.author.color}`}>
-                  {post.author.initials}
-                </div>
-                <div className="text-[10px] text-gray-400 font-sans">
-                  <p className="text-gray-700 font-semibold">{post.author.name}</p>
-                  <p>{post.date} · {post.readTime}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
         </div>
 
         {/* ── Newsletter CTA ── */}
