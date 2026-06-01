@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/components/marketing/Navbar';
 import { Footer } from '@/components/marketing/Footer';
 import { mdxComponents } from '@/components/marketing/mdx-components';
+import { BlogPostMeta } from '@/components/marketing/BlogPostMeta';
 import {
   formatBlogDate,
   getBlogPostBySlug,
@@ -66,9 +67,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-5 tracking-tight leading-tight">
             {post.title}
           </h1>
-          <p className="text-gray-500 font-sans text-sm">
-            {post.author} · {formatBlogDate(post.publishedAt)} · {post.readTime}
-          </p>
+          <BlogPostMeta
+            author={post.author}
+            formattedDate={formatBlogDate(post.publishedAt)}
+            readTime={post.readTime}
+            slug={post.slug}
+          />
         </header>
 
         <article>
