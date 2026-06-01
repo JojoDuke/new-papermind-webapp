@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Navbar } from '@/components/marketing/Navbar';
 import { Footer } from '@/components/marketing/Footer';
-import { mdxComponents } from '@/components/marketing/mdx-components';
 import { BlogPostMeta } from '@/components/marketing/BlogPostMeta';
+import { BlogPostArticle } from '@/components/marketing/BlogPostArticle';
 import {
   formatBlogDate,
   getBlogPostBySlug,
@@ -75,9 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           />
         </header>
 
-        <article>
-          <MDXRemote source={post.content} components={mdxComponents} />
-        </article>
+        <BlogPostArticle post={post} />
       </main>
 
       <Footer />

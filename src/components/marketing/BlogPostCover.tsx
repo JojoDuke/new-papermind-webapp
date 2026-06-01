@@ -7,6 +7,10 @@ type BlogPostCoverProps = {
   imageClassName?: string;
   priority?: boolean;
   sizes?: string;
+  /** cover = fill & crop; contain = show full image inside the frame */
+  fit?: 'cover' | 'contain';
+  /** inset padding so the image sits smaller inside the card */
+  inset?: boolean;
 };
 
 export function BlogPostCover({
@@ -15,18 +19,27 @@ export function BlogPostCover({
   imageClassName = '',
   priority = false,
   sizes = '(max-width: 768px) 100vw, 600px',
+  fit = 'cover',
+  inset = false,
 }: BlogPostCoverProps) {
+  const objectClass = fit === 'contain' ? 'object-contain' : 'object-cover';
+  const hoverClass = fit === 'contain' ? '' : 'group-hover:scale-105';
+
   return (
-    <div className={`relative overflow-hidden bg-pink-50/30 ${className}`}>
+    <div
+      className={`relative overflow-hidden bg-pink-50/30 ${inset ? 'flex items-center justify-center p-5 md:p-6' : ''} ${className}`}
+    >
       {post.image ? (
-        <Image
-          src={post.image}
-          alt={post.imageAlt ?? post.title}
-          fill
-          className={`object-cover transition-transform duration-500 group-hover:scale-105 ${imageClassName}`}
-          priority={priority}
-          sizes={sizes}
-        />
+        <div className={`relative ${inset ? 'h-full w-full max-h-full' : 'absolute inset-0'}`}>
+          <Image
+            src={post.image}
+            alt={post.imageAlt ?? post.title}
+            fill
+            className={`${objectClass} transition-transform duration-500 ${hoverClass} ${imageClassName}`}
+            priority={priority}
+            sizes={sizes}
+          />
+        </div>
       ) : (
         <>
           <div className="absolute inset-0 bg-linear-to-tr from-[#FF539220] to-transparent" />

@@ -8,15 +8,18 @@ image: /blog/your-post-slug.jpg
 imageAlt: "Short description of the cover image"
 ---
 
-Write your post below. This file starts with `_` so it is **not published**.
+<!-- Copy this file, remove the `_` prefix to publish.
+  - frontmatter `image` = thumbnail on the blog index only
+  - Write the full article below in any order you like
+  - Use quotes in frontmatter if title/excerpt contain a colon -->
 
-To publish a post:
+Your opening paragraph. Structure the post however you want — headings, lists, quotes, multiple images.
 
-1. Copy this file and rename it (remove the `_` prefix), e.g. `my-first-post.mdx`
-2. Update the frontmatter above (use quotes if title or excerpt contains a colon `:`)
-3. Add a cover image to `public/blog/` — e.g. `public/blog/my-first-post.jpg`, then set `image: /blog/my-first-post.jpg`
-4. Write your content in Markdown below
-5. Save — with `npm run dev` running, refresh `/blog` to see it
+<BlogImage src="/blog/your-post-slug.jpg" alt="Describe the image" />
+
+Or use Markdown images anywhere:
+
+![Describe the image](/blog/another-photo.jpg)
 
 ## Section heading
 
@@ -29,4 +32,6 @@ Regular paragraph text. **Bold**, *italic*, and [links](https://example.com) all
 
 ### Smaller heading
 
-Another paragraph to keep writing.
+Add more images mid-article if you need them:
+
+<BlogImage src="/blog/extra-photo.jpg" alt="Another image" />

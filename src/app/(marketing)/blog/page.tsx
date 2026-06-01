@@ -22,7 +22,7 @@ function LatestPostCard({ post }: { post: BlogPostMeta }) {
       className="group relative bg-white rounded-[24px] border-[2.5px] border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 block w-full"
     >
       <div className="flex flex-col md:flex-row h-full">
-        <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
+        <div className="md:w-[58%] p-8 md:p-10 flex flex-col justify-center">
           <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 mb-4 group-hover:text-[#FF5392] transition-colors leading-tight">
             {post.title}
           </h2>
@@ -38,9 +38,11 @@ function LatestPostCard({ post }: { post: BlogPostMeta }) {
         </div>
         <BlogPostCover
           post={post}
-          className="md:w-1/2 min-h-[280px] md:min-h-[360px]"
+          className="md:w-[42%] min-h-[200px] md:min-h-[240px]"
+          fit="contain"
+          inset
           priority
-          sizes="(max-width: 768px) 100vw, 600px"
+          sizes="(max-width: 768px) 100vw, 420px"
         />
       </div>
     </Link>
@@ -55,7 +57,9 @@ function OlderPostCard({ post }: { post: BlogPostMeta }) {
     >
       <BlogPostCover
         post={post}
-        className="aspect-[16/10] w-full"
+        className="h-[140px] md:h-[160px] w-full"
+        fit="contain"
+        inset
         sizes="(max-width: 768px) 100vw, 50vw"
       />
       <div className="p-6">
