@@ -30,7 +30,7 @@ export function BlogPostMeta({ author, formattedDate, readTime, slug }: BlogPost
         <button
           type="button"
           onClick={copyLink}
-          className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
         >
           <svg
             className="w-3.5 h-3.5"
