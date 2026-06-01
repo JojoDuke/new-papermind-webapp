@@ -11,6 +11,9 @@ export type BlogPostMeta = {
   author: string;
   publishedAt: string;
   readTime: string;
+  /** Path under /public, e.g. /blog/my-post.jpg */
+  image: string;
+  imageAlt?: string;
 };
 
 export type BlogPost = BlogPostMeta & {
@@ -40,8 +43,10 @@ function parsePostMeta(slug: string, data: Record<string, unknown>): BlogPostMet
   const publishedAt =
     typeof data.publishedAt === 'string' ? data.publishedAt : new Date().toISOString().slice(0, 10);
   const readTime = typeof data.readTime === 'string' ? data.readTime : '5 min read';
+  const image = typeof data.image === 'string' ? data.image : '';
+  const imageAlt = typeof data.imageAlt === 'string' ? data.imageAlt : undefined;
 
-  return { slug, title, excerpt, author, publishedAt, readTime };
+  return { slug, title, excerpt, author, publishedAt, readTime, image, imageAlt };
 }
 
 export function getBlogPostSlugs(): string[] {

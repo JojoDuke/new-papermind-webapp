@@ -1,9 +1,11 @@
 ---
-title: Your Post Title
-excerpt: A short preview shown on the blog index. Keep it to one or two sentences.
+title: "Your Post Title"
+excerpt: "A short preview shown on the blog index. Keep it to one or two sentences."
 author: Papermind Team
 publishedAt: 2026-06-01
 readTime: 5 min read
+image: /blog/your-post-slug.jpg
+imageAlt: "Short description of the cover image"
 ---
 
 Write your post below. This file starts with `_` so it is **not published**.
@@ -11,9 +13,10 @@ Write your post below. This file starts with `_` so it is **not published**.
 To publish a post:
 
 1. Copy this file and rename it (remove the `_` prefix), e.g. `my-first-post.mdx`
-2. Update the frontmatter above
-3. Write your content in Markdown below
-4. Save — with `npm run dev` running, refresh `/blog` to see it
+2. Update the frontmatter above (use quotes if title or excerpt contains a colon `:`)
+3. Add a cover image to `public/blog/` — e.g. `public/blog/my-first-post.jpg`, then set `image: /blog/my-first-post.jpg`
+4. Write your content in Markdown below
+5. Save — with `npm run dev` running, refresh `/blog` to see it
 
 ## Section heading
 

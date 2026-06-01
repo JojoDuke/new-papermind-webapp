@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/marketing/Navbar';
 import { Footer } from '@/components/marketing/Footer';
 import { NewsletterForm } from '@/components/marketing/NewsletterForm';
+import { BlogPostCover } from '@/components/marketing/BlogPostCover';
 import {
   formatBlogDate,
   getBlogPostsByDate,
@@ -35,26 +36,12 @@ function LatestPostCard({ post }: { post: BlogPostMeta }) {
             </p>
           </div>
         </div>
-        <div className="md:w-1/2 relative min-h-[300px] bg-pink-50/30 overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-tr from-[#FF539220] to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-24 h-24 rounded-3xl bg-white border-[2.5px] border-gray-200 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
-              <svg
-                className="w-10 h-10 text-[#FF5392]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <BlogPostCover
+          post={post}
+          className="md:w-1/2 min-h-[280px] md:min-h-[360px]"
+          priority
+          sizes="(max-width: 768px) 100vw, 600px"
+        />
       </div>
     </Link>
   );
@@ -64,17 +51,24 @@ function OlderPostCard({ post }: { post: BlogPostMeta }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group block bg-white rounded-[20px] border-[2.5px] border-gray-200 p-6 hover:shadow-lg transition-all duration-300"
+      className="group block bg-white rounded-[20px] border-[2.5px] border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
     >
-      <h3 className="text-lg font-bold font-serif text-gray-900 mb-2 group-hover:text-[#FF5392] transition-colors leading-snug">
-        {post.title}
-      </h3>
-      <p className="text-gray-500 text-sm leading-relaxed mb-4 font-sans line-clamp-2">
-        {post.excerpt}
-      </p>
-      <p className="text-xs text-gray-400 font-sans">
-        {post.author} · {formatBlogDate(post.publishedAt)} · {post.readTime}
-      </p>
+      <BlogPostCover
+        post={post}
+        className="aspect-[16/10] w-full"
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
+      <div className="p-6">
+        <h3 className="text-lg font-bold font-serif text-gray-900 mb-2 group-hover:text-[#FF5392] transition-colors leading-snug">
+          {post.title}
+        </h3>
+        <p className="text-gray-500 text-sm leading-relaxed mb-4 font-sans line-clamp-2">
+          {post.excerpt}
+        </p>
+        <p className="text-xs text-gray-400 font-sans">
+          {post.author} · {formatBlogDate(post.publishedAt)} · {post.readTime}
+        </p>
+      </div>
     </Link>
   );
 }
