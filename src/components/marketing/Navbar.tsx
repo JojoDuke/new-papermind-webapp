@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import posthog from 'posthog-js';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 
 type UseCase = {
@@ -84,9 +85,14 @@ const useCases: UseCase[] = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [useCasesOpen, setUseCasesOpen] = useState(false);
   const useCasesRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -124,7 +130,12 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md font-sans">
+    <nav
+      aria-hidden={mobileOpen ? true : undefined}
+      className={`sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md font-sans ${
+        mobileOpen ? 'max-md:invisible' : ''
+      }`}
+    >
       <div className="max-w-[1200px] mx-auto px-4 md:px-0 h-16 flex items-center justify-between relative text-gray-900">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 relative z-10 group">
@@ -265,114 +276,120 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile full-screen overlay */}
-      {mobileOpen ? (
-        <div className="md:hidden fixed inset-0 z-[60] bg-white flex flex-col font-sans">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 shrink-0">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 group"
-              onClick={() => setMobileOpen(false)}
-            >
-              <Image
-                src="/logos-icons/pmIcon.png"
-                alt="Papermind Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-lg shadow-sm"
-                priority
-              />
-              <span className="text-2xl font-bold font-serif leading-none tracking-tight">
-                Papermind
-              </span>
-            </Link>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-colors"
-              aria-label="Close menu"
-              onClick={() => setMobileOpen(false)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Nav links */}
-          <div className="flex-1 px-4 py-4 flex flex-col overflow-hidden">
-            <Link
-              href="/about"
-              className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
-              onClick={() => setMobileOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/blog"
-              className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
-              onClick={() => setMobileOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
-              onClick={() => setMobileOpen(false)}
-            >
-              Pricing
-            </Link>
-
-            <div className="flex flex-col gap-1 pt-5">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1 mb-2">Use Cases</p>
-              {useCases.map((item) => (
+      {mounted && mobileOpen
+        ? createPortal(
+            <div className="md:hidden fixed inset-0 z-[100] bg-white flex flex-col font-sans text-gray-900">
+              <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 shrink-0">
                 <Link
-                  key={item.title}
-                  href={item.href}
-                  onClick={() => {
-                    posthog.capture('navbar_use_case_clicked', { use_case: item.title });
-                    setMobileOpen(false);
-                  }}
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+                  href="/"
+                  className="flex items-center gap-2.5 group"
+                  onClick={() => setMobileOpen(false)}
                 >
-                  <span className="grid place-items-center w-9 h-9 rounded-lg bg-gray-100 text-gray-700 shrink-0">
-                    {item.icon}
-                  </span>
-                  <span className="flex flex-col min-w-0">
-                    <span className="text-sm font-semibold text-gray-900 leading-snug">{item.title}</span>
-                    <span className="text-xs text-gray-500 leading-snug">{item.description}</span>
+                  <Image
+                    src="/logos-icons/pmIcon.png"
+                    alt="Papermind Logo"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-lg shadow-sm"
+                    priority
+                  />
+                  <span className="text-2xl font-bold font-serif leading-none tracking-tight">
+                    Papermind
                   </span>
                 </Link>
-              ))}
-            </div>
-          </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-colors"
+                  aria-label="Close menu"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </div>
 
-          {/* Bottom CTAs */}
-          <div className="px-4 pt-4 pb-8 border-t border-gray-100 flex flex-col gap-3 shrink-0">
-            <Link
-              href="/sign-in"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors py-3 text-center border border-gray-200 rounded-xl"
-              onClick={() => {
-                posthog.capture('navbar_sign_in_clicked');
-                setMobileOpen(false);
-              }}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 text-center"
-              onClick={() => {
-                posthog.capture('navbar_start_studying_clicked');
-                setMobileOpen(false);
-              }}
-            >
-              Start Studying
-            </Link>
-          </div>
-        </div>
-      ) : null}
+              <div className="flex-1 overflow-y-auto px-4 py-2">
+                <div className="flex flex-col">
+                  <Link
+                    href="/about"
+                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    About
+                  </Link>
+                  <Link
+                    href="/blog"
+                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    onClick={() => {
+                      posthog.capture('navbar_blog_clicked');
+                      setMobileOpen(false);
+                    }}
+                  >
+                    Blog
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Pricing
+                  </Link>
+                </div>
+
+                <div className="flex flex-col gap-1 pt-5 pb-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1 mb-2">
+                    Use Cases
+                  </p>
+                  {useCases.map((item) => (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      onClick={() => {
+                        posthog.capture('navbar_use_case_clicked', { use_case: item.title });
+                        setMobileOpen(false);
+                      }}
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 active:bg-gray-50 transition-colors"
+                    >
+                      <span className="grid place-items-center w-9 h-9 rounded-lg bg-gray-100 text-gray-700 shrink-0">
+                        {item.icon}
+                      </span>
+                      <span className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-gray-900 leading-snug">{item.title}</span>
+                        <span className="text-xs text-gray-500 leading-snug">{item.description}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-gray-100 flex flex-col gap-3 shrink-0 bg-white">
+                <Link
+                  href="/sign-in"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors py-3 text-center border border-gray-200 rounded-xl"
+                  onClick={() => {
+                    posthog.capture('navbar_sign_in_clicked');
+                    setMobileOpen(false);
+                  }}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 text-center"
+                  onClick={() => {
+                    posthog.capture('navbar_start_studying_clicked');
+                    setMobileOpen(false);
+                  }}
+                >
+                  Start Studying
+                </Link>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
     </nav>
   );
 }
