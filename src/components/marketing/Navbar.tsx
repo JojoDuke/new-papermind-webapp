@@ -119,7 +119,7 @@ export function Navbar() {
               aria-haspopup="menu"
               aria-expanded={useCasesOpen}
               onClick={() => setUseCasesOpen((v) => !v)}
-              className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans outline-none focus-visible:text-[#FF5392]"
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans outline-none focus-visible:text-[#FF5392] cursor-pointer"
             >
               Use Cases
               <svg
@@ -280,7 +280,7 @@ export function Navbar() {
                   <div className="border-b border-gray-100">
                     <button
                       type="button"
-                      className="w-full flex items-center justify-between py-3.5 text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors"
+                      className="w-full flex items-center justify-between py-3.5 text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors cursor-pointer"
                       aria-expanded={mobileUseCasesOpen}
                       onClick={() => setMobileUseCasesOpen((v) => !v)}
                     >
