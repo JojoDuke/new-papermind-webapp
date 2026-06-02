@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import posthog from 'posthog-js';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { marketingUseCases, useCaseHref } from '@/lib/marketing-use-cases';
@@ -21,7 +21,9 @@ const useCaseIcons: Record<string, React.ReactNode> = {
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileUseCasesOpen, setMobileUseCasesOpen] = useState(false);
+  const [useCasesOpen, setUseCasesOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const useCasesRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,6 +48,22 @@ export function Navbar() {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!useCasesOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!useCasesRef.current?.contains(e.target as Node)) setUseCasesOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setUseCasesOpen(false);
+    };
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [useCasesOpen]);
 
   const navigateToBlog = () => {
     posthog.capture("navbar_blog_clicked");
@@ -90,16 +108,71 @@ export function Navbar() {
             Pricing
           </Link>
 
-          {marketingUseCases.map((item) => (
-            <Link
-              key={item.slug}
-              href={useCaseHref(item.slug)}
-              className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans"
-              onClick={() => posthog.capture('navbar_use_case_clicked', { use_case: item.title })}
+          <div
+            ref={useCasesRef}
+            className="relative"
+            onMouseEnter={() => setUseCasesOpen(true)}
+            onMouseLeave={() => setUseCasesOpen(false)}
+          >
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={useCasesOpen}
+              onClick={() => setUseCasesOpen((v) => !v)}
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans outline-none focus-visible:text-[#FF5392]"
             >
-              {item.title}
-            </Link>
-          ))}
+              Use Cases
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform duration-200 ${useCasesOpen ? 'rotate-180' : ''}`}
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+
+            {useCasesOpen ? (
+              <div
+                role="menu"
+                className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[280px]"
+              >
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-2">
+                  {marketingUseCases.map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={useCaseHref(item.slug)}
+                      role="menuitem"
+                      onClick={() => {
+                        posthog.capture('navbar_use_case_clicked', { use_case: item.title });
+                        setUseCasesOpen(false);
+                      }}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                    >
+                      <span className="mt-0.5 grid place-items-center w-9 h-9 rounded-lg bg-gray-100 text-gray-700 group-hover:bg-pink-50 group-hover:text-[#FF5392] transition-colors shrink-0">
+                        {useCaseIcons[item.slug]}
+                      </span>
+                      <span className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-gray-900 leading-snug">
+                          {item.title}
+                        </span>
+                        <span className="text-xs text-gray-500 leading-snug mt-0.5">
+                          {item.description}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {/* CTA Buttons */}
