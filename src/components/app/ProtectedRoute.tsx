@@ -21,7 +21,7 @@ function devBypassSubscription(): boolean {
 interface ProtectedRouteProps {
   children: ReactNode;
   redirectTo?: string;
-  /** When true, users without an active trial or paid plan are sent to /checkout. */
+  /** When true, users without an active trial or paid plan are sent to /checkout or /upgrade. */
   requireSubscription?: boolean;
 }
 
@@ -36,10 +36,12 @@ export function ProtectedRoute({
   const [allowPaywallSyncReturn, setAllowPaywallSyncReturn] = useState(false);
   const [checkoutGrace, setCheckoutGrace] = useState(false);
   const bypassSubscription = devBypassSubscription();
-  const hasPaidAccess = useQuery(
-    api.subscriptions.hasPaidAccess,
+
+  const subscriptionState = useQuery(
+    api.subscriptions.getSubscriptionState,
     requireSubscription && !bypassSubscription ? {} : 'skip'
   );
+
   const subRedirected = useRef(false);
 
   // Returning from Polar with ?checkout=success: subscription row may not exist yet.
@@ -63,11 +65,12 @@ export function ProtectedRoute({
   }, [pathname]);
 
   useEffect(() => {
-    if (hasPaidAccess === true) {
+    const state = subscriptionState?.state;
+    if (state === 'paid' || state === 'trial_active') {
       clearCheckoutAccessGrace();
       setCheckoutGrace(false);
     }
-  }, [hasPaidAccess]);
+  }, [subscriptionState]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -79,29 +82,32 @@ export function ProtectedRoute({
     if (!requireSubscription || bypassSubscription || !isAuthenticated || isLoading) {
       return;
     }
-    if (hasPaidAccess === undefined) {
-      return;
-    }
-    if (!hasPaidAccess && !subRedirected.current) {
-      if (allowPaywallSyncReturn || checkoutGrace) {
-        return;
-      }
+    if (subscriptionState === undefined) return;
+
+    const state = subscriptionState.state;
+    const hasAccess = state === 'paid' || state === 'trial_active';
+
+    if (!hasAccess && !subRedirected.current) {
+      if (allowPaywallSyncReturn || checkoutGrace) return;
       subRedirected.current = true;
-      markPaywallRedirectToCheckout();
-      router.replace('/checkout');
+      if (state === 'trial_expired') {
+        router.replace('/upgrade');
+      } else {
+        markPaywallRedirectToCheckout();
+        router.replace('/checkout');
+      }
     }
   }, [
     requireSubscription,
     bypassSubscription,
     isAuthenticated,
     isLoading,
-    hasPaidAccess,
+    subscriptionState,
     router,
     allowPaywallSyncReturn,
     checkoutGrace,
   ]);
 
-  // Show loading spinner while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -110,16 +116,9 @@ export function ProtectedRoute({
     );
   }
 
-  // Don't render children if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
-  if (
-    requireSubscription &&
-    !bypassSubscription &&
-    hasPaidAccess === undefined
-  ) {
+  if (requireSubscription && !bypassSubscription && subscriptionState === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
@@ -127,13 +126,16 @@ export function ProtectedRoute({
     );
   }
 
-  if (
-    requireSubscription &&
-    !bypassSubscription &&
-    hasPaidAccess === false &&
-    !allowPaywallSyncReturn &&
-    !checkoutGrace
-  ) {
+  const state = subscriptionState?.state;
+  const hasAccess =
+    bypassSubscription ||
+    !requireSubscription ||
+    state === 'paid' ||
+    state === 'trial_active' ||
+    allowPaywallSyncReturn ||
+    checkoutGrace;
+
+  if (requireSubscription && !bypassSubscription && !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
@@ -143,4 +145,3 @@ export function ProtectedRoute({
 
   return <>{children}</>;
 }
-

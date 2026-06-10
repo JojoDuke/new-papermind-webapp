@@ -16,6 +16,7 @@ import type * as flashcards from "../flashcards.js";
 import type * as http from "../http.js";
 import type * as lib_newUserNotifyMessage from "../lib/newUserNotifyMessage.js";
 import type * as lib_telegram from "../lib/telegram.js";
+import type * as mockExams from "../mockExams.js";
 import type * as newUserAdminEmail from "../newUserAdminEmail.js";
 import type * as progress from "../progress.js";
 import type * as quizzes from "../quizzes.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/newUserNotifyMessage": typeof lib_newUserNotifyMessage;
   "lib/telegram": typeof lib_telegram;
+  mockExams: typeof mockExams;
   newUserAdminEmail: typeof newUserAdminEmail;
   progress: typeof progress;
   quizzes: typeof quizzes;

@@ -22,8 +22,8 @@ export default function AuthPage() {
   
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const hasPaidAccess = useQuery(
-    api.subscriptions.hasPaidAccess,
+  const subscriptionState = useQuery(
+    api.subscriptions.getSubscriptionState,
     isAuthenticated ? {} : 'skip'
   );
   const postAuthRedirected = useRef(false);
@@ -38,20 +38,30 @@ export default function AuthPage() {
     return `/checkout?plan=${plan}&interval=${interval}`;
   }
 
-  // After login or signup, continue to card-upfront trial checkout.
-  // Full page navigation keeps Convex Auth cookies and RSC layout in sync; client-only
-  // router.replace can leave checkout thinking the user is signed out (bounce /auth ↔ /checkout).
+  // After login or signup, route based on subscription state.
+  // paid / trial_active → /dashboard
+  // trial_expired → /upgrade
+  // no_subscription → /checkout
   useEffect(() => {
     if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
-    if (hasPaidAccess === undefined) return;
+    if (subscriptionState === undefined) return;
     postAuthRedirected.current = true;
     const devBypass =
       process.env.NODE_ENV === 'development' &&
       process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
-    window.location.assign(
-      devBypass || hasPaidAccess ? '/dashboard' : checkoutEntryPath()
-    );
-  }, [isAuthenticated, authLoading, hasPaidAccess]);
+    if (devBypass) {
+      window.location.assign('/dashboard');
+      return;
+    }
+    const { state } = subscriptionState;
+    if (state === 'paid' || state === 'trial_active') {
+      window.location.assign('/dashboard');
+    } else if (state === 'trial_expired') {
+      window.location.assign('/upgrade');
+    } else {
+      window.location.assign(checkoutEntryPath());
+    }
+  }, [isAuthenticated, authLoading, subscriptionState]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -119,6 +129,7 @@ export default function AuthPage() {
         sessionStorage.setItem('pm_checkout_plan', plan);
         sessionStorage.setItem('pm_checkout_interval', interval);
       }
+      // Google OAuth redirects back to /sign-in which will then re-evaluate subscriptionState
       await signIn('google', {
         redirectTo: devBypass ? '/dashboard' : checkoutEntryPath(),
       });

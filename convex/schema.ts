@@ -113,4 +113,29 @@ export default defineSchema({
   newUserAdminNotified: defineTable({
     userId: v.id("users"),
   }).index("by_user", ["userId"]),
+
+  mockExamSessions: defineTable({
+    userId: v.id("users"),
+    documentId: v.id("documents"),
+    title: v.string(),
+    examType: v.string(), // e.g. "nclex-rn"
+    timeLimitMinutes: v.number(),
+    questions: v.array(v.object({
+      question: v.string(),
+      correctAnswer: v.string(),
+      distractor1: v.string(),
+      distractor2: v.string(),
+      distractor3: v.optional(v.string()),
+    })),
+    answers: v.optional(v.array(v.object({
+      questionIndex: v.number(),
+      selectedAnswer: v.string(),
+    }))),
+    startedAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+    scorePercent: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_exam_type", ["userId", "examType"]),
 });

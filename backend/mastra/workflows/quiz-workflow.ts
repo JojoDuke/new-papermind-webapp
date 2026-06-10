@@ -6,6 +6,7 @@ import {
   distributeCardsAcrossBatches,
   groupChunksIntoBatches,
 } from "../chunk-text";
+import { applyPdfJsPolyfills } from "../pdf-polyfills";
 
 const configSchema = z.object({
   questionCountPreset: z.enum(["low", "medium", "high"]),
@@ -36,6 +37,7 @@ const extractPdfStep = createStep({
     }
     const buffer = Buffer.from(await response.arrayBuffer());
 
+    applyPdfJsPolyfills();
     const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: buffer });
 

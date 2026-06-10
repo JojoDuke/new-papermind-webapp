@@ -2,6 +2,67 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { auth } from "./auth";
 
+export type SubscriptionState =
+  | "paid"
+  | "trial_active"
+  | "trial_expired"
+  | "no_subscription";
+
+export const getSubscriptionState = query({
+  args: {},
+  handler: async (ctx): Promise<{
+    state: SubscriptionState;
+    trialEndsAt?: number;
+    currentPeriodEndsAt?: number;
+    status?: string;
+  }> => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return { state: "no_subscription" };
+
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (!sub) return { state: "no_subscription" };
+
+    const s = String(sub.status).toLowerCase();
+    const now = Date.now();
+
+    if (s === "active") {
+      return {
+        state: "paid",
+        currentPeriodEndsAt: sub.currentPeriodEndMs,
+        status: sub.status,
+      };
+    }
+
+    if (s === "trialing") {
+      // If trialEndMs is missing or in the future → active trial
+      if (!sub.trialEndMs || sub.trialEndMs > now) {
+        return {
+          state: "trial_active",
+          trialEndsAt: sub.trialEndMs,
+          status: sub.status,
+        };
+      }
+      // trialEndMs is in the past → expired
+      return {
+        state: "trial_expired",
+        trialEndsAt: sub.trialEndMs,
+        status: sub.status,
+      };
+    }
+
+    // canceled, past_due, etc.
+    return {
+      state: "trial_expired",
+      trialEndsAt: sub.trialEndMs,
+      status: sub.status,
+    };
+  },
+});
+
 export const getMySubscription = query({
   args: {},
   handler: async (ctx) => {
