@@ -2,11 +2,12 @@ import { Navbar } from '@/components/marketing/Navbar';
 import { Footer } from '@/components/marketing/Footer';
 import { LandingCTAButton } from '@/components/marketing/LandingCTAButton';
 import { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata('/about', {
   title: 'About Us - Papermind',
   description: 'Learn about the mission behind Papermind and how we are using AI to reshape the future of accelerated learning.',
-};
+});
 
 export default function AboutPage() {
   return (

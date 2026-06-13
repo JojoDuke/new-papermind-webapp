@@ -1,4 +1,12 @@
+import type { Metadata } from 'next';
 import { Navbar } from '@/components/marketing/Navbar';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata: Metadata = pageMetadata('/', {
+  title: 'Papermind - AI-Powered Study Tool',
+  description:
+    'Transform your study materials into interactive quizzes with the power of AI. Upload PDFs, generate personalized quizzes, and master your subjects faster.',
+});
 import { Footer } from '@/components/marketing/Footer';
 import { DemoWidget } from '@/components/marketing/DemoWidget';
 import { FeatureTabSelector } from '@/components/marketing/FeatureTabSelector';

@@ -10,6 +10,7 @@ import {
   getBlogPostBySlug,
   getBlogPostSlugs,
 } from '@/lib/blog';
+import { pageMetadata } from '@/lib/site';
 
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
@@ -27,10 +28,10 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     return { title: 'Post not found — Papermind' };
   }
 
-  return {
+  return pageMetadata(`/blog/${slug}`, {
     title: `${post.title} — Papermind Blog`,
     description: post.excerpt,
-  };
+  });
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {

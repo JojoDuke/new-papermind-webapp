@@ -1,5 +1,7 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navbar } from '@/components/marketing/Navbar';
+import { pageMetadata } from '@/lib/site';
 import { Footer } from '@/components/marketing/Footer';
 import { NewsletterForm } from '@/components/marketing/NewsletterForm';
 import { BlogPostCover } from '@/components/marketing/BlogPostCover';
@@ -9,11 +11,11 @@ import {
   type BlogPostMeta,
 } from '@/lib/blog';
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata('/blog', {
   title: 'Blog — Papermind',
   description:
     'Study tips, AI insights, and exam strategies from the Papermind team.',
-};
+});
 
 function LatestPostCard({ post }: { post: BlogPostMeta }) {
   return (

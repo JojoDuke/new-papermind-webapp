@@ -1,10 +1,11 @@
 import { LegalPageShell } from '@/components/marketing/LegalPageShell';
 import { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata('/privacy', {
   title: 'Privacy Policy - Papermind',
   description: 'How Papermind collects, uses, and protects your personal information.',
-};
+});
 
 export default function PrivacyPage() {
   return (

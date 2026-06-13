@@ -1,10 +1,11 @@
 import { LegalPageShell } from '@/components/marketing/LegalPageShell';
 import { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata('/terms', {
   title: 'Terms of Service - Papermind',
   description: 'Terms and conditions for using Papermind.',
-};
+});
 
 export default function TermsPage() {
   return (

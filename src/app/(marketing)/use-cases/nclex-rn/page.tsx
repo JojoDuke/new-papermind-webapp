@@ -2,12 +2,13 @@ import { Metadata } from 'next';
 import { Navbar } from '@/components/marketing/Navbar';
 import { Footer } from '@/components/marketing/Footer';
 import { LandingCTAButton } from '@/components/marketing/LandingCTAButton';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata('/use-cases/nclex-rn', {
   title: 'NCLEX-RN Prep - Papermind',
   description:
     'Prepare for the NCLEX-RN with AI-powered flashcards, quizzes, and mock exams built from your nursing notes and textbooks.',
-};
+});
 
 const features = [
   {
