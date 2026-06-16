@@ -14,14 +14,18 @@ import type * as devTools from "../devTools.js";
 import type * as documents from "../documents.js";
 import type * as flashcards from "../flashcards.js";
 import type * as http from "../http.js";
+import type * as lib_authRedirect from "../lib/authRedirect.js";
+import type * as lib_isPaidUser from "../lib/isPaidUser.js";
 import type * as lib_newUserNotifyMessage from "../lib/newUserNotifyMessage.js";
 import type * as lib_telegram from "../lib/telegram.js";
+import type * as migrations from "../migrations.js";
 import type * as mockExams from "../mockExams.js";
 import type * as newUserAdminEmail from "../newUserAdminEmail.js";
 import type * as progress from "../progress.js";
 import type * as quizzes from "../quizzes.js";
 import type * as studyGuides from "../studyGuides.js";
 import type * as subscriptions from "../subscriptions.js";
+import type * as usageQuota from "../usageQuota.js";
 
 import type {
   ApiFromModules,
@@ -44,14 +48,18 @@ declare const fullApi: ApiFromModules<{
   documents: typeof documents;
   flashcards: typeof flashcards;
   http: typeof http;
+  "lib/authRedirect": typeof lib_authRedirect;
+  "lib/isPaidUser": typeof lib_isPaidUser;
   "lib/newUserNotifyMessage": typeof lib_newUserNotifyMessage;
   "lib/telegram": typeof lib_telegram;
+  migrations: typeof migrations;
   mockExams: typeof mockExams;
   newUserAdminEmail: typeof newUserAdminEmail;
   progress: typeof progress;
   quizzes: typeof quizzes;
   studyGuides: typeof studyGuides;
   subscriptions: typeof subscriptions;
+  usageQuota: typeof usageQuota;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

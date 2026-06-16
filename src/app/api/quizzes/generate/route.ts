@@ -33,9 +33,23 @@ export async function POST(req: NextRequest) {
   }
 
   const docId = documentId as Id<"documents">;
-  const pdfUrl = await convex.query(api.documents.getDocumentUrl, { documentId: docId });
+  const [pdfUrl, docQuota] = await Promise.all([
+    convex.query(api.documents.getDocumentUrl, { documentId: docId }),
+    convex.query(api.usageQuota.getDocumentQuota, { documentId: docId }),
+  ]);
   if (!pdfUrl) {
     return NextResponse.json({ error: "Could not retrieve PDF URL" }, { status: 404 });
+  }
+
+  // ── Quota check ──────────────────────────────────────────────────────────────
+  if (
+    docQuota.quizDecks.limit !== null &&
+    docQuota.quizDecks.used >= docQuota.quizDecks.limit
+  ) {
+    return NextResponse.json(
+      { error: "upgrade_required", message: "Free accounts can create 1 quiz per document." },
+      { status: 402 }
+    );
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {

@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { FREE_LIMITS } from "./usageQuota";
+import { isPaidUser } from "./lib/isPaidUser";
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -29,6 +31,16 @@ export const saveDocument = mutation({
     if (existing.some((doc) => doc.name.trim().toLowerCase() === normalizedName)) {
       await ctx.storage.delete(args.storageId);
       throw new Error("This file is already in your documents.");
+    }
+
+    // Free tier: check document upload limit
+    const isPaid = await isPaidUser(ctx, userId);
+
+    if (!isPaid && existing.length >= FREE_LIMITS.documents) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error(
+        `upgrade_required: Free accounts can upload up to ${FREE_LIMITS.documents} documents. Upgrade to upload more.`
+      );
     }
 
     return await ctx.db.insert("documents", {

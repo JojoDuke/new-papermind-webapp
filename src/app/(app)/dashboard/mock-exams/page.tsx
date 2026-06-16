@@ -10,6 +10,7 @@ import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
+import { openPricingModal } from '@/components/app/pricing-modal-context';
 
 type Document = {
   _id: Id<'documents'>;
@@ -80,7 +81,17 @@ function CreateMockExamModal({
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Generation failed');
+      if (!res.ok) {
+        if (res.status === 402 || data.error === 'upgrade_required') {
+          onClose();
+          openPricingModal({
+            title: 'Unlock unlimited mock exams',
+            subtitle: data.message ?? 'Upgrade to generate more mock exams.',
+          });
+          return;
+        }
+        throw new Error(data.error ?? 'Generation failed');
+      }
       toast.success('Mock exam created!');
       onClose();
       router.push(`/dashboard/mock-exams/${data.sessionId}`);

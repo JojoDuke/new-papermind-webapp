@@ -87,16 +87,13 @@ function CheckoutContent() {
     }
   }, [searchParams]);
 
+  // After a successful checkout, Polar redirects here with ?checkout=success —
+  // send the user straight to their dashboard.
   useEffect(() => {
     if (hasAccess !== true) return;
     if (consumeCheckoutSuccessNavigation()) {
       router.replace('/dashboard');
-      return;
     }
-    if (wasRecentlyPaywalledToCheckout()) {
-      return;
-    }
-    router.replace('/dashboard');
   }, [hasAccess, router]);
 
   const canceled = searchParams?.get('canceled') === '1';
@@ -412,7 +409,7 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <ProtectedRoute requireSubscription={false}>
+    <ProtectedRoute>
       <Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center bg-gray-50">

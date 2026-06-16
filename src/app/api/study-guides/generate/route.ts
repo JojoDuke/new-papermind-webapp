@@ -30,13 +30,25 @@ export async function POST(req: NextRequest) {
 
   // ── Fetch document info from Convex ─────────────────────────────────────────
   const docId = documentId as Id<"documents">;
-  const [pdfUrl, doc] = await Promise.all([
+  const [pdfUrl, doc, docQuota] = await Promise.all([
     convex.query(api.documents.getDocumentUrl, { documentId: docId }),
     convex.query(api.documents.getDocument, { documentId: docId }),
+    convex.query(api.usageQuota.getDocumentQuota, { documentId: docId }),
   ]);
 
   if (!pdfUrl || !doc) {
     return NextResponse.json({ error: "Document not found" }, { status: 404 });
+  }
+
+  // ── Quota check ──────────────────────────────────────────────────────────────
+  if (
+    docQuota.studyGuides.limit !== null &&
+    docQuota.studyGuides.used >= docQuota.studyGuides.limit
+  ) {
+    return NextResponse.json(
+      { error: "upgrade_required", message: "Free accounts can generate study guides once per document." },
+      { status: 402 }
+    );
   }
 
   // ── Check LLM key ────────────────────────────────────────────────────────────

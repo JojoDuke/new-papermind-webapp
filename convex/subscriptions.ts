@@ -142,5 +142,16 @@ export const syncFromPolar = mutation({
     } else {
       await ctx.db.insert("subscriptions", row);
     }
+
+    // Denormalize plan onto the user row so it's visible in the dashboard
+    // without a join.
+    const s = args.status.toLowerCase();
+    const plan: "free" | "trialing" | "paid" =
+      s === "active" ? "paid" : s === "trialing" ? "trialing" : "free";
+
+    const user = await ctx.db.get(args.userId);
+    if (user) {
+      await ctx.db.patch(args.userId, { plan, planUpdatedAt: now });
+    }
   },
 });

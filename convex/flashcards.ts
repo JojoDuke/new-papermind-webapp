@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { FREE_LIMITS } from "./usageQuota";
+import { isPaidUser } from "./lib/isPaidUser";
 
 const CARD_COUNTS = { low: 5, medium: 8, high: 12 } as const;
 
@@ -103,6 +105,22 @@ export const saveAIGeneratedDeck = mutation({
     if (!doc || doc.userId !== userId) throw new Error("Document not found");
 
     if (args.cards.length === 0) throw new Error("No cards provided");
+
+    // Free tier check
+    const isPaid = await isPaidUser(ctx, userId);
+
+    if (!isPaid) {
+      const existingDecks = await ctx.db
+        .query("flashcardDecks")
+        .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
+        .collect();
+      const userDecks = existingDecks.filter((d) => d.userId === userId);
+      if (userDecks.length >= FREE_LIMITS.flashcardDecksPerDocument) {
+        throw new Error(
+          `upgrade_required: Free accounts can create ${FREE_LIMITS.flashcardDecksPerDocument} flashcard deck per document.`
+        );
+      }
+    }
 
     const deckId = await ctx.db.insert("flashcardDecks", {
       userId,

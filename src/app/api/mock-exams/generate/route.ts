@@ -32,8 +32,22 @@ export async function POST(req: NextRequest) {
   }
 
   const docId = documentId as Id<"documents">;
-  const pdfUrl = await convex.query(api.documents.getDocumentUrl, { documentId: docId });
+  const [pdfUrl, quota] = await Promise.all([
+    convex.query(api.documents.getDocumentUrl, { documentId: docId }),
+    convex.query(api.usageQuota.getMyQuota, {}),
+  ]);
   if (!pdfUrl) return NextResponse.json({ error: "Document not found" }, { status: 404 });
+
+  // ── Quota check ──────────────────────────────────────────────────────────────
+  if (
+    quota.mockExams.limit !== null &&
+    quota.mockExams.used >= quota.mockExams.limit
+  ) {
+    return NextResponse.json(
+      { error: "upgrade_required", message: "Free accounts get 1 mock exam preview. Upgrade to generate more." },
+      { status: 402 }
+    );
+  }
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "Anthropic API key is not configured." }, { status: 503 });

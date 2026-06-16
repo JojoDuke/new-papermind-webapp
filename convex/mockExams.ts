@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { auth } from "./auth";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { FREE_LIMITS } from "./usageQuota";
+import { isPaidUser } from "./lib/isPaidUser";
 
 export const listMyMockExamSessions = query({
   args: { examType: v.optional(v.string()) },
@@ -63,6 +65,21 @@ export const saveGeneratedMockExam = mutation({
 
     const doc = await ctx.db.get(args.documentId);
     if (!doc || doc.userId !== userId) throw new Error("Document not found");
+
+    // Free tier check: 1 preview exam total
+    const isPaid = await isPaidUser(ctx, userId);
+
+    if (!isPaid) {
+      const allExams = await ctx.db
+        .query("mockExamSessions")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      if (allExams.length >= FREE_LIMITS.mockExamsTotal) {
+        throw new Error(
+          `upgrade_required: Free accounts get ${FREE_LIMITS.mockExamsTotal} mock exam preview. Upgrade to generate more.`
+        );
+      }
+    }
 
     const sessionId = await ctx.db.insert("mockExamSessions", {
       userId,

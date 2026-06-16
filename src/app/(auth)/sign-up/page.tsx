@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { useConvexAuth, useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
+import { useConvexAuth } from 'convex/react';
+import { authRedirectUrl } from '@/lib/auth-redirect';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
@@ -22,36 +22,14 @@ export default function AuthPage() {
   
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const hasPaidAccess = useQuery(
-    api.subscriptions.hasPaidAccess,
-    isAuthenticated ? {} : 'skip'
-  );
   const postAuthRedirected = useRef(false);
 
-  function checkoutEntryPath(): string {
-    if (typeof window === 'undefined') {
-      return '/checkout?plan=pro&interval=monthly';
-    }
-    const q = new URLSearchParams(window.location.search);
-    const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
-    const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
-    return `/checkout?plan=${plan}&interval=${interval}`;
-  }
-
-  // After login or signup, continue to card-upfront trial checkout.
-  // Full page navigation keeps Convex Auth cookies and RSC layout in sync; client-only
-  // router.replace can leave checkout thinking the user is signed out (bounce /auth ↔ /checkout).
+  // After signup, always go to the dashboard. Upgrade prompts appear inline.
   useEffect(() => {
     if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
-    if (hasPaidAccess === undefined) return;
     postAuthRedirected.current = true;
-    const devBypass =
-      process.env.NODE_ENV === 'development' &&
-      process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
-    window.location.assign(
-      devBypass || hasPaidAccess ? '/dashboard' : checkoutEntryPath()
-    );
-  }, [isAuthenticated, authLoading, hasPaidAccess]);
+    window.location.assign('/dashboard');
+  }, [isAuthenticated, authLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -120,7 +98,7 @@ export default function AuthPage() {
         sessionStorage.setItem('pm_checkout_interval', interval);
       }
       await signIn('google', {
-        redirectTo: devBypass ? '/dashboard' : checkoutEntryPath(),
+        redirectTo: authRedirectUrl('/dashboard'),
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';

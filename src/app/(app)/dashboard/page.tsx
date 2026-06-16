@@ -163,10 +163,16 @@ export default function DashboardPage() {
         }).catch(() => {/* non-critical, fail silently */});
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Upload failed. Please try again.';
-      toast.error(message);
-      console.error(err);
+      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      if (message.startsWith('upgrade_required')) {
+        openPricingModal({
+          title: 'Upgrade to upload more documents',
+          subtitle: 'Free accounts can upload up to 2 documents. Upgrade for unlimited uploads.',
+        });
+      } else {
+        toast.error(message);
+        console.error(err);
+      }
     } finally {
       setIsUploading(false);
       setUploadingFileName(null);
@@ -234,6 +240,10 @@ export default function DashboardPage() {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+          if (res.status === 402 || err.error === 'upgrade_required') {
+            openPricingModal({ title: 'Unlock more flashcard decks', subtitle: err.message ?? 'Upgrade to create more flashcard decks.' });
+            return;
+          }
           throw new Error(err.error ?? 'Generation failed');
         }
         const { deckId } = await res.json();

@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { useConvexAuth, useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
+import { useConvexAuth } from 'convex/react';
+import { authRedirectUrl } from '@/lib/auth-redirect';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,46 +22,14 @@ export default function AuthPage() {
   
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const subscriptionState = useQuery(
-    api.subscriptions.getSubscriptionState,
-    isAuthenticated ? {} : 'skip'
-  );
   const postAuthRedirected = useRef(false);
 
-  function checkoutEntryPath(): string {
-    if (typeof window === 'undefined') {
-      return '/checkout?plan=pro&interval=monthly';
-    }
-    const q = new URLSearchParams(window.location.search);
-    const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
-    const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
-    return `/checkout?plan=${plan}&interval=${interval}`;
-  }
-
-  // After login or signup, route based on subscription state.
-  // paid / trial_active → /dashboard
-  // trial_expired → /upgrade
-  // no_subscription → /checkout
+  // After login, always go to the dashboard. Upgrade prompts appear inline.
   useEffect(() => {
     if (authLoading || !isAuthenticated || postAuthRedirected.current) return;
-    if (subscriptionState === undefined) return;
     postAuthRedirected.current = true;
-    const devBypass =
-      process.env.NODE_ENV === 'development' &&
-      process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
-    if (devBypass) {
-      window.location.assign('/dashboard');
-      return;
-    }
-    const { state } = subscriptionState;
-    if (state === 'paid' || state === 'trial_active') {
-      window.location.assign('/dashboard');
-    } else if (state === 'trial_expired') {
-      window.location.assign('/upgrade');
-    } else {
-      window.location.assign(checkoutEntryPath());
-    }
-  }, [isAuthenticated, authLoading, subscriptionState]);
+    window.location.assign('/dashboard');
+  }, [isAuthenticated, authLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -119,19 +87,8 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      const devBypass =
-        process.env.NODE_ENV === 'development' &&
-        process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
-      if (!devBypass && typeof window !== 'undefined') {
-        const q = new URLSearchParams(window.location.search);
-        const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
-        const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
-        sessionStorage.setItem('pm_checkout_plan', plan);
-        sessionStorage.setItem('pm_checkout_interval', interval);
-      }
-      // Google OAuth redirects back to /sign-in which will then re-evaluate subscriptionState
       await signIn('google', {
-        redirectTo: devBypass ? '/dashboard' : checkoutEntryPath(),
+        redirectTo: authRedirectUrl('/dashboard'),
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';

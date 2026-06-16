@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { FREE_LIMITS } from "./usageQuota";
+import { isPaidUser } from "./lib/isPaidUser";
 
 export const saveStudyGuides = mutation({
   args: {
@@ -20,6 +22,21 @@ export const saveStudyGuides = mutation({
 
     const doc = await ctx.db.get(args.documentId);
     if (!doc || doc.userId !== userId) throw new Error("Document not found");
+
+    // Free tier check: one generation run per document
+    const isPaid = await isPaidUser(ctx, userId);
+
+    if (!isPaid) {
+      const existingGuides = await ctx.db
+        .query("studyGuides")
+        .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
+        .collect();
+      if (existingGuides.some((g) => g.userId === userId)) {
+        throw new Error(
+          `upgrade_required: Free accounts can generate study guides once per document.`
+        );
+      }
+    }
 
     const ids: string[] = [];
     for (const guide of args.guides) {

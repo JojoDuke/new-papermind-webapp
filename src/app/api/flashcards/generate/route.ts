@@ -36,11 +36,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // ── Fetch PDF URL from Convex ────────────────────────────────────────────────
+  // ── Fetch PDF URL + quota from Convex ───────────────────────────────────────
   const docId = documentId as Id<"documents">;
-  const pdfUrl = await convex.query(api.documents.getDocumentUrl, { documentId: docId });
+  const [pdfUrl, docQuota] = await Promise.all([
+    convex.query(api.documents.getDocumentUrl, { documentId: docId }),
+    convex.query(api.usageQuota.getDocumentQuota, { documentId: docId }),
+  ]);
   if (!pdfUrl) {
     return NextResponse.json({ error: "Could not retrieve PDF URL" }, { status: 404 });
+  }
+
+  // ── Quota check ──────────────────────────────────────────────────────────────
+  if (
+    docQuota.flashcardDecks.limit !== null &&
+    docQuota.flashcardDecks.used >= docQuota.flashcardDecks.limit
+  ) {
+    return NextResponse.json(
+      { error: "upgrade_required", message: "Free accounts can create 1 flashcard deck per document." },
+      { status: 402 }
+    );
   }
 
   // ── Run the Mastra workflow ──────────────────────────────────────────────────
