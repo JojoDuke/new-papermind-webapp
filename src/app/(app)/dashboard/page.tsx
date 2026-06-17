@@ -13,6 +13,7 @@ import { useAuthToken } from '@convex-dev/auth/react';
 import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import { setCheckoutAccessGrace } from '@/lib/checkout-grace';
+import { isUpgradeRequiredError } from '@/lib/upgrade-required';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function DashboardPage() {
     user?.email?.split('@')[0] ||
     'there';
   const documents = useQuery(api.documents.listDocuments);
+  const quota = useQuery(api.usageQuota.getMyQuota);
   const progressSummary = useQuery(api.progress.getUserProgressSummary);
   const selectedDoc = useQuery(
     api.documents.getDocument,
@@ -126,6 +128,20 @@ export default function DashboardPage() {
       return;
     }
 
+    if (
+      quota &&
+      !quota.isPaid &&
+      quota.documents.limit !== null &&
+      quota.documents.used >= quota.documents.limit
+    ) {
+      openPricingModal({
+        title: 'Upgrade to upload more documents',
+        subtitle: `Free accounts can upload up to ${quota.documents.limit} documents. Upgrade for unlimited uploads.`,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setIsUploading(true);
     setUploadPhase('uploading');
     setUploadingFileName(file.name);
@@ -191,13 +207,13 @@ export default function DashboardPage() {
         toast.success(`${count} study guide${count === 1 ? '' : 's'} created.`);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
-      if (message.startsWith('upgrade_required')) {
+      if (isUpgradeRequiredError(err)) {
         openPricingModal({
           title: 'Upgrade to upload more documents',
           subtitle: 'Free accounts can upload up to 2 documents. Upgrade for unlimited uploads.',
         });
       } else {
+        const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
         toast.error(message);
         console.error(err);
       }
