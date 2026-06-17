@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import 'pdf-parse/worker';
 import { flashcardAuthorAgent, flashcardSchema } from '../../../../../backend/mastra/agents/flashcard-author';
+import { createPdfParser } from '../../../../../backend/mastra/pdf-server';
 import {
   dedupeCardsByFront,
   distributeCardsAcrossBatches,
@@ -80,8 +80,7 @@ export async function POST(req: NextRequest) {
 
   let text = '';
   try {
-    const { PDFParse } = await import('pdf-parse');
-    const parser = new PDFParse({ data: buffer });
+    const parser = createPdfParser(buffer);
     const result = await parser.getText({ first: 1, last: MAX_PAGES });
     text = result.text.trim();
     await parser.destroy();

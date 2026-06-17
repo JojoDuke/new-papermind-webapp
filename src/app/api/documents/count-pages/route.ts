@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
-import { applyPdfJsPolyfills } from "../../../../../backend/mastra/pdf-polyfills";
+import { createPdfParser } from "../../../../../backend/mastra/pdf-server";
+
+export const runtime = "nodejs";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -30,9 +32,7 @@ export async function POST(req: NextRequest) {
   }
   const buffer = Buffer.from(await response.arrayBuffer());
 
-  applyPdfJsPolyfills();
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
+  const parser = createPdfParser(buffer);
   let pageCount = 0;
   try {
     const info = await parser.getInfo();

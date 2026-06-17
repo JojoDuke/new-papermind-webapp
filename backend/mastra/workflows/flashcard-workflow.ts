@@ -6,7 +6,7 @@ import {
   distributeCardsAcrossBatches,
   groupChunksIntoBatches,
 } from "../chunk-text";
-import { applyPdfJsPolyfills } from "../pdf-polyfills";
+import { createPdfParser } from "../pdf-server";
 
 // ─── Shared config schema (passed through the pipeline) ──────────────────────
 
@@ -39,11 +39,7 @@ const extractPdfStep = createStep({
     }
     const buffer = Buffer.from(await response.arrayBuffer());
 
-    applyPdfJsPolyfills();
-    // pdf-parse v2+ exports the PDFParse class (no default function). Use
-    // getText({ first, last }) for an inclusive page range — see ParseParameters.
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: buffer });
+    const parser = createPdfParser(buffer);
 
     let text = "";
     let pageCount = 0;

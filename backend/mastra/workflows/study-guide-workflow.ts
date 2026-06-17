@@ -2,7 +2,7 @@ import { createWorkflow, createStep } from "@mastra/core/workflows";
 import { z } from "zod";
 import { studyGuideAuthorAgent, studyGuideSchema } from "../agents/study-guide-author";
 import { groupChunksIntoBatches } from "../chunk-text";
-import { applyPdfJsPolyfills } from "../pdf-polyfills";
+import { createPdfParser } from "../pdf-server";
 
 const MAX_TEXT_CHARS = 40_000;
 
@@ -30,9 +30,7 @@ const extractPdfStep = createStep({
     }
     const buffer = Buffer.from(await response.arrayBuffer());
 
-    applyPdfJsPolyfills();
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: buffer });
+    const parser = createPdfParser(buffer);
 
     let text = "";
     try {
