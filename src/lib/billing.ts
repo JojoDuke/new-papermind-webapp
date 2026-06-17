@@ -3,6 +3,33 @@ export const TRIAL_DAYS = 7;
 
 export type BillingPlan = "starter" | "pro";
 export type BillingInterval = "monthly" | "yearly";
+export type UserPlan = "free" | "trialing" | "paid";
+
+/** Human-readable label for `users.plan` (shown in profile menu, etc.). */
+export function formatUserPlanLabel(plan: UserPlan | undefined): string {
+  switch (plan) {
+    case "paid":
+      return "Paid plan";
+    case "trialing":
+      return "Free trial";
+    case "free":
+    default:
+      return "Free plan";
+  }
+}
+
+/** Tailwind classes for plan label under the user email. */
+export function userPlanLabelClass(plan: UserPlan | undefined): string {
+  switch (plan) {
+    case "paid":
+      return "text-emerald-600";
+    case "trialing":
+      return "text-blue-600";
+    case "free":
+    default:
+      return "text-gray-500";
+  }
+}
 
 /** Standard monthly list prices (USD). */
 export const LIST_PRICE_MONTHLY_USD: Record<BillingPlan, number> = {

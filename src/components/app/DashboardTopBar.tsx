@@ -6,6 +6,7 @@ import { useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../../convex/_generated/api';
 import { useDashboardNav } from '@/components/app/dashboard-nav-context';
+import { formatUserPlanLabel, userPlanLabelClass, type UserPlan } from '@/lib/billing';
 
 /** Persistent top-right actions: theme toggle, notifications, profile menu. */
 export function DashboardTopBar() {
@@ -57,6 +58,8 @@ export function DashboardTopBar() {
   }, [showProfileMenu]);
 
   const userInitial = (user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase();
+  const userPlan = (user?.plan ?? 'free') as UserPlan;
+  const planLabel = formatUserPlanLabel(userPlan);
 
   return (
     <div className="shrink-0 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 pt-3 pb-2 border-b border-gray-100 md:border-b-0">
@@ -167,6 +170,9 @@ export function DashboardTopBar() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-900 truncate">{user?.name || 'User'}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                <p className={`text-xs font-medium mt-0.5 ${userPlanLabelClass(userPlan)}`}>
+                  {planLabel}
+                </p>
               </div>
             </div>
 
