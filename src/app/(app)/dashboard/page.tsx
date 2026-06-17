@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
+  const [uploadPhase, setUploadPhase] = useState<'uploading' | 'generating'>('uploading');
   const [openMenuId, setOpenMenuId] = useState<Id<'documents'> | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<Id<'documents'> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -126,6 +127,7 @@ export default function DashboardPage() {
     }
 
     setIsUploading(true);
+    setUploadPhase('uploading');
     setUploadingFileName(file.name);
 
     try {
@@ -150,17 +152,43 @@ export default function DashboardPage() {
         }).catch(() => {/* non-critical, fail silently */});
       }
 
-      // Show the success modal immediately; study guides generate in the background
+      setUploadPhase('generating');
+
+      if (!authToken) {
+        toast.error('Document uploaded, but study guides could not be generated. Please sign in again.');
+        return;
+      }
+
+      const guideRes = await fetch('/api/study-guides/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ documentId, guideCount: 3 }),
+      });
+
+      if (!guideRes.ok) {
+        const err = await guideRes.json().catch(() => ({ error: 'Generation failed' }));
+        if (guideRes.status === 402 || err.error === 'upgrade_required') {
+          openPricingModal({
+            title: 'Upgrade to generate more study guides',
+            subtitle: err.message ?? 'Free accounts can generate study guides once per document.',
+          });
+        } else {
+          toast.error(
+            typeof err.message === 'string'
+              ? err.message
+              : typeof err.error === 'string'
+                ? err.error
+                : 'Document uploaded, but study guides could not be generated.'
+          );
+        }
+        return;
+      }
+
+      const { count } = (await guideRes.json()) as { count?: number };
       setUploadSuccessDocName(file.name);
       setUploadSuccessDocId(documentId);
-
-      // Fire-and-forget: generate study guides
-      if (authToken) {
-        fetch('/api/study-guides/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-          body: JSON.stringify({ documentId, guideCount: 3 }),
-        }).catch(() => {/* non-critical, fail silently */});
+      if (typeof count === 'number' && count > 0) {
+        toast.success(`${count} study guide${count === 1 ? '' : 's'} created.`);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
@@ -175,6 +203,7 @@ export default function DashboardPage() {
       }
     } finally {
       setIsUploading(false);
+      setUploadPhase('uploading');
       setUploadingFileName(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -477,7 +506,11 @@ export default function DashboardPage() {
                 disabled={isUploading}
                 className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploading ? 'Uploading...' : 'Click to upload'}
+                {isUploading
+                  ? uploadPhase === 'generating'
+                    ? 'Creating study guides…'
+                    : 'Uploading...'
+                  : 'Click to upload'}
               </button>
 
               <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
@@ -520,7 +553,9 @@ export default function DashboardPage() {
                           <div className="h-2.5 bg-pink-100 rounded-full w-3/4 mx-auto" />
                           <div className="h-2 bg-pink-50 rounded-full w-1/2 mx-auto" />
                         </div>
-                        <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">Reading document…</p>
+                        <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">
+                          {uploadPhase === 'generating' ? 'Creating study guides…' : 'Reading document…'}
+                        </p>
                       </div>
                     )}
 

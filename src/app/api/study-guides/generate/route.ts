@@ -4,6 +4,9 @@ import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { studyGuideWorkflow } from "../../../../../backend/mastra/workflows/study-guide-workflow";
 
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {

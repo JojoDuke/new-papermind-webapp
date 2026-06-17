@@ -89,8 +89,9 @@ export const getDocumentQuota = query({
         .collect(),
     ]);
 
-    // Study guides: if any guides exist for this doc, the free set was used.
-    const studyGuideRunsUsed = studyGuides.length > 0 ? 1 : 0;
+    // Study guides: if this user already has guides for this doc, the free set was used.
+    const userStudyGuides = studyGuides.filter((g) => g.userId === userId);
+    const studyGuideRunsUsed = userStudyGuides.length > 0 ? 1 : 0;
 
     return {
       isPaid: paid,
