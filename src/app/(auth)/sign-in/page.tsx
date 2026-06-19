@@ -113,7 +113,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-surface-page">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-gray-50">
         <div className="w-full max-w-md">
           {/* Back Home Link */}
           <Link href="/" className="inline-flex items-center text-sm text-text-secondary hover:text-text-primary mb-8 transition-colors">
@@ -147,7 +147,7 @@ export default function AuthPage() {
             <button 
               type="button" 
               onClick={handleGoogleSignIn}
-              className="w-full inline-flex justify-center items-center py-3 px-4 border border-border-strong rounded-lg shadow-sm bg-surface-card text-sm font-medium text-text-secondary hover:bg-surface-subtle transition-all cursor-pointer"
+              className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -163,10 +163,10 @@ export default function AuthPage() {
           <div className="mb-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border-strong" />
+                <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-surface-page text-text-muted">
+                <span className="px-3 bg-gray-50 text-gray-500">
                   Or continue with email
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function AuthPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required={!isLogin}
-                  className="w-full px-4 py-3 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -211,7 +211,7 @@ export default function AuthPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
                 placeholder="email@example.com"
               />
             </div>
@@ -228,7 +228,7 @@ export default function AuthPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 pr-12 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
+                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
                   placeholder="Enter your password"
                 />
                 <button
@@ -263,7 +263,7 @@ export default function AuthPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required={!isLogin}
-                    className="w-full px-4 py-3 pr-12 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
+                    className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
                     placeholder="Confirm your password"
                   />
                   <button

@@ -145,7 +145,7 @@ export function DashboardSidebar() {
               alt="Toggle sidebar"
               width={24}
               height={24}
-              className={`w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-200 ${!showLabels ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-200 dark:invert ${!showLabels ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 pointer-events-none'}`}
               priority
             />
           </div>
@@ -156,7 +156,7 @@ export function DashboardSidebar() {
           className={`hidden md:block hover:opacity-70 transition-all duration-200 cursor-pointer shrink-0 ${!showLabels ? 'opacity-0 invisible w-0' : 'opacity-100 visible'}`}
           aria-label="Collapse sidebar"
         >
-          <Image src="/logos-icons/layouting.png" alt="Toggle sidebar" width={16} height={16} className="w-4 h-4" />
+          <Image src="/logos-icons/layouting.png" alt="Toggle sidebar" width={16} height={16} className="w-4 h-4 dark:invert" />
         </button>
       </div>
 

@@ -140,7 +140,7 @@ export function StudyDeckCard({
         ) : (
           <Link
             href={href}
-            className="text-sm font-medium text-text-primary leading-tight line-clamp-2 min-h-[2.5rem] px-0.5 cursor-pointer"
+            className="text-sm font-medium text-text-primary leading-tight line-clamp-3 px-0.5 cursor-pointer"
           >
             {title}
           </Link>
