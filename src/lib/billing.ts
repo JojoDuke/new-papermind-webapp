@@ -1,6 +1,3 @@
-/** Free trial length for new subscriptions (Polar checkout). */
-export const TRIAL_DAYS = 7;
-
 export type BillingPlan = "starter";
 export const DEFAULT_BILLING_PLAN: BillingPlan = "starter";
 export type BillingInterval = "monthly" | "yearly";
@@ -10,9 +7,8 @@ export type UserPlan = "free" | "trialing" | "paid";
 export function formatUserPlanLabel(plan: UserPlan | undefined): string {
   switch (plan) {
     case "paid":
-      return "Paid plan";
     case "trialing":
-      return "Free trial";
+      return "Paid plan";
     case "free":
     default:
       return "Free plan";
@@ -23,9 +19,8 @@ export function formatUserPlanLabel(plan: UserPlan | undefined): string {
 export function userPlanLabelClass(plan: UserPlan | undefined): string {
   switch (plan) {
     case "paid":
-      return "text-emerald-600";
     case "trialing":
-      return "text-blue-600";
+      return "text-emerald-600";
     case "free":
     default:
       return "text-gray-500";
@@ -63,3 +58,4 @@ export function formatUsd(amount: number, maximumFractionDigits = 2): string {
     maximumFractionDigits,
   });
 }
+

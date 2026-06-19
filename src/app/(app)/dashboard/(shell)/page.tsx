@@ -1,13 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { Id } from '../../../../convex/_generated/dataModel';
+import { api } from '../../../../../convex/_generated/api';
+import { Id } from '../../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
 import { useAuthToken } from '@convex-dev/auth/react';
 import { UploadSuccessModal } from '@/components/app/UploadSuccessModal';
@@ -20,7 +18,6 @@ export default function DashboardPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
-  const [uploadPhase, setUploadPhase] = useState<'uploading' | 'generating'>('uploading');
   const [openMenuId, setOpenMenuId] = useState<Id<'documents'> | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<Id<'documents'> | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -143,7 +140,6 @@ export default function DashboardPage() {
     }
 
     setIsUploading(true);
-    setUploadPhase('uploading');
     setUploadingFileName(file.name);
 
     try {
@@ -168,44 +164,8 @@ export default function DashboardPage() {
         }).catch(() => {/* non-critical, fail silently */});
       }
 
-      setUploadPhase('generating');
-
-      if (!authToken) {
-        toast.error('Document uploaded, but study guides could not be generated. Please sign in again.');
-        return;
-      }
-
-      const guideRes = await fetch('/api/study-guides/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body: JSON.stringify({ documentId, guideCount: 3 }),
-      });
-
-      if (!guideRes.ok) {
-        const err = await guideRes.json().catch(() => ({ error: 'Generation failed' }));
-        if (guideRes.status === 402 || err.error === 'upgrade_required') {
-          openPricingModal({
-            title: 'Upgrade to generate more study guides',
-            subtitle: err.message ?? 'Free accounts can generate study guides once per document.',
-          });
-        } else {
-          toast.error(
-            typeof err.message === 'string'
-              ? err.message
-              : typeof err.error === 'string'
-                ? err.error
-                : 'Document uploaded, but study guides could not be generated.'
-          );
-        }
-        return;
-      }
-
-      const { count } = (await guideRes.json()) as { count?: number };
       setUploadSuccessDocName(file.name);
       setUploadSuccessDocId(documentId);
-      if (typeof count === 'number' && count > 0) {
-        toast.success(`${count} study guide${count === 1 ? '' : 's'} created.`);
-      }
     } catch (err) {
       if (isUpgradeRequiredError(err)) {
         openPricingModal({
@@ -219,7 +179,6 @@ export default function DashboardPage() {
       }
     } finally {
       setIsUploading(false);
-      setUploadPhase('uploading');
       setUploadingFileName(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -317,9 +276,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        {selectedDocId ? (
+    <>
+      {selectedDocId ? (
           /* ── Generation config view ── */
           <main className={dashboardMainClass}>
             <button
@@ -491,10 +449,10 @@ export default function DashboardPage() {
           /* ── Home view ── */
           <main className={`${dashboardMainClass}`}>
             <header className="mb-5 md:mb-6">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5">
+              <h1 className="text-xl sm:text-2xl font-bold text-text-primary mb-1.5">
                 Welcome back, {welcomeName} 👋
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 Upload a document here to generate study material from it
               </p>
             </header>
@@ -506,7 +464,7 @@ export default function DashboardPage() {
               onDrop={handleDrop}
               tabIndex={-1}
               className={`border-2 border-dashed rounded-xl p-6 sm:p-10 flex flex-col items-center text-center outline-none focus:outline-none ${
-                isDragging ? 'border-pink-400 bg-pink-50' : 'border-pink-200 bg-white'
+                isDragging ? 'border-pink-400 bg-pink-50 dark:bg-pink-950/30' : 'border-pink-200 bg-surface-card'
               }`}
             >
               <input
@@ -522,23 +480,19 @@ export default function DashboardPage() {
                 disabled={isUploading}
                 className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-full transition-colors mb-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploading
-                  ? uploadPhase === 'generating'
-                    ? 'Creating study guides…'
-                    : 'Uploading...'
-                  : 'Click to upload'}
+                {isUploading ? 'Uploading...' : 'Click to upload'}
               </button>
 
-              <p className="text-sm text-gray-500 mb-8">or drag & drop files here</p>
+              <p className="text-sm text-text-muted mb-8">or drag & drop files here</p>
 
               {/* Supported File Types */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                <span className="text-gray-700">Supported Files:</span>
+                <span className="text-text-secondary">Supported Files:</span>
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-gray-700">PDF</span>
+                  <span className="text-text-secondary">PDF</span>
                 </div>
               </div>
             </div>
@@ -550,12 +504,12 @@ export default function DashboardPage() {
               {/* Documents Section */}
               {(isUploading || (documents && documents.length > 0)) && (
                 <div>
-                  <h2 className="text-sm font-semibold text-gray-900 mb-4">Your Documents</h2>
+                  <h2 className="text-sm font-semibold text-text-primary mb-4">Your Documents</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
                     {/* Uploading skeleton card */}
                     {isUploading && uploadingFileName && (
-                      <div className="bg-white border border-pink-100 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm">
+                      <div className="bg-surface-card border border-pink-100 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm">
                         <div className="relative w-14 h-16 flex items-center justify-center">
                           <svg className="w-14 h-16 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
@@ -570,7 +524,7 @@ export default function DashboardPage() {
                           <div className="h-2 bg-pink-50 rounded-full w-1/2 mx-auto" />
                         </div>
                         <p className="text-xs text-pink-400 font-medium tracking-wide animate-pulse">
-                          {uploadPhase === 'generating' ? 'Creating study guides…' : 'Reading document…'}
+                          Reading document…
                         </p>
                       </div>
                     )}
@@ -579,7 +533,7 @@ export default function DashboardPage() {
                     {documents?.map((doc) => (
                       <div
                         key={doc._id}
-                        className="group relative bg-white border border-gray-200 hover:border-pink-300 rounded-xl p-5 flex flex-col items-center gap-3 transition-colors"
+                        className="group relative bg-surface-card border border-border-default hover:border-pink-300 rounded-xl p-5 flex flex-col items-center gap-3 transition-colors"
                       >
                         {/* 3-dot menu */}
                         <div className="absolute top-3 right-3">
@@ -599,7 +553,7 @@ export default function DashboardPage() {
                           {openMenuId === doc._id && (
                             <div
                               onClick={(e) => e.stopPropagation()}
-                              className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
+                              className="absolute right-0 top-7 z-20 bg-surface-card border border-border-subtle rounded-lg shadow-lg py-1 w-36"
                             >
                               <button
                                 onClick={() => { setOpenMenuId(null); setConfirmDeleteId(doc._id); }}
@@ -627,10 +581,10 @@ export default function DashboardPage() {
                             <span className="absolute bottom-2.5 left-1/2 -translate-x-1/2 text-[7px] font-bold text-white tracking-wide">PDF</span>
                           </div>
                           <div className="w-full text-center">
-                            <p className="text-xs font-medium text-gray-700 truncate w-full" title={doc.name}>
+                            <p className="text-xs font-medium text-text-secondary truncate w-full" title={doc.name}>
                               {doc.name}
                             </p>
-                            <p className="text-[10px] text-gray-400 mt-0.5">
+                            <p className="text-[10px] text-text-faint mt-0.5">
                               {new Date(doc.uploadedAt).toLocaleDateString()}
                             </p>
                           </div>
@@ -644,7 +598,7 @@ export default function DashboardPage() {
 
               {/* Continue Studying */}
               <div className="mt-10">
-                <h2 className="text-sm font-semibold text-gray-900 mb-4">Continue Studying</h2>
+                <h2 className="text-sm font-semibold text-text-primary mb-4">Continue Studying</h2>
                 {progressSummary && progressSummary.continueStudying.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {progressSummary.continueStudying.map((item) => (
@@ -658,11 +612,11 @@ export default function DashboardPage() {
                               : `/dashboard/quizzes/${item.deckId}`
                           )
                         }
-                        className="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col gap-2 text-left hover:border-pink-200 transition-all cursor-pointer"
+                        className="bg-surface-card border border-border-default rounded-2xl p-4 flex flex-col gap-2 text-left hover:border-pink-200 transition-all cursor-pointer"
                       >
-                        <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
-                        <p className="text-xs text-gray-400 capitalize">{item.type === 'flashcard' ? 'Flashcards' : 'Quiz'}</p>
-                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <p className="text-sm font-semibold text-text-primary truncate">{item.title}</p>
+                        <p className="text-xs text-text-faint capitalize">{item.type === 'flashcard' ? 'Flashcards' : 'Quiz'}</p>
+                        <div className="h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
                           <div
                             className="h-full bg-pink-400 rounded-full"
                             style={{ width: `${Math.round(item.progress * 100)}%` }}
@@ -672,66 +626,66 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
-                    <svg className="w-8 h-8 text-gray-200 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="bg-surface-card border border-border-default rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
+                    <svg className="w-8 h-8 text-border-strong mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <p className="text-sm font-medium text-gray-600">No decks in progress</p>
-                    <p className="text-xs text-gray-400">Generate study materials from a document to get started.</p>
+                    <p className="text-sm font-medium text-text-secondary">No decks in progress</p>
+                    <p className="text-xs text-text-faint">Generate study materials from a document to get started.</p>
                   </div>
                 )}
               </div>
 
               {/* Study Tools */}
               <div className="mt-10">
-                <h2 className="text-sm font-semibold text-gray-900 mb-4">Study Tools</h2>
+                <h2 className="text-sm font-semibold text-text-primary mb-4">Study Tools</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
 
                   {/* Flashcards */}
                   <div
                     onClick={() => router.push('/dashboard/flashcards')}
-                    className="bg-pink-50 border border-pink-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-pink-300 transition-all group"
+                    className="bg-pink-50 dark:bg-pink-950/20 border border-pink-200 dark:border-pink-900/40 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-pink-300 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-sm font-semibold text-gray-900">Flashcards</p>
-                      <p className="text-xs text-gray-400">Smart cards<br />that adapt</p>
+                      <p className="text-sm font-semibold text-text-primary">Flashcards</p>
+                      <p className="text-xs text-text-faint">Smart cards<br />that adapt</p>
                     </div>
                   </div>
 
                   {/* Quizzes */}
                   <div
                     onClick={() => router.push('/dashboard/quizzes')}
-                    className="bg-amber-50 border border-amber-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-amber-300 transition-all group"
+                    className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-amber-300 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-sm font-semibold text-gray-900">Quizzes</p>
-                      <p className="text-xs text-gray-400">Generate quizzes<br />to test yourself</p>
+                      <p className="text-sm font-semibold text-text-primary">Quizzes</p>
+                      <p className="text-xs text-text-faint">Generate quizzes<br />to test yourself</p>
                     </div>
                   </div>
 
                   {/* Study Guides */}
                   <div
                     onClick={() => router.push('/dashboard/study-guides')}
-                    className="bg-green-50 border border-green-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-green-300 transition-all group"
+                    className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-green-300 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                       </svg>
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-sm font-semibold text-gray-900">Study Guides</p>
-                      <p className="text-xs text-gray-400">AI-generated<br />summaries</p>
+                      <p className="text-sm font-semibold text-text-primary">Study Guides</p>
+                      <p className="text-xs text-text-faint">AI-generated<br />summaries</p>
                     </div>
                   </div>
 
@@ -743,16 +697,16 @@ export default function DashboardPage() {
                         subtitle: 'Full-length practice exams are included with a paid plan. Upgrade to get started.',
                       })
                     }
-                    className="bg-purple-50 border border-purple-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
+                    className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shrink-0 shadow-sm">
                       <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                       </svg>
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-sm font-semibold text-gray-900">Mock Exams</p>
-                      <p className="text-xs text-gray-400">Realistic practice<br />exams</p>
+                      <p className="text-sm font-semibold text-text-primary">Mock Exams</p>
+                      <p className="text-xs text-text-faint">Realistic practice<br />exams</p>
                     </div>
                   </div>
 
@@ -765,15 +719,15 @@ export default function DashboardPage() {
             <div className="w-full lg:w-64 shrink-0 flex flex-col">
 
               {/* Your progress */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full">
-                <h2 className="text-sm font-semibold text-gray-900">Your progress</h2>
+              <div className="bg-surface-card border border-border-subtle rounded-2xl p-5 flex flex-col justify-between h-full">
+                <h2 className="text-sm font-semibold text-text-primary">Your progress</h2>
 
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">Overall progress</p>
-                  <p className="text-3xl font-bold text-gray-900 mb-2">
+                  <p className="text-xs text-text-faint mb-1">Overall progress</p>
+                  <p className="text-3xl font-bold text-text-primary mb-2">
                     {progressSummary?.overallProgress ?? 0}%
                   </p>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-surface-subtle rounded-full overflow-hidden">
                     <div
                       className="h-full bg-pink-400 rounded-full transition-all"
                       style={{ width: `${progressSummary?.overallProgress ?? 0}%` }}
@@ -787,29 +741,29 @@ export default function DashboardPage() {
                     { label: 'Quizzes taken', value: String(progressSummary?.quizzesTaken ?? 0), icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
                   ].map(({ label, value, icon }) => (
                     <div key={label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-2 text-xs text-text-muted">
+                        <svg className="w-4 h-4 text-border-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                         </svg>
                         {label}
                       </div>
-                      <span className="text-xs font-semibold text-gray-700">{value}</span>
+                      <span className="text-xs font-semibold text-text-secondary">{value}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="h-px bg-gray-100" />
+                <div className="h-px bg-border-subtle" />
 
                 {/* Motivational card */}
-                <div className="bg-pink-50 border border-pink-200 rounded-xl overflow-hidden flex items-end">
+                <div className="bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-900/40 rounded-xl overflow-hidden flex items-end">
                   <img
                     src="/assets/foxLeftSidebar.png"
                     alt="Papermind fox"
-                    className="w-20 h-20 object-contain object-bottom shrink-0 mix-blend-multiply translate-y-2"
+                    className="w-20 h-20 object-contain object-bottom shrink-0 mix-blend-multiply dark:mix-blend-normal translate-y-2"
                   />
                   <div className="flex-1 py-4 pr-4 pl-1">
-                    <p className="text-sm font-bold text-gray-900 mb-1">You&apos;ve got this!</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">Every study session brings you closer to your goal.</p>
+                    <p className="text-sm font-bold text-text-primary mb-1">You&apos;ve got this!</p>
+                    <p className="text-xs text-text-muted leading-relaxed">Every study session brings you closer to your goal.</p>
                   </div>
                 </div>
               </div>
@@ -830,16 +784,16 @@ export default function DashboardPage() {
             onClick={() => !isDeleting && setConfirmDeleteId(null)}
           />
           {/* Modal */}
-          <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 flex flex-col gap-4">
+          <div className="relative bg-surface-card rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
                 <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Delete document?</h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h3 className="text-sm font-semibold text-text-primary">Delete document?</h3>
+                <p className="text-xs text-text-muted mt-0.5">
                   This will permanently remove the file. This action can't be undone.
                 </p>
               </div>
@@ -848,7 +802,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setConfirmDeleteId(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary border border-border-default rounded-lg hover:bg-surface-subtle transition-all cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -870,7 +824,6 @@ export default function DashboardPage() {
       {/* Upload success modal */}
       {uploadSuccessDocId && (
         <UploadSuccessModal
-          documentId={uploadSuccessDocId}
           documentName={uploadSuccessDocName}
           onClose={() => setUploadSuccessDocId(null)}
           onGenerateFlashcards={() => {
@@ -883,8 +836,7 @@ export default function DashboardPage() {
           }}
         />
       )}
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </>
   );
 }
 

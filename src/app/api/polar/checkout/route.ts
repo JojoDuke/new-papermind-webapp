@@ -3,7 +3,6 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
 import {
   DEFAULT_BILLING_PLAN,
-  TRIAL_DAYS,
   type BillingInterval,
 } from "@/lib/billing";
 import { getPolarServer } from "@/lib/polar-server";
@@ -95,7 +94,7 @@ export async function POST(req: NextRequest) {
     const checkout = await polar.checkouts.create({
       products: [productId],
       successUrl: `${origin}/checkout/success?checkout_id={CHECKOUT_ID}`,
-      returnUrl: `${origin}/checkout?canceled=1&interval=${interval}`,
+      returnUrl: `${origin}/dashboard`,
       embedOrigin: origin,
       externalCustomerId: user._id,
       customerEmail: user.email ?? undefined,
@@ -105,9 +104,6 @@ export async function POST(req: NextRequest) {
         billingPlan: plan,
         billingInterval: interval,
       },
-      trialInterval: "day",
-      trialIntervalCount: TRIAL_DAYS,
-      allowTrial: true,
     });
 
     if (!checkout.url) {

@@ -47,7 +47,7 @@ export default function TermsPage() {
       <section>
         <h2 className="text-xl font-bold font-serif text-gray-900 mb-3">4. Subscriptions and payments</h2>
         <p>
-          Paid plans, free trials, and billing intervals are described on our pricing page. Subscriptions renew
+          Paid plans and billing intervals are described on our pricing page. Subscriptions renew
           automatically unless canceled before the renewal date. Fees are processed by our payment partner. Refunds
           are handled according to the policy displayed at checkout or required by applicable law. We may change
           pricing with reasonable notice.

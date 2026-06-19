@@ -85,7 +85,7 @@ export default function PricingPage() {
                 {billing === 'yearly' && (
                   <p className="text-sm text-emerald-400 font-semibold font-sans mt-1">Billed Annually</p>
                 )}
-                <p className="text-sm text-gray-400 font-sans mt-2">7-day free trial · Cancel anytime</p>
+                <p className="text-sm text-gray-400 font-sans mt-2">Cancel anytime</p>
               </div>
               <ul className="flex flex-col gap-3 flex-1">
                 {PLAN_FEATURES.map((f) => (
@@ -103,7 +103,7 @@ export default function PricingPage() {
                 <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden="true">
                   <span className="blurred-border absolute inset-0 z-20" />
                 </span>
-                <span className="relative z-30">Start free trial</span>
+                <span className="relative z-30">Subscribe now</span>
               </Link>
             </div>
           </div>

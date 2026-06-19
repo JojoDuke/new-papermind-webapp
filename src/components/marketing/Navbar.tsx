@@ -73,11 +73,11 @@ export function Navbar() {
   return (
     <nav
       aria-hidden={mobileOpen ? true : undefined}
-      className={`sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md font-sans ${
+      className={`sticky top-0 z-50 w-full border-b border-border-subtle bg-surface-card/80 backdrop-blur-md font-sans ${
         mobileOpen ? 'max-md:invisible' : ''
       }`}
     >
-      <div className="max-w-[1200px] mx-auto px-4 md:px-0 h-16 flex items-center justify-between relative text-gray-900">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-0 h-16 flex items-center justify-between relative text-text-primary">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 relative z-10 group">
           <Image
@@ -95,16 +95,16 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-8 font-sans absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-          <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+          <Link href="/about" className="text-sm font-medium text-text-secondary hover:text-[#FF5392] transition-colors font-sans">
             About
           </Link>
           <Link
           href="/blog"
           onClick={navigateToBlog}
-          className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+          className="text-sm font-medium text-text-secondary hover:text-[#FF5392] transition-colors font-sans">
             Blog
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans">
+          <Link href="/pricing" className="text-sm font-medium text-text-secondary hover:text-[#FF5392] transition-colors font-sans">
             Pricing
           </Link>
 
@@ -119,7 +119,7 @@ export function Navbar() {
               aria-haspopup="menu"
               aria-expanded={useCasesOpen}
               onClick={() => setUseCasesOpen((v) => !v)}
-              className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-[#FF5392] transition-colors font-sans outline-none focus-visible:text-[#FF5392] cursor-pointer"
+              className="inline-flex items-center gap-1 text-sm font-medium text-text-secondary hover:text-[#FF5392] transition-colors font-sans outline-none focus-visible:text-[#FF5392] cursor-pointer"
             >
               Use Cases
               <svg
@@ -144,7 +144,7 @@ export function Navbar() {
                 role="menu"
                 className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[280px]"
               >
-                <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-2">
+                <div className="bg-surface-card border border-border-default rounded-2xl shadow-lg p-2">
                   {marketingUseCases.map((item) => (
                     <Link
                       key={item.slug}
@@ -154,16 +154,16 @@ export function Navbar() {
                         posthog.capture('navbar_use_case_clicked', { use_case: item.title });
                         setUseCasesOpen(false);
                       }}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-subtle transition-colors group"
                     >
-                      <span className="mt-0.5 grid place-items-center w-9 h-9 rounded-lg bg-gray-100 text-gray-700 group-hover:bg-pink-50 group-hover:text-[#FF5392] transition-colors shrink-0">
+                      <span className="mt-0.5 grid place-items-center w-9 h-9 rounded-lg bg-surface-subtle text-text-secondary group-hover:bg-pink-50 dark:group-hover:bg-pink-950/30 group-hover:text-[#FF5392] transition-colors shrink-0">
                         {useCaseIcons[item.slug]}
                       </span>
                       <span className="flex flex-col min-w-0">
-                        <span className="text-sm font-semibold text-gray-900 leading-snug">
+                        <span className="text-sm font-semibold text-text-primary leading-snug">
                           {item.title}
                         </span>
-                        <span className="text-xs text-gray-500 leading-snug mt-0.5">
+                        <span className="text-xs text-text-muted leading-snug mt-0.5">
                           {item.description}
                         </span>
                       </span>
@@ -179,7 +179,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-4 font-sans relative z-10">
           <Link
             href="/sign-in"
-            className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-4 py-2"
+            className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-4 py-2"
             onClick={() => posthog.capture("navbar_sign_in_clicked")}
           >
             Sign In
@@ -196,7 +196,7 @@ export function Navbar() {
         {/* Mobile menu button */}
         <button
           type="button"
-          className="md:hidden relative z-10 inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-colors"
+          className="md:hidden relative z-10 inline-flex items-center justify-center rounded-lg p-2 text-text-secondary hover:bg-surface-subtle active:bg-surface-subtle transition-colors"
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((v) => !v)}
@@ -218,8 +218,8 @@ export function Navbar() {
 
       {mounted && mobileOpen
         ? createPortal(
-            <div className="md:hidden fixed inset-0 z-[100] bg-white flex flex-col font-sans text-gray-900">
-              <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 shrink-0">
+            <div className="md:hidden fixed inset-0 z-[100] bg-surface-card flex flex-col font-sans text-text-primary">
+              <div className="flex items-center justify-between px-4 h-16 border-b border-border-subtle shrink-0">
                 <Link
                   href="/"
                   className="flex items-center gap-2.5 group"
@@ -239,7 +239,7 @@ export function Navbar() {
                 </Link>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 active:bg-gray-100 transition-colors"
+                  className="inline-flex items-center justify-center rounded-lg p-2 text-text-secondary hover:bg-surface-subtle active:bg-surface-subtle transition-colors"
                   aria-label="Close menu"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -254,14 +254,14 @@ export function Navbar() {
                 <div className="flex flex-col">
                   <Link
                     href="/about"
-                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    className="text-base font-medium text-text-secondary hover:text-[#FF5392] transition-colors py-3.5 border-b border-border-subtle"
                     onClick={() => setMobileOpen(false)}
                   >
                     About
                   </Link>
                   <Link
                     href="/blog"
-                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    className="text-base font-medium text-text-secondary hover:text-[#FF5392] transition-colors py-3.5 border-b border-border-subtle"
                     onClick={() => {
                       posthog.capture('navbar_blog_clicked');
                       setMobileOpen(false);
@@ -271,16 +271,16 @@ export function Navbar() {
                   </Link>
                   <Link
                     href="/pricing"
-                    className="text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors py-3.5 border-b border-gray-100"
+                    className="text-base font-medium text-text-secondary hover:text-[#FF5392] transition-colors py-3.5 border-b border-border-subtle"
                     onClick={() => setMobileOpen(false)}
                   >
                     Pricing
                   </Link>
 
-                  <div className="border-b border-gray-100">
+                  <div className="border-b border-border-subtle">
                     <button
                       type="button"
-                      className="w-full flex items-center justify-between py-3.5 text-base font-medium text-gray-700 hover:text-[#FF5392] transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between py-3.5 text-base font-medium text-text-secondary hover:text-[#FF5392] transition-colors cursor-pointer"
                       aria-expanded={mobileUseCasesOpen}
                       onClick={() => setMobileUseCasesOpen((v) => !v)}
                     >
@@ -308,18 +308,18 @@ export function Navbar() {
                           <Link
                             key={item.slug}
                             href={useCaseHref(item.slug)}
-                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 active:bg-gray-50 transition-colors"
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-subtle active:bg-surface-subtle transition-colors"
                             onClick={() => {
                               posthog.capture('navbar_use_case_clicked', { use_case: item.title });
                               setMobileOpen(false);
                             }}
                           >
-                            <span className="grid place-items-center w-9 h-9 rounded-lg bg-gray-100 text-gray-700 shrink-0">
+                            <span className="grid place-items-center w-9 h-9 rounded-lg bg-surface-subtle text-text-secondary shrink-0">
                               {useCaseIcons[item.slug]}
                             </span>
                             <span className="flex flex-col min-w-0">
-                              <span className="text-sm font-semibold text-gray-900 leading-snug">{item.title}</span>
-                              <span className="text-xs text-gray-500 leading-snug">{item.description}</span>
+                              <span className="text-sm font-semibold text-text-primary leading-snug">{item.title}</span>
+                              <span className="text-xs text-text-muted leading-snug">{item.description}</span>
                             </span>
                           </Link>
                         ))}
@@ -329,10 +329,10 @@ export function Navbar() {
                 </div>
               </div>
 
-              <div className="px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-gray-100 flex flex-col gap-3 shrink-0 bg-white">
+              <div className="px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-border-subtle flex flex-col gap-3 shrink-0 bg-surface-card">
                 <Link
                   href="/sign-in"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors py-3 text-center border border-gray-200 rounded-xl"
+                  className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors py-3 text-center border border-border-default rounded-xl"
                   onClick={() => {
                     posthog.capture('navbar_sign_in_clicked');
                     setMobileOpen(false);

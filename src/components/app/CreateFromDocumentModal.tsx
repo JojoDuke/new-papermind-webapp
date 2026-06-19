@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthToken } from '@convex-dev/auth/react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import toast from 'react-hot-toast';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
+import { isUpgradeRequiredError } from '@/lib/upgrade-required';
 import type { Id } from '../../../convex/_generated/dataModel';
 
 type Document = {
@@ -39,9 +42,15 @@ export function CreateFromDocumentModal({
 }: CreateFromDocumentModalProps) {
   const router = useRouter();
   const authToken = useAuthToken();
+
   const [step, setStep] = useState<'select' | 'configure'>('select');
   const [selectedDocId, setSelectedDocId] = useState<Id<'documents'> | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const documentQuota = useQuery(
+    api.usageQuota.getDocumentQuota,
+    selectedDocId ? { documentId: selectedDocId } : 'skip',
+  );
 
   const [quizName, setQuizName] = useState('');
   const [deckName, setDeckName] = useState('');
@@ -171,7 +180,12 @@ export function CreateFromDocumentModal({
       router.push(`/dashboard/quizzes/${deckId}`);
       toast.success('Quiz generated.');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Could not generate quiz.');
+      if (isUpgradeRequiredError(e)) {
+        onClose();
+        openPricingModal({ title: 'Upgrade to generate more quizzes', subtitle: 'Free accounts are limited. Upgrade to keep generating.' });
+      } else {
+        toast.error(e instanceof Error ? e.message : 'Could not generate quiz.');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -207,7 +221,12 @@ export function CreateFromDocumentModal({
       handleClose();
       toast.success(`${count} study guide${count === 1 ? '' : 's'} created.`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Could not generate study guides.');
+      if (isUpgradeRequiredError(e)) {
+        onClose();
+        openPricingModal({ title: 'Upgrade to generate more study guides', subtitle: 'Free accounts are limited. Upgrade to keep generating.' });
+      } else {
+        toast.error(e instanceof Error ? e.message : 'Could not generate study guides.');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -259,13 +278,48 @@ export function CreateFromDocumentModal({
       router.push(`/dashboard/flashcards/${deckId}`);
       toast.success('Flashcards generated.');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Could not generate flashcards.');
+      if (isUpgradeRequiredError(e)) {
+        onClose();
+        openPricingModal({ title: 'Upgrade to generate more flashcards', subtitle: 'Free accounts are limited. Upgrade to keep generating.' });
+      } else {
+        toast.error(e instanceof Error ? e.message : 'Could not generate flashcards.');
+      }
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const isOverQuota = (): boolean => {
+    if (!documentQuota || documentQuota.isPaid) return false;
+    if (mode === 'flashcard') {
+      const { used, limit } = documentQuota.flashcardDecks;
+      return limit !== null && used >= limit;
+    }
+    if (mode === 'quiz') {
+      const { used, limit } = documentQuota.quizDecks;
+      return limit !== null && used >= limit;
+    }
+    if (mode === 'study-guide') {
+      const { used, limit } = documentQuota.studyGuides;
+      return limit !== null && used >= limit;
+    }
+    return false;
+  };
+
   const handleGenerate = () => {
+    if (isOverQuota()) {
+      const titles: Record<typeof mode, string> = {
+        flashcard: 'Upgrade to generate more flashcards',
+        quiz: 'Upgrade to generate more quizzes',
+        'study-guide': 'Upgrade to generate more study guides',
+      };
+      onClose();
+      openPricingModal({
+        title: titles[mode],
+        subtitle: "You've used your free generation for this document. Upgrade for unlimited access.",
+      });
+      return;
+    }
     if (mode === 'quiz') {
       void handleGenerateQuiz();
     } else if (mode === 'flashcard') {
@@ -362,18 +416,18 @@ export function CreateFromDocumentModal({
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[min(90dvh,720px)] flex flex-col overflow-hidden"
+        className="bg-surface-card rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[min(90dvh,720px)] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-border-subtle shrink-0">
           <div>
-            <h2 className="text-lg font-bold font-serif text-gray-900">{title}</h2>
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            <h2 className="text-lg font-bold font-serif text-text-primary">{title}</h2>
+            <p className="text-sm text-text-muted mt-1">{subtitle}</p>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-border-default transition-colors text-text-muted cursor-pointer shrink-0"
             aria-label="Close"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,15 +442,15 @@ export function CreateFromDocumentModal({
               {documents === undefined && (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+                    <div key={i} className="h-16 rounded-xl bg-surface-subtle animate-pulse" />
                   ))}
                 </div>
               )}
 
               {documents && documents.length === 0 && (
                 <div className="text-center py-10">
-                  <p className="text-sm font-medium text-gray-600 mb-1">No documents yet</p>
-                  <p className="text-xs text-gray-400 mb-4">
+                  <p className="text-sm font-medium text-text-secondary mb-1">No documents yet</p>
+                  <p className="text-xs text-text-faint mb-4">
                     Upload a PDF on the dashboard first, then come back to create from it.
                   </p>
                   <button
@@ -419,7 +473,7 @@ export function CreateFromDocumentModal({
                       key={doc._id}
                       type="button"
                       onClick={() => handleSelectDocument(doc)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-pink-300 hover:bg-pink-50/50 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-border-default hover:border-pink-300 hover:bg-pink-50/50 dark:hover:bg-pink-950/20 transition-colors text-left cursor-pointer"
                     >
                       <div className="relative w-10 h-12 shrink-0">
                         <svg className="w-10 h-12 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
@@ -428,13 +482,13 @@ export function CreateFromDocumentModal({
                         </svg>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-800 truncate">{doc.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-sm font-medium text-text-primary truncate">{doc.name}</p>
+                        <p className="text-xs text-text-faint mt-0.5">
                           {new Date(doc.uploadedAt).toLocaleDateString()}
                           {doc.pageCount ? ` · ${doc.pageCount} pages` : ''}
                         </p>
                       </div>
-                      <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-text-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
@@ -449,26 +503,26 @@ export function CreateFromDocumentModal({
               <button
                 type="button"
                 onClick={() => setStep('select')}
-                className="self-start flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 cursor-pointer"
+                className="self-start flex items-center gap-1.5 text-sm text-text-faint hover:text-text-secondary cursor-pointer"
               >
                 ← Change document
               </button>
 
-              <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-                <p className="text-xs text-gray-400 mb-0.5">Document</p>
-                <p className="text-sm font-medium text-gray-800 truncate">{selectedDoc.name}</p>
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle px-4 py-3">
+                <p className="text-xs text-text-faint mb-0.5">Document</p>
+                <p className="text-sm font-medium text-text-primary truncate">{selectedDoc.name}</p>
               </div>
 
               {needsName && (
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-medium text-gray-600">{nameLabel}</span>
+                  <span className="text-xs font-medium text-text-secondary">{nameLabel}</span>
                   <input
                     type="text"
                     value={nameValue}
                     onChange={(e) => setNameValue(e.target.value)}
                     maxLength={80}
                     placeholder={namePlaceholder}
-                    className={`w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 ${
+                    className={`w-full px-3 py-2.5 rounded-lg border border-border-default bg-surface-card text-sm text-text-primary placeholder:text-text-faint focus:outline-none focus:ring-2 ${
                       mode === 'quiz' ? 'focus:ring-purple-300' : 'focus:ring-pink-300'
                     }`}
                   />
@@ -478,7 +532,7 @@ export function CreateFromDocumentModal({
               {usesPageRange && (
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-400 uppercase">From page</span>
+                    <span className="text-[10px] text-text-faint uppercase">From page</span>
                     <input
                       type="number"
                       min={1}
@@ -486,11 +540,11 @@ export function CreateFromDocumentModal({
                       onChange={(e) =>
                         setPageRangeFrom(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      className="w-full px-3 py-2 rounded-lg border border-border-default bg-surface-card text-sm text-text-primary"
                     />
                   </label>
                   <label className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-400 uppercase">To page</span>
+                    <span className="text-[10px] text-text-faint uppercase">To page</span>
                     <input
                       type="number"
                       min={1}
@@ -498,7 +552,7 @@ export function CreateFromDocumentModal({
                       onChange={(e) =>
                         setPageRangeTo(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      className="w-full px-3 py-2 rounded-lg border border-border-default bg-surface-card text-sm text-text-primary"
                     />
                   </label>
                 </div>
@@ -506,7 +560,7 @@ export function CreateFromDocumentModal({
 
               {mode === 'flashcard' && (
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-3">Flashcard types</p>
+                  <p className="text-xs font-medium text-text-secondary mb-3">Flashcard types</p>
                   <div className="flex flex-col gap-2.5">
                     {[
                       { key: 'termDef', label: 'term & definition' },
@@ -523,7 +577,7 @@ export function CreateFromDocumentModal({
                           className={`w-4 h-4 rounded flex items-center justify-center border transition-all cursor-pointer ${
                             cardTypes[key as keyof typeof cardTypes]
                               ? 'bg-pink-500 border-pink-500'
-                              : 'bg-white border-gray-300 group-hover:border-pink-400'
+                              : 'bg-surface-card border-border-strong group-hover:border-pink-400'
                           }`}
                         >
                           {cardTypes[key as keyof typeof cardTypes] && (
@@ -532,7 +586,7 @@ export function CreateFromDocumentModal({
                             </svg>
                           )}
                         </div>
-                        <span className="text-sm text-gray-600 select-none">{label}</span>
+                        <span className="text-sm text-text-secondary select-none">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -540,7 +594,7 @@ export function CreateFromDocumentModal({
               )}
 
               <div>
-                <p className="text-xs font-medium text-gray-600 mb-2">{presetLabel}</p>
+                <p className="text-xs font-medium text-text-secondary mb-2">{presetLabel}</p>
                 <div className="grid grid-cols-3 gap-2">
                   {(['low', 'medium', 'high'] as const).map((level) => (
                     <button
@@ -550,7 +604,7 @@ export function CreateFromDocumentModal({
                       className={`py-2 rounded-lg text-xs font-medium border cursor-pointer capitalize ${
                         presetValue === level
                           ? activePresetClass
-                          : 'bg-white text-gray-500 border-gray-200'
+                          : 'bg-surface-card text-text-muted border-border-default'
                       }`}
                     >
                       {level} ({presetMap[level]})
@@ -563,7 +617,7 @@ export function CreateFromDocumentModal({
         </div>
 
         {step === 'configure' && (
-          <div className="px-6 py-4 border-t border-gray-100 shrink-0">
+          <div className="px-6 py-4 border-t border-border-subtle shrink-0">
             <button
               type="button"
               onClick={handleGenerate}

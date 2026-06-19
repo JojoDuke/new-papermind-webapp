@@ -47,14 +47,14 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
   }, [idx, q?.correctAnswer, q?.distractor1, q?.distractor2]);
 
   const outerCls =
-    'w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col min-h-[520px]';
+    'w-full bg-surface-card rounded-3xl shadow-xl border border-border-subtle overflow-hidden flex flex-col min-h-[520px]';
 
   if (loading) {
     return (
       <div className={outerCls}>
         <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-purple-400 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Loading quiz…</p>
+          <div className="w-8 h-8 border-2 border-border-default border-t-purple-400 rounded-full animate-spin" />
+          <p className="text-sm text-text-muted">Loading quiz…</p>
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
   if (!questions || questions.length === 0) {
     return (
       <div className={outerCls}>
-        <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
+        <div className="flex-1 flex items-center justify-center text-sm text-text-muted">
           No questions in this quiz.
         </div>
       </div>
@@ -75,8 +75,8 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
     return (
       <div className={outerCls}>
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 py-10">
-          <span className="text-6xl font-bold text-gray-900 tabular-nums">{pct}%</span>
-          <p className="text-sm text-gray-500">
+          <span className="text-6xl font-bold text-text-primary tabular-nums">{pct}%</span>
+          <p className="text-sm text-text-muted">
             {finalScore.correct} / {finalScore.total} correct
           </p>
           <button
@@ -102,7 +102,7 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
   if (!q) {
     return (
       <div className={outerCls}>
-        <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
+        <div className="flex-1 flex items-center justify-center text-sm text-text-muted">
           No questions in this quiz.
         </div>
       </div>
@@ -148,21 +148,21 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
   return (
     <div className={outerCls}>
       <div className="px-6 pt-6 pb-2">
-        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-surface-subtle rounded-full overflow-hidden">
           <div
             className="h-full bg-purple-400 rounded-full transition-all duration-300"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
         {deckName && (
-          <p className="text-[11px] text-gray-400 truncate mt-2 text-center" title={deckName}>
+          <p className="text-[11px] text-text-faint truncate mt-2 text-center" title={deckName}>
             {deckName}
           </p>
         )}
       </div>
 
       <div className="flex-1 flex flex-col px-6 pb-6 pt-4 gap-5">
-        <p className="text-lg font-semibold text-gray-800 text-center leading-snug">
+        <p className="text-lg font-semibold text-text-primary text-center leading-snug">
           {q.question}
         </p>
 
@@ -179,11 +179,11 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
 
             if (!answered) {
               if (isSelected) {
-                buttonCls += 'border-purple-400 bg-purple-50 text-purple-800';
-                letterCls += 'border-purple-400 bg-purple-100 text-purple-700';
+                buttonCls += 'border-purple-400 bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-300';
+                letterCls += 'border-purple-400 bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300';
               } else {
-                buttonCls += 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50';
-                letterCls += 'border-gray-200 bg-gray-50 text-gray-500';
+                buttonCls += 'border-border-default bg-surface-card text-text-secondary hover:border-border-strong hover:bg-surface-subtle';
+                letterCls += 'border-border-default bg-surface-subtle text-text-muted';
               }
             } else if (isCorrect) {
               buttonCls += 'border-green-400 bg-green-50 text-green-800';
@@ -192,8 +192,8 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
               buttonCls += 'border-red-300 bg-red-50 text-red-700';
               letterCls += 'border-red-300 bg-red-100 text-red-600';
             } else {
-              buttonCls += 'border-gray-200 bg-white text-gray-500';
-              letterCls += 'border-gray-200 bg-gray-50 text-gray-400';
+              buttonCls += 'border-border-default bg-surface-card text-text-muted';
+              letterCls += 'border-border-default bg-surface-subtle text-text-faint';
             }
 
             return (
@@ -232,7 +232,7 @@ export function QuizStudyView({ questions, loading, deckId, deckName }: QuizStud
           )}
         </div>
 
-        <p className="text-center text-xs text-gray-400 tabular-nums">
+        <p className="text-center text-xs text-text-faint tabular-nums">
           {idx + 1} / {questions.length}
         </p>
       </div>

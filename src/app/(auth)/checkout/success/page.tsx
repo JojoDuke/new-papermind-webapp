@@ -1,8 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthToken } from "@convex-dev/auth/react";
 import { ProtectedRoute } from "@/components/app/ProtectedRoute";
 import {
@@ -10,15 +9,15 @@ import {
   setCheckoutAccessGrace,
 } from "@/lib/checkout-grace";
 
-const VERIFY_ATTEMPTS = 15;
+const VERIFY_ATTEMPTS = 8;
 const VERIFY_INTERVAL_MS = 1500;
 
 function CheckoutSuccessInner() {
   const searchParams = useSearchParams();
   const authToken = useAuthToken();
+  const router = useRouter();
   const ran = useRef(false);
-  const [message, setMessage] = useState("Activating your subscription…");
-  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (ran.current) return;
@@ -27,12 +26,8 @@ function CheckoutSuccessInner() {
       searchParams?.get("checkout_id")?.trim() ??
       searchParams?.get("session_id")?.trim();
 
-    if (!checkoutId) {
-      setError("Missing checkout confirmation. Start again from checkout.");
-      return;
-    }
-
-    if (!authToken) {
+    if (!checkoutId || !authToken) {
+      router.replace("/dashboard");
       return;
     }
 
@@ -58,55 +53,46 @@ function CheckoutSuccessInner() {
           if (res.ok && data.ok) {
             setCheckoutAccessGrace();
             markCheckoutSuccessNavigation();
-            window.location.assign("/dashboard");
+            setDone(true);
+            router.replace("/dashboard");
             return;
           }
 
-          if (!res.ok && data.error) {
-            setError(data.error);
-            return;
+          // Hard errors — stop polling
+          if (data.reason === "checkout_not_complete" || (!res.ok && data.error)) {
+            break;
           }
-
-          if (data.reason === "checkout_not_complete") {
-            setError("Checkout did not complete. Try again from checkout.");
-            return;
-          }
-
-          setMessage(
-            attempt < VERIFY_ATTEMPTS - 1
-              ? "Finalizing with Polar…"
-              : "Still waiting on Polar…"
-          );
         } catch {
-          setMessage("Retrying…");
+          // network hiccup — keep trying
         }
         await new Promise((r) => setTimeout(r, VERIFY_INTERVAL_MS));
       }
 
-      setError(
-        "We could not confirm your subscription yet. Refresh this page or open Support from checkout."
-      );
+      // Verification timed out or failed — just go to dashboard anyway;
+      // the webhook will have activated it by the time they get there.
+      setDone(true);
+      router.replace("/dashboard");
     })();
-  }, [authToken, searchParams]);
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-        <p className="text-sm text-red-600 text-center max-w-md mb-4">{error}</p>
-        <Link
-          href="/checkout"
-          className="text-sm font-semibold text-[#FF5392] hover:underline"
-        >
-          Back to checkout
-        </Link>
-      </div>
-    );
-  }
+  }, [authToken, searchParams, router]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4" />
-      <p className="text-sm text-gray-600 text-center">{message}</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 gap-5">
+      {!done && (
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
+      )}
+      <p className="text-sm text-gray-600 text-center">
+        {done ? "All set! Taking you to your dashboard…" : "Activating your subscription…"}
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          setCheckoutAccessGrace();
+          router.replace("/dashboard");
+        }}
+        className="text-sm font-semibold text-[#FF5392] hover:underline cursor-pointer"
+      >
+        Continue to dashboard →
+      </button>
     </div>
   );
 }

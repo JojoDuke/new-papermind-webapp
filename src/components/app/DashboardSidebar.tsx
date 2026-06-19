@@ -4,8 +4,11 @@ import { useEffect, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import { useDashboardNav } from '@/components/app/dashboard-nav-context';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
+import { formatUserPlanLabel, type UserPlan } from '@/lib/billing';
 
 type NavItem = {
   href: string;
@@ -17,8 +20,13 @@ type NavItem = {
 export function DashboardSidebar() {
   const pathname = usePathname() ?? '';
   const { mobileNavOpen, closeMobileNav } = useDashboardNav();
+  const quota = useQuery(api.usageQuota.getMyQuota);
+  const user = useQuery(api.auth.currentUser);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hash, setHash] = useState('');
+
+  const userPlan = (user?.plan ?? 'free') as UserPlan;
+  const isPaid = quota?.isPaid ?? false;
 
   useEffect(() => {
     const sync = () => setHash(typeof window !== 'undefined' ? window.location.hash : '');
@@ -84,8 +92,8 @@ export function DashboardSidebar() {
 
   const linkBase =
     'group relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 text-sm';
-  const linkInactive = 'text-gray-700 hover:bg-gray-100';
-  const linkActive = 'bg-pink-50 text-pink-700 hover:bg-pink-100';
+  const linkInactive = 'text-text-secondary hover:bg-surface-subtle';
+  const linkActive = 'bg-pink-50 text-pink-700 hover:bg-pink-100 dark:bg-pink-950/30 dark:text-pink-400 dark:hover:bg-pink-950/50';
 
   const collapsedTip = (label: string) => (isSidebarCollapsed ? label : undefined);
   const mobileExpanded = mobileNavOpen;
@@ -105,7 +113,7 @@ export function DashboardSidebar() {
       )}
       <aside
         className={[
-          'bg-white border-r border-gray-200 flex flex-col overflow-x-hidden shrink-0 z-50',
+          'bg-surface-card border-r border-border-default flex flex-col overflow-x-hidden shrink-0 z-50',
           'fixed md:relative inset-y-0 left-0 h-full',
           'transition-transform duration-300 md:transition-[width] md:duration-300',
           mobileNavOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
@@ -122,7 +130,7 @@ export function DashboardSidebar() {
         >
           <div className="relative w-8 h-8">
             <div
-              className={`absolute inset-0 -m-2 rounded-lg transition-all duration-200 ${isSidebarCollapsed ? 'group-hover:bg-pink-50' : 'bg-transparent'}`}
+              className={`absolute inset-0 -m-2 rounded-lg transition-all duration-200 ${isSidebarCollapsed ? 'group-hover:bg-pink-50 dark:group-hover:bg-pink-950/30' : 'bg-transparent'}`}
             />
             <Image
               src="/logos-icons/pmIcon.png"
@@ -159,25 +167,25 @@ export function DashboardSidebar() {
           title={collapsedTip('Dashboard')}
           className={`${linkBase} ${isDashboard ? linkActive : linkInactive} ${!showLabels ? 'justify-center' : ''}`}
         >
-          <svg className={`w-5 h-5 shrink-0 ${isDashboard ? 'text-pink-600' : 'text-gray-500 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 shrink-0 ${isDashboard ? 'text-pink-600 dark:text-pink-400' : 'text-text-muted group-hover:text-text-secondary'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
           {showLabels && (
-            <span className={`font-medium ${isDashboard ? 'text-pink-700' : 'text-gray-900'}`}>
+            <span className={`font-medium ${isDashboard ? 'text-pink-700 dark:text-pink-400' : 'text-text-primary'}`}>
               Dashboard
             </span>
           )}
         </Link>
 
         {showLabels && (
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 px-2.5 pt-3 pb-0.5">My Study</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-text-faint px-2.5 pt-3 pb-0.5">My Study</p>
         )}
 
         {myStudyItems.map((item) => {
           const active = item.isActive(pathname, hash);
           const className = `${linkBase} ${active ? linkActive : linkInactive} ${!showLabels ? 'justify-center' : ''}`;
 
-          if (item.label === 'Mock Exams') {
+          if (item.label === 'Mock Exams' && !isPaid) {
             return (
               <button
                 key={item.href + item.label}
@@ -192,11 +200,11 @@ export function DashboardSidebar() {
                 }}
                 className={`${className} w-full cursor-pointer`}
               >
-                <span className={`shrink-0 ${active ? 'text-pink-600' : 'text-gray-500 group-hover:text-gray-600'}`}>
+                <span className={`shrink-0 ${active ? 'text-pink-600 dark:text-pink-400' : 'text-text-muted group-hover:text-text-secondary'}`}>
                   {item.icon}
                 </span>
                 {showLabels && (
-                  <span className={`font-medium ${active ? 'text-pink-700' : 'text-gray-900'}`}>{item.label}</span>
+                  <span className={`font-medium ${active ? 'text-pink-700 dark:text-pink-400' : 'text-text-primary'}`}>{item.label}</span>
                 )}
               </button>
             );
@@ -210,39 +218,55 @@ export function DashboardSidebar() {
               title={collapsedTip(item.label)}
               className={className}
             >
-              <span className={`shrink-0 ${active ? 'text-pink-600' : 'text-gray-500 group-hover:text-gray-600'}`}>
+              <span className={`shrink-0 ${active ? 'text-pink-600 dark:text-pink-400' : 'text-text-muted group-hover:text-text-secondary'}`}>
                 {item.icon}
               </span>
               {showLabels && (
-                <span className={`font-medium ${active ? 'text-pink-700' : 'text-gray-900'}`}>{item.label}</span>
+                <span className={`font-medium ${active ? 'text-pink-700 dark:text-pink-400' : 'text-text-primary'}`}>{item.label}</span>
               )}
             </Link>
           );
         })}
       </nav>
 
-      {showLabels && (
+      {showLabels && quota !== undefined && (
         <div className="px-3 pb-3">
-          <div className="rounded-2xl bg-amber-50/90 border border-amber-100/80 p-3.5 relative overflow-hidden">
-            <div className="absolute right-2 top-2 text-lg leading-none" aria-hidden>
-              ✦
+          {isPaid ? (
+            <div className="rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-100/80 dark:border-emerald-900/50 p-3.5">
+              <p className="text-sm font-bold text-text-primary">{formatUserPlanLabel(userPlan)}</p>
+              <p className="text-xs text-text-secondary mt-1 mb-3 leading-snug">
+                You have full access to all features.
+              </p>
+              <Link
+                href="/dashboard/settings"
+                onClick={closeMobileNav}
+                className="block w-full text-center rounded-full border border-emerald-200 dark:border-emerald-800 bg-surface-card text-emerald-700 dark:text-emerald-400 text-xs font-semibold py-2.5 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors"
+              >
+                Manage subscription
+              </Link>
             </div>
-            <p className="text-sm font-bold text-gray-900 pr-6">Upgrade your plan</p>
-            <p className="text-xs text-gray-600 mt-1 mb-3 leading-snug">Unlock unlimited content and features.</p>
-            <button
-              type="button"
-              onClick={() => {
-                closeMobileNav();
-                openPricingModal();
-              }}
-              className="pink-glowing-button group relative block w-full text-center rounded-full text-white text-xs font-semibold py-2.5 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden>
-                <span className="blurred-border absolute inset-0 z-20 rounded-full" />
-              </span>
-              <span className="relative z-30">Upgrade now</span>
-            </button>
-          </div>
+          ) : (
+            <div className="rounded-2xl bg-amber-50/90 dark:bg-amber-950/20 border border-amber-100/80 dark:border-amber-900/40 p-3.5 relative overflow-hidden">
+              <div className="absolute right-2 top-2 text-lg leading-none" aria-hidden>
+                ✦
+              </div>
+              <p className="text-sm font-bold text-text-primary pr-6">Upgrade your plan</p>
+              <p className="text-xs text-text-secondary mt-1 mb-3 leading-snug">Unlock unlimited content and features.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileNav();
+                  openPricingModal();
+                }}
+                className="pink-glowing-button group relative block w-full text-center rounded-full text-white text-xs font-semibold py-2.5 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              >
+                <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden>
+                  <span className="blurred-border absolute inset-0 z-20 rounded-full" />
+                </span>
+                <span className="relative z-30">Upgrade now</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

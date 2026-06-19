@@ -104,29 +104,29 @@ export function StudyGuideChatPanel({
 
   return (
       <aside
-        className={`fixed top-0 right-0 z-40 h-full bg-white border-l border-gray-200 shadow-xl flex flex-col transition-transform duration-300 ease-out w-full max-w-[400px] ${
+        className={`fixed top-0 right-0 z-40 h-full bg-surface-card border-l border-border-default shadow-xl flex flex-col transition-transform duration-300 ease-out w-full max-w-[400px] ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-hidden={!isOpen}
       >
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border-subtle shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <Image
               src="/assets/foxLeftSidebar.png"
               alt=""
               width={36}
               height={36}
-              className="object-contain shrink-0 mix-blend-multiply"
+              className="object-contain shrink-0 mix-blend-multiply dark:mix-blend-normal"
             />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">Ask Paige</p>
-              <p className="text-[11px] text-gray-400 truncate">About this study guide</p>
+              <p className="text-sm font-semibold text-text-primary truncate">Ask Paige</p>
+              <p className="text-[11px] text-text-faint truncate">About this study guide</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-text-faint hover:bg-surface-subtle hover:text-text-secondary transition-colors cursor-pointer"
             aria-label="Close chat"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@ export function StudyGuideChatPanel({
                 className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-green-600 text-white rounded-br-md'
-                    : 'bg-green-50 text-gray-800 border border-green-100 rounded-bl-md'
+                    : 'bg-green-50 dark:bg-green-950/20 text-text-primary border border-green-100 dark:border-green-900/40 rounded-bl-md'
                 }`}
               >
                 {msg.content}
@@ -154,7 +154,7 @@ export function StudyGuideChatPanel({
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-green-50 border border-green-100 rounded-2xl rounded-bl-md px-4 py-3 flex gap-1">
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/40 rounded-2xl rounded-bl-md px-4 py-3 flex gap-1">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce [animation-delay:0ms]" />
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce [animation-delay:150ms]" />
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce [animation-delay:300ms]" />
@@ -182,7 +182,7 @@ export function StudyGuideChatPanel({
           <p className="px-4 text-xs text-red-500 shrink-0">{error}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="p-4 border-t border-gray-100 shrink-0">
+        <form onSubmit={handleSubmit} className="p-4 border-t border-border-subtle shrink-0">
           <div className="flex gap-2 items-end">
             <textarea
               ref={inputRef}
@@ -192,7 +192,7 @@ export function StudyGuideChatPanel({
               placeholder="Ask a question…"
               rows={2}
               disabled={isLoading}
-              className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300 disabled:opacity-60"
+              className="flex-1 resize-none rounded-xl border border-border-default bg-surface-card px-3 py-2.5 text-sm text-text-primary placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300 disabled:opacity-60"
             />
             <button
               type="submit"
@@ -205,7 +205,7 @@ export function StudyGuideChatPanel({
               </svg>
             </button>
           </div>
-          <p className="text-[10px] text-gray-400 mt-2">Enter to send · Shift+Enter for new line</p>
+          <p className="text-[10px] text-text-faint mt-2">Enter to send · Shift+Enter for new line</p>
         </form>
       </aside>
   );

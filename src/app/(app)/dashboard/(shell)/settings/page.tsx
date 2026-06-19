@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { useQuery } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useRouter } from 'next/navigation';
-import { api } from '../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../convex/_generated/api';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import toast from 'react-hot-toast';
 
@@ -30,9 +28,9 @@ function SubscriptionBadge({ state }: { state: string }) {
   }
   if (state === 'trial_active') {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-        Free trial
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        Active
       </span>
     );
   }
@@ -40,7 +38,7 @@ function SubscriptionBadge({ state }: { state: string }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-        Trial expired
+        Expired
       </span>
     );
   }
@@ -73,28 +71,26 @@ export default function DashboardSettingsPage() {
   const subState = subscriptionState?.state ?? 'no_subscription';
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <main className={`${dashboardMainClass} max-w-2xl`}>
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Settings</h1>
-          <p className="text-sm text-gray-500 mb-8">Manage your account and subscription</p>
+    <main className={`${dashboardMainClass} max-w-2xl`}>
+          <h1 className="text-xl font-bold text-text-primary mb-1">Settings</h1>
+          <p className="text-sm text-text-muted mb-8">Manage your account and subscription</p>
 
           {/* Profile section */}
-          <section className="bg-white border border-gray-200 rounded-2xl mb-5 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">Profile</h2>
+          <section className="bg-surface-card border border-border-default rounded-2xl mb-5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-border-subtle">
+              <h2 className="text-sm font-semibold text-text-primary">Profile</h2>
             </div>
             <div className="px-6 py-5">
               {user === undefined ? (
-                <div className="h-14 bg-gray-100 rounded-xl animate-pulse" />
+                <div className="h-14 bg-surface-subtle rounded-xl animate-pulse" />
               ) : (
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-xl font-semibold shrink-0 select-none">
                     {userInitial}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-base font-semibold text-gray-900">{user?.name || 'Unknown'}</p>
-                    <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                    <p className="text-base font-semibold text-text-primary">{user?.name || 'Unknown'}</p>
+                    <p className="text-sm text-text-muted truncate">{user?.email}</p>
                   </div>
                 </div>
               )}
@@ -102,72 +98,55 @@ export default function DashboardSettingsPage() {
           </section>
 
           {/* Subscription section */}
-          <section className="bg-white border border-gray-200 rounded-2xl mb-5 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
+          <section className="bg-surface-card border border-border-default rounded-2xl mb-5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-text-primary">Subscription</h2>
               {subscriptionState && <SubscriptionBadge state={subState} />}
             </div>
             <div className="px-6 py-5 space-y-4">
               {subscriptionState === undefined ? (
                 <div className="space-y-2">
-                  {[1, 2].map((i) => <div key={i} className="h-5 bg-gray-100 rounded animate-pulse" />)}
+                  {[1, 2].map((i) => <div key={i} className="h-5 bg-surface-subtle rounded animate-pulse" />)}
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-xs font-medium text-gray-400 mb-0.5">Plan status</p>
-                      <p className="text-gray-800 font-medium capitalize">
-                        {subState === 'paid' ? 'Active subscriber' :
-                         subState === 'trial_active' ? 'Free trial (active)' :
-                         subState === 'trial_expired' ? 'Trial expired' : 'No plan'}
+                      <p className="text-xs font-medium text-text-faint mb-0.5">Plan status</p>
+                      <p className="text-text-primary font-medium capitalize">
+                        {subState === 'paid' || subState === 'trial_active' ? 'Active subscriber' :
+                         subState === 'trial_expired' ? 'Subscription expired' : 'No plan'}
                       </p>
                     </div>
                     {subscription?.priceId && (
                       <div>
-                        <p className="text-xs font-medium text-gray-400 mb-0.5">Billing</p>
-                        <p className="text-gray-800 font-medium">
+                        <p className="text-xs font-medium text-text-faint mb-0.5">Billing</p>
+                        <p className="text-text-primary font-medium">
                           {subscription.priceId.includes('yearly') || subscription.priceId.includes('annual') ? 'Annual' : 'Monthly'}
                         </p>
                       </div>
                     )}
-                    {subscriptionState.trialEndsAt && (
+                    {subscriptionState.trialEndsAt && subState === 'trial_expired' && (
                       <div>
-                        <p className="text-xs font-medium text-gray-400 mb-0.5">
-                          {subState === 'trial_active' ? 'Trial ends' : 'Trial ended'}
-                        </p>
-                        <p className="text-gray-800 font-medium">{formatDate(subscriptionState.trialEndsAt)}</p>
+                        <p className="text-xs font-medium text-text-faint mb-0.5">Ended</p>
+                        <p className="text-text-primary font-medium">{formatDate(subscriptionState.trialEndsAt)}</p>
                       </div>
                     )}
                     {subscriptionState.currentPeriodEndsAt && (
                       <div>
-                        <p className="text-xs font-medium text-gray-400 mb-0.5">Next billing date</p>
-                        <p className="text-gray-800 font-medium">{formatDate(subscriptionState.currentPeriodEndsAt)}</p>
+                        <p className="text-xs font-medium text-text-faint mb-0.5">Next billing date</p>
+                        <p className="text-text-primary font-medium">{formatDate(subscriptionState.currentPeriodEndsAt)}</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Trial countdown */}
-                  {subState === 'trial_active' && subscriptionState.trialEndsAt && (
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-start gap-2.5">
-                      <svg className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-sm text-blue-700">
-                        Your free trial gives you full access.{' '}
-                        {Math.max(0, Math.ceil((subscriptionState.trialEndsAt - Date.now()) / 86400000))} days remaining.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Expired CTA */}
                   {subState === 'trial_expired' && (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
                       <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                       <div>
-                        <p className="text-sm text-amber-700 font-medium mb-1">Your trial has expired</p>
+                        <p className="text-sm text-amber-700 font-medium mb-1">Your subscription has expired</p>
                         <button
                           type="button"
                           onClick={() => router.push('/upgrade')}
@@ -201,18 +180,18 @@ export default function DashboardSettingsPage() {
           </section>
 
           {/* Account actions */}
-          <section className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">Account</h2>
+          <section className="bg-surface-card border border-border-default rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-border-subtle">
+              <h2 className="text-sm font-semibold text-text-primary">Account</h2>
             </div>
             <div className="px-6 py-5 space-y-3">
               {showSignOutConfirm ? (
                 <div className="flex items-center gap-3">
-                  <p className="text-sm text-gray-600 flex-1">Are you sure you want to sign out?</p>
+                  <p className="text-sm text-text-secondary flex-1">Are you sure you want to sign out?</p>
                   <button
                     type="button"
                     onClick={() => setShowSignOutConfirm(false)}
-                    className="px-3 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="px-3 py-1.5 text-sm text-text-secondary border border-border-default rounded-lg hover:bg-surface-subtle transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -238,8 +217,6 @@ export default function DashboardSettingsPage() {
               )}
             </div>
           </section>
-        </main>
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </main>
   );
 }

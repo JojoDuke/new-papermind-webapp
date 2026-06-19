@@ -50,9 +50,11 @@ function UpgradeContent() {
     }
   }, [subscriptionState]);
 
-  const trialExpiredAt = useMemo(() => {
-    if (!subscriptionState?.trialEndsAt) return null;
-    return new Date(subscriptionState.trialEndsAt).toLocaleDateString(undefined, {
+  const subscriptionEndedAt = useMemo(() => {
+    if (!subscriptionState?.trialEndsAt && !subscriptionState?.currentPeriodEndsAt) return null;
+    const endedAt = subscriptionState.trialEndsAt ?? subscriptionState.currentPeriodEndsAt;
+    if (!endedAt) return null;
+    return new Date(endedAt).toLocaleDateString(undefined, {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -130,13 +132,13 @@ function UpgradeContent() {
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
             <Image src="/logos-icons/pmIcon.png" alt="" width={40} height={40} className="w-10 h-10" />
-            <h1 className="text-2xl font-bold text-gray-900">Your trial has ended</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Subscription required</h1>
           </div>
 
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-            {trialExpiredAt
-              ? `Your free trial expired on ${trialExpiredAt}. `
-              : 'Your free trial has expired. '}
+            {subscriptionEndedAt
+              ? `Your subscription ended on ${subscriptionEndedAt}. `
+              : 'Your subscription is no longer active. '}
             Choose a plan below to get back into Papermind and keep your progress.
           </p>
 

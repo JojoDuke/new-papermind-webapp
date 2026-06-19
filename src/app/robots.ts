@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         '/dashboard/',
         '/sign-in',
         '/sign-up',
-        '/checkout',
+        '/checkout/success',
         '/upgrade',
         '/forgot-password',
         '/api/',

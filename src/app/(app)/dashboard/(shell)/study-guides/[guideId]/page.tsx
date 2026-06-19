@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../../convex/_generated/api';
 import { StudyGuideDetailView } from '@/components/app/StudyGuideDetailView';
 import { StudyGuideChatPanel, StudyGuideChatToggle } from '@/components/app/StudyGuideChatPanel';
 import Link from 'next/link';
-import type { Id } from '../../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../../convex/_generated/dataModel';
 
 export default function StudyGuideDetailPage() {
   const params = useParams();
@@ -21,26 +19,24 @@ export default function StudyGuideDetailPage() {
   const notFound = guide === null;
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <div className="flex flex-1 min-w-0 relative">
+    <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden relative">
           <main
-            className={`flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 md:p-8 min-w-0 transition-[margin] duration-300 ${
+            className={`flex-1 overflow-y-auto bg-surface-page p-4 sm:p-6 md:p-8 min-w-0 transition-[margin] duration-300 ${
               chatOpen ? 'mr-0 sm:mr-[min(400px,100vw)]' : ''
             }`}
           >
             {loading && (
               <div className="max-w-3xl animate-pulse space-y-4">
-                <div className="h-4 bg-gray-100 rounded w-16" />
-                <div className="h-8 bg-gray-100 rounded w-2/3" />
-                <div className="h-4 bg-gray-100 rounded w-full max-w-md" />
+                <div className="h-4 bg-surface-subtle rounded w-16" />
+                <div className="h-8 bg-surface-subtle rounded w-2/3" />
+                <div className="h-4 bg-surface-subtle rounded w-full max-w-md" />
                 <div className="h-32 bg-green-50 rounded-2xl mt-8" />
               </div>
             )}
 
             {notFound && (
               <div className="max-w-sm py-16">
-                <p className="text-sm text-gray-600 mb-4">This study guide could not be found.</p>
+                <p className="text-sm text-text-secondary mb-4">This study guide could not be found.</p>
                 <Link
                   href="/dashboard/study-guides"
                   className="text-sm font-medium text-green-600 hover:text-green-700"
@@ -82,7 +78,5 @@ export default function StudyGuideDetailPage() {
             />
           )}
         </div>
-      </DashboardAppShell>
-    </ProtectedRoute>
   );
 }

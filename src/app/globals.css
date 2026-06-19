@@ -1,19 +1,67 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Semantic surfaces */
+  --surface-page: #f9fafb;
+  --surface-card: #ffffff;
+  --surface-subtle: #f3f4f6;
+
+  /* Semantic text */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+
+  /* Semantic borders */
+  --border-subtle: #f3f4f6;
+  --border-default: #e5e7eb;
+  --border-strong: #d1d5db;
 }
 
 .dark {
-  --background: #0f0f0f;
-  --foreground: #ededed;
+  --background: #18181b;
+  --foreground: #fafafa;
   color-scheme: dark;
+
+  /* Semantic surfaces */
+  --surface-page: #18181b;
+  --surface-card: #27272a;
+  --surface-subtle: #3f3f46;
+
+  /* Semantic text */
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-faint: #52525b;
+
+  /* Semantic borders */
+  --border-subtle: #27272a;
+  --border-default: #3f3f46;
+  --border-strong: #52525b;
 }
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
   --font-sans: var(--font-jakarta-sans);
   --font-serif: var(--font-pt-serif);
 }
@@ -102,5 +150,9 @@ h1, h2, h3, h4, h5, h6 {
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: destination-out;
+  }
+
+  .dark .blurred-border {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
   }
 }

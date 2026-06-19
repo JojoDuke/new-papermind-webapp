@@ -4,22 +4,20 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../convex/_generated/api';
 import { CreateFromDocumentModal } from '@/components/app/CreateFromDocumentModal';
 import { StudyDeckCard } from '@/components/app/StudyDeckCard';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import toast from 'react-hot-toast';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../convex/_generated/dataModel';
 
-function QuizzesPageContent() {
+function FlashcardsPageContent() {
   const searchParams = useSearchParams();
   const user = useQuery(api.auth.currentUser);
-  const decks = useQuery(api.quizzes.listMyQuizDecks);
+  const decks = useQuery(api.flashcards.listMyFlashcardDecks);
   const documents = useQuery(api.documents.listDocuments);
-  const renameDeck = useMutation(api.quizzes.renameQuizDeck);
-  const deleteDeck = useMutation(api.quizzes.deleteQuizDeck);
+  const renameDeck = useMutation(api.flashcards.renameFlashcardDeck);
+  const deleteDeck = useMutation(api.flashcards.deleteFlashcardDeck);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [initialDocumentId, setInitialDocumentId] = useState<Id<'documents'> | null>(null);
@@ -35,19 +33,19 @@ function QuizzesPageContent() {
   const userInitial =
     (user?.name?.trim()[0] || user?.email?.[0] || '?').toUpperCase();
 
-  const handleRename = async (deckId: Id<'quizDecks'>, newName: string) => {
+  const handleRename = async (deckId: Id<'flashcardDecks'>, newName: string) => {
     try {
       await renameDeck({ deckId, deckName: newName });
-      toast.success('Quiz renamed.');
+      toast.success('Deck renamed.');
     } catch {
       toast.error('Failed to rename. Please try again.');
     }
   };
 
-  const handleDelete = async (deckId: Id<'quizDecks'>) => {
+  const handleDelete = async (deckId: Id<'flashcardDecks'>) => {
     try {
       await deleteDeck({ deckId });
-      toast.success('Quiz deleted.');
+      toast.success('Deck deleted.');
     } catch {
       toast.error('Failed to delete. Please try again.');
     }
@@ -68,14 +66,13 @@ function QuizzesPageContent() {
   };
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <main className={`${dashboardMainClass} bg-gray-50 flex flex-col`}>
+    <>
+      <main className={`${dashboardMainClass} bg-surface-page flex flex-col`}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 md:mb-8 shrink-0">
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-gray-900 mb-1">Quizzes</h1>
-              <p className="text-sm text-gray-500">
-                Multiple-choice quizzes generated from your documents
+              <h1 className="text-xl font-bold text-text-primary mb-1">Flashcards</h1>
+              <p className="text-sm text-text-muted">
+                Flashcard decks generated from your documents
               </p>
             </div>
             <button
@@ -84,7 +81,7 @@ function QuizzesPageContent() {
               className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#FF5392] text-[#FF5392] text-sm font-semibold font-sans hover:bg-pink-50 transition-colors cursor-pointer"
             >
               <span className="text-base leading-none">+</span>
-              Create quiz from document
+              Create flashcards from document
             </button>
           </div>
 
@@ -100,18 +97,18 @@ function QuizzesPageContent() {
             <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 min-h-[420px]">
               <Image
                 src="/assets/foxAsleepEmptyState.png"
-                alt="Sleeping fox — no quizzes yet"
+                alt="Sleeping fox — no flashcard decks yet"
                 width={360}
                 height={360}
                 priority
                 className="object-contain w-full max-w-[320px] h-auto mb-6"
               />
-              <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 mb-3">
-                No quizzes yet
+              <h2 className="text-2xl md:text-3xl font-bold font-serif text-text-primary mb-3">
+                No flashcard decks yet
               </h2>
-              <p className="text-sm text-gray-500 font-sans max-w-md leading-relaxed">
-                We haven&apos;t created any quizzes for your documents yet. Upload a document
-                and generate a quiz to test your understanding.
+              <p className="text-sm text-text-muted font-sans max-w-md leading-relaxed">
+                We haven&apos;t created any flashcards for your documents yet. Upload a document
+                and generate a deck to start studying.
               </p>
             </div>
           )}
@@ -123,10 +120,9 @@ function QuizzesPageContent() {
                   key={deck._id}
                   deckId={deck._id}
                   title={deck.deckName}
-                  cardCount={deck.questionCount}
+                  cardCount={deck.cardCount}
                   progress={deck.progress}
                   userInitial={userInitial}
-                  studyHref={`/dashboard/quizzes/${deck._id}`}
                   onRename={(newName) => handleRename(deck._id, newName)}
                   onDelete={() => handleDelete(deck._id)}
                 />
@@ -138,19 +134,18 @@ function QuizzesPageContent() {
         <CreateFromDocumentModal
           isOpen={showCreateModal}
           onClose={closeCreateModal}
-          mode="quiz"
+          mode="flashcard"
           documents={documents}
           initialDocumentId={initialDocumentId}
         />
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </>
   );
 }
 
-export default function QuizzesPage() {
+export default function FlashcardsPage() {
   return (
     <Suspense fallback={null}>
-      <QuizzesPageContent />
+      <FlashcardsPageContent />
     </Suspense>
   );
 }

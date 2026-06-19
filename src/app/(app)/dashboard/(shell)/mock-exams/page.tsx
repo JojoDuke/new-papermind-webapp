@@ -4,11 +4,9 @@ import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { useAuthToken } from '@convex-dev/auth/react';
-import { api } from '../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../convex/_generated/api';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
 
@@ -105,12 +103,12 @@ function CreateMockExamModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900">
+      <div className="relative bg-surface-card rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+          <h2 className="text-base font-semibold text-text-primary">
             {step === 'select' ? 'Select a document' : 'Configure exam'}
           </h2>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button type="button" onClick={onClose} className="text-text-faint hover:text-text-secondary cursor-pointer">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -130,16 +128,16 @@ function CreateMockExamModal({
                     key={doc._id}
                     type="button"
                     onClick={() => handleSelectDoc(doc._id)}
-                    className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[#FF5392] hover:bg-pink-50/50 transition-all cursor-pointer"
+                    className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-border-default hover:border-[#FF5392] hover:bg-pink-50/50 dark:hover:bg-pink-950/20 transition-all cursor-pointer"
                   >
-                    <span className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                    <span className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
                       <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{stripPdf(doc.name)}</p>
-                      {doc.pageCount && <p className="text-xs text-gray-400">{doc.pageCount} pages</p>}
+                      <p className="text-sm font-medium text-text-primary truncate">{stripPdf(doc.name)}</p>
+                      {doc.pageCount && <p className="text-xs text-text-faint">{doc.pageCount} pages</p>}
                     </div>
                   </button>
                 ))
@@ -148,45 +146,45 @@ function CreateMockExamModal({
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Exam title</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">Exam title</label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 text-gray-900"
+                  className="w-full px-3 py-2 border border-border-default bg-surface-card rounded-xl text-sm focus:outline-none focus:border-pink-400 text-text-primary"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Page from</label>
+                  <div>
+                  <label className="block text-xs font-medium text-text-secondary mb-1">Page from</label>
                   <input
                     type="number"
                     min={1}
                     max={selectedDoc?.pageCount ?? 999}
                     value={pageFrom}
                     onChange={(e) => setPageFrom(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 text-gray-900"
+                    className="w-full px-3 py-2 border border-border-default bg-surface-card rounded-xl text-sm focus:outline-none focus:border-pink-400 text-text-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Page to</label>
+                  <label className="block text-xs font-medium text-text-secondary mb-1">Page to</label>
                   <input
                     type="number"
                     min={pageFrom}
                     max={selectedDoc?.pageCount ?? 999}
                     value={pageTo}
                     onChange={(e) => setPageTo(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 text-gray-900"
+                    className="w-full px-3 py-2 border border-border-default bg-surface-card rounded-xl text-sm focus:outline-none focus:border-pink-400 text-text-primary"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Time limit</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">Time limit</label>
                 <select
                   value={timeLimitMinutes}
                   onChange={(e) => setTimeLimitMinutes(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 text-gray-900 bg-white cursor-pointer"
+                  className="w-full px-3 py-2 border border-border-default rounded-xl text-sm focus:outline-none focus:border-pink-400 text-text-primary bg-surface-card cursor-pointer"
                 >
                   {[30, 60, 90, 120, 150, 180].map((m) => (
                     <option key={m} value={m}>{m} minutes</option>
@@ -194,7 +192,7 @@ function CreateMockExamModal({
                 </select>
               </div>
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-text-faint">
                 Questions are generated from pages {pageFrom}–{pageTo} of your document using NCLEX-RN style formatting.
               </p>
 
@@ -202,7 +200,7 @@ function CreateMockExamModal({
                 <button
                   type="button"
                   onClick={() => setStep('select')}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl border border-border-default text-sm text-text-secondary hover:bg-surface-subtle transition-colors cursor-pointer"
                 >
                   Back
                 </button>
@@ -247,17 +245,16 @@ function MockExamsContent() {
   };
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <main className={`${dashboardMainClass} flex flex-col`}>
+    <>
+      <main className={`${dashboardMainClass} flex flex-col`}>
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 md:mb-8 shrink-0">
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl">🎓</span>
-                <h1 className="text-xl font-bold text-gray-900">NCLEX-RN Mock Exams</h1>
+                <h1 className="text-xl font-bold text-text-primary">NCLEX-RN Mock Exams</h1>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 Full-length timed practice exams built from your nursing study materials
               </p>
             </div>
@@ -304,8 +301,8 @@ function MockExamsContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold font-serif text-gray-900 mb-2">No mock exams yet</h2>
-              <p className="text-sm text-gray-500 max-w-sm leading-relaxed mb-6">
+              <h2 className="text-2xl font-bold font-serif text-text-primary mb-2">No mock exams yet</h2>
+              <p className="text-sm text-text-muted max-w-sm leading-relaxed mb-6">
                 Create your first NCLEX-RN mock exam from any uploaded document. Timed, scored, and built from your own materials.
               </p>
               <button
@@ -343,7 +340,7 @@ function MockExamsContent() {
                 return (
                   <div
                     key={session._id}
-                    className="w-full sm:w-72 bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-md transition-shadow flex flex-col gap-3"
+                    className="w-full sm:w-72 bg-surface-card border border-border-default rounded-2xl p-5 hover:shadow-md transition-shadow flex flex-col gap-3"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
@@ -364,18 +361,18 @@ function MockExamsContent() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 leading-snug mb-1 line-clamp-2">{session.title}</p>
-                      <p className="text-xs text-gray-400">{session.questions.length} questions · {session.timeLimitMinutes} min</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{formatDate(session.createdAt)}</p>
+                      <p className="text-sm font-semibold text-text-primary leading-snug mb-1 line-clamp-2">{session.title}</p>
+                      <p className="text-xs text-text-faint">{session.questions.length} questions · {session.timeLimitMinutes} min</p>
+                      <p className="text-xs text-text-faint mt-0.5">{formatDate(session.createdAt)}</p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         isComplete
-                          ? 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400'
                           : isInProgress
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
+                          : 'bg-surface-subtle text-text-secondary'
                       }`}>
                         {isComplete ? 'Completed' : isInProgress ? 'In progress' : 'Not started'}
                       </span>
@@ -387,7 +384,7 @@ function MockExamsContent() {
                     <button
                       type="button"
                       onClick={() => router.push(`/dashboard/mock-exams/${session._id}`)}
-                      className="w-full py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#FF5392] hover:text-[#FF5392] hover:bg-pink-50 transition-all cursor-pointer"
+                      className="w-full py-2 rounded-xl border border-border-default text-sm font-medium text-text-secondary hover:border-[#FF5392] hover:text-[#FF5392] hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-all cursor-pointer"
                     >
                       {isComplete ? 'Review results' : isInProgress ? 'Continue exam' : 'Start exam'}
                     </button>
@@ -404,8 +401,7 @@ function MockExamsContent() {
             onClose={() => setShowCreateModal(false)}
           />
         )}
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </>
   );
 }
 

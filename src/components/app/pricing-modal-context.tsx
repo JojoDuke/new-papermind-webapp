@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { PricingModal } from '@/components/app/PricingModal';
+import type { BillingInterval } from '@/lib/billing';
 
 type PricingModalOptions = {
   title?: string;
   subtitle?: string;
+  interval?: BillingInterval;
 };
 
 type PricingModalContextValue = {
@@ -16,7 +18,7 @@ const PricingModalContext = createContext<PricingModalContextValue | null>(null)
 
 let openPricingModalGlobal: ((opts?: PricingModalOptions) => void) | null = null;
 
-/** Open pricing from anywhere under PricingModalProvider (no hook required). */
+/** Open the pricing modal from anywhere under PricingModalProvider (no hook required). */
 export function openPricingModal(opts?: PricingModalOptions) {
   openPricingModalGlobal?.(opts);
 }
@@ -40,6 +42,7 @@ export function PricingModalProvider({ children }: { children: ReactNode }) {
         onClose={() => setOpen(false)}
         title={options.title}
         subtitle={options.subtitle}
+        defaultInterval={options.interval}
       />
     </PricingModalContext.Provider>
   );

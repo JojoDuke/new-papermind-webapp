@@ -342,8 +342,8 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
 
   // ── Render helpers ────────────────────────────────────────────────────────
   const outerCls = [
-    'w-full bg-white rounded-2xl sm:rounded-3xl border overflow-hidden flex flex-col min-h-[min(520px,75dvh)]',
-    flatChrome ? 'border-[2.5px] border-gray-200' : 'border-gray-100',
+    'w-full bg-surface-card rounded-2xl sm:rounded-3xl border overflow-hidden flex flex-col min-h-[min(520px,75dvh)]',
+    flatChrome ? 'border-[2.5px] border-border-default' : 'border-border-subtle',
     flatChrome ? '' : 'shadow-xl',
   ]
     .filter(Boolean)
@@ -354,7 +354,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
       <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex flex-1 justify-center pr-3">
-            <div className="w-[90%] h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-[90%] h-1.5 bg-surface-subtle rounded-full overflow-hidden">
               <div
                 className="h-full bg-pink-400 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${progress * 100}%` }}
@@ -373,8 +373,8 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
               onClick={() => setSoundEnabled((v) => !v)}
               className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                 soundEnabled
-                  ? 'text-pink-500 bg-pink-50 border-pink-200 hover:bg-pink-100'
-                  : 'text-gray-400 bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  ? 'text-pink-500 bg-pink-50 dark:bg-pink-950/30 border-pink-200 hover:bg-pink-100'
+                  : 'text-text-faint bg-surface-subtle border-border-default hover:bg-border-default'
               }`}
               aria-label={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
             >
@@ -396,21 +396,21 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
                 soundTooltipOpen ? 'opacity-100' : 'opacity-0 invisible'
               }`}
             >
-              <div className="relative bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+              <div className="relative bg-zinc-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
                 <span className="block font-medium">
                   {soundEnabled ? 'Sound is on' : 'Sound is off'}
                 </span>
-                <span className="block text-gray-400 mt-0.5">
+                <span className="block text-zinc-400 mt-0.5">
                   {soundEnabled ? 'Click to mute feedback sounds' : 'Click to enable feedback sounds'}
                 </span>
-                <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-900 rotate-45" />
+                <div className="absolute -top-1 right-3 w-2 h-2 bg-zinc-900 rotate-45" />
               </div>
             </div>
           </div>
         </div>
 
         {deckName && (
-          <p className="text-[11px] text-gray-400 truncate mt-2 text-center" title={deckName}>
+          <p className="text-[11px] text-text-faint truncate mt-2 text-center" title={deckName}>
             {deckName}
           </p>
         )}
@@ -424,8 +424,8 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
       <div className={outerCls}>
         {renderHeader()}
         <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-pink-400 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Loading cards…</p>
+          <div className="w-8 h-8 border-2 border-border-default border-t-pink-400 rounded-full animate-spin" />
+          <p className="text-sm text-text-muted">Loading cards…</p>
         </div>
       </div>
     );
@@ -436,7 +436,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
     return (
       <div className={outerCls}>
         {renderHeader()}
-        <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
+        <div className="flex-1 flex items-center justify-center text-sm text-text-muted">
           No cards in this deck.
         </div>
       </div>
@@ -467,34 +467,34 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
               setLearnFlipped((f) => !f);
               setLearnSeen(true);
             }}
-            className="relative mx-auto w-full max-w-sm aspect-4/5 max-h-[280px] cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded-2xl"
+            className="relative mx-auto w-full max-w-sm aspect-4/5 max-h-[280px] cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-border-strong rounded-2xl"
             style={{ perspective: '1000px' }}
           >
             <div
-              className="relative w-full h-full transition-transform duration-500 rounded-2xl border border-gray-200 bg-white shadow-sm group-hover:shadow-md"
+              className="relative w-full h-full transition-transform duration-500 rounded-2xl border border-border-default bg-surface-card shadow-sm group-hover:shadow-md"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: learnFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
               }}
             >
               <div
-                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
+                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-surface-card"
                 style={{ backfaceVisibility: 'hidden' }}
               >
-                <p className="text-lg font-semibold text-gray-800 leading-snug text-center">{card.front}</p>
+                <p className="text-lg font-semibold text-text-primary leading-snug text-center">{card.front}</p>
               </div>
               <div
-                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-white"
+                className="absolute inset-0 flex items-center justify-center p-6 rounded-2xl bg-surface-card"
                 style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
               >
-                <p className="text-center text-lg font-medium text-gray-700 leading-snug">{card.back}</p>
+                <p className="text-center text-lg font-medium text-text-secondary leading-snug">{card.back}</p>
               </div>
             </div>
           </button>
 
-          <p className="text-center text-sm text-gray-500 mt-5">
+          <p className="text-center text-sm text-text-muted mt-5">
             Click card or press{' '}
-            <kbd className="px-2 py-0.5 rounded-md border border-gray-200 bg-gray-50 text-xs font-mono text-gray-600">
+            <kbd className="px-2 py-0.5 rounded-md border border-border-default bg-surface-subtle text-xs font-mono text-text-secondary">
               SPACE
             </kbd>{' '}
             to flip
@@ -535,11 +535,11 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
           </div>
         )}
 
-        <div className="flex-1 flex flex-row gap-0 divide-x divide-gray-100 min-h-0">
+        <div className="flex-1 flex flex-row gap-0 divide-x divide-border-subtle min-h-0">
           {/* Left — card front (same style as learn phase) */}
           <div className="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 py-4 sm:py-6">
-            <div className="w-full max-w-xs aspect-4/5 max-h-[280px] rounded-2xl border border-gray-200 bg-white shadow-sm flex items-center justify-center p-6">
-              <p className="text-center text-lg font-semibold text-gray-800 leading-snug">{q.card.front}</p>
+            <div className="w-full max-w-xs aspect-4/5 max-h-[280px] rounded-2xl border border-border-default bg-surface-card shadow-sm flex items-center justify-center p-6">
+              <p className="text-center text-lg font-semibold text-text-primary leading-snug">{q.card.front}</p>
             </div>
           </div>
 
@@ -555,8 +555,8 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
                       onClick={() => setSelectedOption(opt)}
                       className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all cursor-pointer ${
                         selectedOption === opt
-                          ? 'border-pink-400 bg-pink-50 text-pink-700 font-medium'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-pink-400 bg-pink-50 dark:bg-pink-950/30 text-pink-700 dark:text-pink-400 font-medium'
+                          : 'border-border-default bg-surface-card text-text-secondary hover:border-border-strong hover:bg-surface-subtle'
                       }`}
                     >
                       {opt}
@@ -567,7 +567,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
                   <button
                     type="button"
                     onClick={handleSkip}
-                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl border border-border-default text-text-muted text-sm hover:bg-surface-subtle transition-colors cursor-pointer"
                   >
                     Skip
                   </button>
@@ -590,13 +590,13 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
                   onChange={(e) => setFreeText(e.target.value)}
                   placeholder="Type your answer…"
                   rows={4}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
+                  className="w-full rounded-xl border border-border-default bg-surface-card px-4 py-3 text-sm text-text-primary placeholder:text-text-faint resize-none focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleSkip}
-                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl border border-border-default text-text-muted text-sm hover:bg-surface-subtle transition-colors cursor-pointer"
                   >
                     Skip
                   </button>
@@ -614,17 +614,17 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
 
             {answerState === 'self_mark' && (
               <>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Your answer</p>
-                  <p className="text-sm text-gray-700">{freeText}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-3 mb-1">Correct answer</p>
-                  <p className="text-sm font-medium text-gray-800">{q.card.back}</p>
+                <div className="rounded-xl border border-border-default bg-surface-subtle px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-widest text-text-faint mb-1">Your answer</p>
+                  <p className="text-sm text-text-secondary">{freeText}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-text-faint mt-3 mb-1">Correct answer</p>
+                  <p className="text-sm font-medium text-text-primary">{q.card.back}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => handleSelfMark(false)}
-                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl border border-border-default text-text-secondary text-sm hover:bg-surface-subtle transition-colors cursor-pointer"
                   >
                     Missed it
                   </button>
@@ -643,19 +643,19 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
               <>
                 <div className={`rounded-xl border px-4 py-3 ${
                   answerState === 'skipped'
-                    ? 'border-gray-200 bg-gray-50'
+                    ? 'border-border-default bg-surface-subtle'
                     : wasCorrect
                     ? 'border-green-200 bg-green-50'
                     : 'border-red-100 bg-red-50'
                 }`}>
                   {answerState === 'skipped' ? (
-                    <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Correct answer</p>
+                    <p className="text-[10px] uppercase tracking-widest text-text-faint mb-1">Correct answer</p>
                   ) : wasCorrect ? (
                     <p className="text-[10px] uppercase tracking-widest text-green-500 mb-1">Correct!</p>
                   ) : (
                     <p className="text-[10px] uppercase tracking-widest text-red-400 mb-1">Incorrect</p>
                   )}
-                  <p className="text-sm font-medium text-gray-800">{q.card.back}</p>
+                  <p className="text-sm font-medium text-text-primary">{q.card.back}</p>
                 </div>
                 <button
                   type="button"
@@ -668,7 +668,7 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
             )}
 
             <div className="text-right">
-              <span className="text-xs text-gray-400 tabular-nums">{quizIdx + 1} / {quizQueue.length}</span>
+              <span className="text-xs text-text-faint tabular-nums">{quizIdx + 1} / {quizQueue.length}</span>
             </div>
           </div>
         </div>
@@ -690,18 +690,18 @@ export function FlashcardStudyView({ cards, loading, deckName, deckId, flatChrom
         {renderHeader()}
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 py-10">
           <div className="flex flex-col items-center gap-1">
-            <span className="text-6xl font-bold text-gray-900 tabular-nums">{pct}%</span>
-            <span className="text-sm text-gray-500">{score.correct} / {score.total} correct on first attempt</span>
+            <span className="text-6xl font-bold text-text-primary tabular-nums">{pct}%</span>
+            <span className="text-sm text-text-muted">{score.correct} / {score.total} correct on first attempt</span>
           </div>
 
-          <div className="w-full max-w-xs h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="w-full max-w-xs h-2 bg-surface-subtle rounded-full overflow-hidden">
             <div
               className="h-full bg-pink-400 rounded-full transition-all duration-700"
               style={{ width: `${pct}%` }}
             />
           </div>
 
-          <p className="text-sm text-gray-600 text-center">{message}</p>
+          <p className="text-sm text-text-secondary text-center">{message}</p>
 
           <button
             type="button"

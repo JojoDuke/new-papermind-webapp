@@ -4,13 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../convex/_generated/api';
 import { CreateFromDocumentModal } from '@/components/app/CreateFromDocumentModal';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
 import toast from 'react-hot-toast';
-import type { Id } from '../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../convex/_generated/dataModel';
 
 export default function StudyGuidesPage() {
   const router = useRouter();
@@ -47,13 +45,12 @@ export default function StudyGuidesPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <main className={`${dashboardMainClass} bg-gray-50 flex flex-col`}>
+    <>
+      <main className={`${dashboardMainClass} bg-surface-page flex flex-col`}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 md:mb-8 shrink-0">
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 mb-2">Study Guides</h1>
-              <p className="text-sm text-gray-500 font-sans max-w-xl">
+              <h1 className="text-xl sm:text-2xl font-bold font-serif text-text-primary mb-2">Study Guides</h1>
+              <p className="text-sm text-text-muted font-sans max-w-xl">
                 Comprehensive summaries and explanations to help you understand key topics in depth.
               </p>
             </div>
@@ -72,12 +69,12 @@ export default function StudyGuidesPage() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col items-center gap-3 animate-pulse"
+                  className="bg-surface-card border border-border-default rounded-xl p-5 flex flex-col items-center gap-3 animate-pulse"
                 >
-                  <div className="w-14 h-16 bg-gray-100 rounded" />
+                  <div className="w-14 h-16 bg-surface-subtle rounded" />
                   <div className="w-full space-y-2">
-                    <div className="h-2.5 bg-gray-100 rounded-full w-3/4 mx-auto" />
-                    <div className="h-2 bg-gray-50 rounded-full w-1/2 mx-auto" />
+                    <div className="h-2.5 bg-surface-subtle rounded-full w-3/4 mx-auto" />
+                    <div className="h-2 bg-surface-page rounded-full w-1/2 mx-auto" />
                   </div>
                 </div>
               ))}
@@ -94,10 +91,10 @@ export default function StudyGuidesPage() {
                 priority
                 className="object-contain w-full max-w-[320px] h-auto mb-6"
               />
-              <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 mb-3">
+              <h2 className="text-2xl md:text-3xl font-bold font-serif text-text-primary mb-3">
                 No study guides yet
               </h2>
-              <p className="text-sm text-gray-500 font-sans max-w-md leading-relaxed">
+              <p className="text-sm text-text-muted font-sans max-w-md leading-relaxed">
                 We haven&apos;t created any study guides for your documents yet. Upload a document
                 and our AI will create comprehensive study guides to help you learn better.
               </p>
@@ -109,7 +106,7 @@ export default function StudyGuidesPage() {
               {studyGuides.map((guide) => (
                 <div
                   key={guide._id}
-                  className="group relative bg-white border border-gray-200 hover:border-green-200 rounded-xl p-5 flex flex-col items-center gap-3 transition-colors"
+                  className="group relative bg-surface-card border border-border-default hover:border-green-200 rounded-xl p-5 flex flex-col items-center gap-3 transition-colors"
                 >
                   <div className="absolute top-3 right-3">
                     <button
@@ -129,7 +126,7 @@ export default function StudyGuidesPage() {
                     {openMenuId === guide._id && (
                       <div
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
+                        className="absolute right-0 top-7 z-20 bg-surface-card border border-border-subtle rounded-lg shadow-lg py-1 w-36"
                       >
                         <button
                           onClick={() => {
@@ -162,10 +159,10 @@ export default function StudyGuidesPage() {
                       </span>
                     </div>
                     <div className="w-full text-center">
-                      <p className="text-xs font-medium text-gray-700 truncate w-full" title={guide.title}>
+                      <p className="text-xs font-medium text-text-secondary truncate w-full" title={guide.title}>
                         {guide.title}
                       </p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">
+                      <p className="text-[10px] text-text-faint mt-0.5">
                         {new Date(guide.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -183,7 +180,6 @@ export default function StudyGuidesPage() {
           mode="study-guide"
           documents={documents}
         />
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </>
   );
 }

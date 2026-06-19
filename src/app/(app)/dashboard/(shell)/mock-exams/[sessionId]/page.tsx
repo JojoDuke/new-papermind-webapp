@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../../../convex/_generated/api';
-import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import { DashboardAppShell } from '@/components/app/DashboardAppShell';
+import { api } from '../../../../../../../convex/_generated/api';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
-import type { Id } from '../../../../../../convex/_generated/dataModel';
+import type { Id } from '../../../../../../../convex/_generated/dataModel';
 import toast from 'react-hot-toast';
 
 function shuffle<T>(arr: T[]): T[] {
@@ -125,30 +123,22 @@ export default function MockExamSessionPage() {
 
   if (session === undefined) {
     return (
-      <ProtectedRoute>
-        <DashboardAppShell>
-          <main className={`${dashboardMainClass} flex items-center justify-center`}>
-            <div className="w-8 h-8 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
-          </main>
-        </DashboardAppShell>
-      </ProtectedRoute>
+      <main className={`${dashboardMainClass} flex items-center justify-center`}>
+        <div className="w-8 h-8 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
+      </main>
     );
   }
 
   if (session === null) {
     return (
-      <ProtectedRoute>
-        <DashboardAppShell>
-          <main className={`${dashboardMainClass} flex items-center justify-center`}>
-            <div className="text-center">
-              <p className="text-gray-500 mb-4">Exam session not found.</p>
-              <button onClick={() => router.push('/dashboard/mock-exams')} className="text-[#FF5392] text-sm font-medium cursor-pointer">
-                ← Back to mock exams
-              </button>
-            </div>
-          </main>
-        </DashboardAppShell>
-      </ProtectedRoute>
+      <main className={`${dashboardMainClass} flex items-center justify-center`}>
+        <div className="text-center">
+          <p className="text-text-muted mb-4">Exam session not found.</p>
+          <button onClick={() => router.push('/dashboard/mock-exams')} className="text-[#FF5392] text-sm font-medium cursor-pointer">
+            ← Back to mock exams
+          </button>
+        </div>
+      </main>
     );
   }
 
@@ -161,13 +151,11 @@ export default function MockExamSessionPage() {
       : 0;
 
     return (
-      <ProtectedRoute>
-        <DashboardAppShell>
-          <main className={`${dashboardMainClass} flex flex-col`}>
-            <button
-              type="button"
-              onClick={() => router.push('/dashboard/mock-exams')}
-              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 cursor-pointer w-fit"
+      <main className={`${dashboardMainClass} flex flex-col`}>
+        <button
+          type="button"
+          onClick={() => router.push('/dashboard/mock-exams')}
+              className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-secondary mb-6 cursor-pointer w-fit"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -181,12 +169,12 @@ export default function MockExamSessionPage() {
                 {passed ? '🎉 Passing score' : 'Keep studying'}
               </p>
               <p className="text-6xl font-bold mb-1" style={{ color: passed ? '#059669' : '#dc2626' }}>{score}%</p>
-              <p className="text-sm text-gray-600">{correctCount} / {session.questions.length} correct</p>
-              <p className="text-xs text-gray-400 mt-1">NCLEX-RN passing threshold is 75%</p>
+              <p className="text-sm text-text-secondary">{correctCount} / {session.questions.length} correct</p>
+              <p className="text-xs text-text-faint mt-1">NCLEX-RN passing threshold is 75%</p>
             </div>
 
             {/* Question review */}
-            <h2 className="text-base font-semibold text-gray-900 mb-4">Question review</h2>
+            <h2 className="text-base font-semibold text-text-primary mb-4">Question review</h2>
             <div className="space-y-4">
               {session.questions.map((q, idx) => {
                 const userAnswer = session.answers?.find((a) => a.questionIndex === idx)?.selectedAnswer ?? null;
@@ -207,7 +195,7 @@ export default function MockExamSessionPage() {
                           </svg>
                         )}
                       </span>
-                      <p className="text-sm font-medium text-gray-800">{idx + 1}. {q.question}</p>
+                      <p className="text-sm font-medium text-text-primary">{idx + 1}. {q.question}</p>
                     </div>
                     <div className="space-y-1.5 ml-7">
                       {choices.map((choice) => {
@@ -221,7 +209,7 @@ export default function MockExamSessionPage() {
                                 ? 'bg-emerald-100 border-emerald-300 text-emerald-800 font-medium'
                                 : isUserChoice && !isCorrectChoice
                                 ? 'bg-red-100 border-red-300 text-red-700'
-                                : 'bg-white border-gray-200 text-gray-600'
+                                : 'bg-surface-card border-border-default text-text-secondary'
                             }`}
                           >
                             {choice}
@@ -235,53 +223,49 @@ export default function MockExamSessionPage() {
                 );
               })}
             </div>
-          </main>
-        </DashboardAppShell>
-      </ProtectedRoute>
+      </main>
     );
   }
 
   // ── Pre-start screen ─────────────────────────────────────────────────────
   if (!examStarted) {
     return (
-      <ProtectedRoute>
-        <DashboardAppShell>
-          <main className={`${dashboardMainClass} flex items-center justify-center`}>
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 sm:p-12 max-w-md w-full text-center">
-              <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-5">
+      <main className={`${dashboardMainClass} flex items-center justify-center`}>
+            <div className="bg-surface-card border border-border-default rounded-2xl p-8 sm:p-12 max-w-md w-full text-center">
+              <div className="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-950/30 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">{session.title}</h1>
-              <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-6">
+              <h1 className="text-xl font-bold text-text-primary mb-2">{session.title}</h1>
+              <div className="flex items-center justify-center gap-4 text-sm text-text-muted mb-6">
                 <span>{session.questions.length} questions</span>
                 <span>·</span>
                 <span>{session.timeLimitMinutes} min</span>
                 <span>·</span>
                 <span>NCLEX-RN</span>
               </div>
-              <ul className="text-sm text-gray-600 text-left space-y-2 mb-8 bg-gray-50 rounded-xl p-4">
+              <ul className="text-sm text-text-secondary text-left space-y-2 mb-8 bg-surface-subtle rounded-xl p-4">
                 <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Timer starts when you click Start
                 </li>
                 <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   No feedback until you submit
                 </li>
                 <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                   Navigate freely between questions
                 </li>
                 <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-text-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   75% or higher is a passing score
@@ -297,14 +281,12 @@ export default function MockExamSessionPage() {
               <button
                 type="button"
                 onClick={() => router.push('/dashboard/mock-exams')}
-                className="mt-3 w-full py-2 text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+                className="mt-3 w-full py-2 text-sm text-text-muted hover:text-text-secondary cursor-pointer"
               >
                 Cancel
               </button>
             </div>
-          </main>
-        </DashboardAppShell>
-      </ProtectedRoute>
+    </main>
     );
   }
 
@@ -315,16 +297,14 @@ export default function MockExamSessionPage() {
   const isLowTime = timeLeft !== null && timeLeft < 300;
 
   return (
-    <ProtectedRoute>
-      <DashboardAppShell>
-        <main className={`${dashboardMainClass} flex flex-col max-w-3xl mx-auto`}>
+    <main className={`${dashboardMainClass} flex flex-col max-w-3xl mx-auto`}>
           {/* Exam header */}
           <div className="flex items-center justify-between mb-6 shrink-0">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392]">NCLEX-RN</p>
-              <h1 className="text-base font-semibold text-gray-900 truncate">{session.title}</h1>
+              <h1 className="text-base font-semibold text-text-primary truncate">{session.title}</h1>
             </div>
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-sm font-semibold shrink-0 ${isLowTime ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-100 text-gray-700'}`}>
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-sm font-semibold shrink-0 ${isLowTime ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40' : 'bg-surface-subtle text-text-secondary'}`}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -334,11 +314,11 @@ export default function MockExamSessionPage() {
 
           {/* Progress bar */}
           <div className="mb-6 shrink-0">
-            <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <div className="flex justify-between text-xs text-text-faint mb-1">
               <span>Question {currentIndex + 1} of {session.questions.length}</span>
               <span>{answeredCount} answered</span>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-subtle rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#FF5392] rounded-full transition-all"
                 style={{ width: `${((currentIndex + 1) / session.questions.length) * 100}%` }}
@@ -347,9 +327,9 @@ export default function MockExamSessionPage() {
           </div>
 
           {/* Question */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-5 flex-1">
-            <p className="text-sm text-gray-500 mb-3">Question {currentIndex + 1}</p>
-            <p className="text-gray-900 font-medium leading-relaxed mb-6">{question.question}</p>
+          <div className="bg-surface-card border border-border-default rounded-2xl p-6 mb-5 flex-1">
+            <p className="text-sm text-text-muted mb-3">Question {currentIndex + 1}</p>
+            <p className="text-text-primary font-medium leading-relaxed mb-6">{question.question}</p>
 
             <div className="space-y-3">
               {choices.map((choice, ci) => {
@@ -362,11 +342,11 @@ export default function MockExamSessionPage() {
                     onClick={() => setAnswers((prev) => ({ ...prev, [currentIndex]: choice }))}
                     className={`w-full text-left flex items-start gap-3 px-4 py-3.5 rounded-xl border-2 transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-[#FF5392] bg-pink-50 text-gray-900'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                        ? 'border-[#FF5392] bg-pink-50 dark:bg-pink-950/20 text-text-primary'
+                        : 'border-border-default hover:border-border-strong text-text-secondary'
                     }`}
                   >
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? 'bg-[#FF5392] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? 'bg-[#FF5392] text-white' : 'bg-surface-subtle text-text-secondary'}`}>
                       {label}
                     </span>
                     <span className="text-sm leading-relaxed pt-0.5">{choice}</span>
@@ -382,7 +362,7 @@ export default function MockExamSessionPage() {
               type="button"
               disabled={currentIndex === 0}
               onClick={() => setCurrentIndex((i) => i - 1)}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 py-2.5 rounded-xl border border-border-default text-sm text-text-secondary hover:bg-surface-subtle transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ← Previous
             </button>
@@ -424,16 +404,14 @@ export default function MockExamSessionPage() {
                   idx === currentIndex
                     ? 'bg-[#FF5392] text-white'
                     : answers[idx]
-                    ? 'bg-pink-100 text-pink-700'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-pink-100 dark:bg-pink-950/30 text-pink-700 dark:text-pink-400'
+                    : 'bg-surface-subtle text-text-muted hover:bg-border-default'
                 }`}
               >
                 {idx + 1}
               </button>
             ))}
           </div>
-        </main>
-      </DashboardAppShell>
-    </ProtectedRoute>
+    </main>
   );
 }

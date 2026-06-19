@@ -178,8 +178,8 @@ export function DemoWidget() {
 
   if (!hydrated) {
     return (
-      <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden min-h-[320px] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-pink-400 rounded-full animate-spin" />
+      <div className="w-full rounded-[20px] bg-surface-card border-[2.5px] border-border-default overflow-hidden min-h-[320px] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-border-default border-t-pink-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -191,11 +191,11 @@ export function DemoWidget() {
         <div className="flex items-center justify-between px-1 gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse shrink-0" />
-            <p className="text-xs font-medium text-gray-500 truncate">
+            <p className="text-xs font-medium text-text-muted truncate">
               Live demo &mdash;{' '}
-              <span className="text-gray-400 font-normal">{fileName}</span>
+              <span className="text-text-faint font-normal">{fileName}</span>
               {demoLocked && (
-                <span className="text-gray-400 font-normal"> &middot; your saved demo deck</span>
+                <span className="text-text-faint font-normal"> &middot; your saved demo deck</span>
               )}
             </p>
           </div>
@@ -215,7 +215,7 @@ export function DemoWidget() {
                 setFileName(null);
                 setError(null);
               }}
-              className="shrink-0 text-xs text-gray-400 hover:text-gray-600 transition-colors cursor-pointer flex items-center gap-1"
+              className="shrink-0 text-xs text-text-faint hover:text-text-secondary transition-colors cursor-pointer flex items-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -232,10 +232,10 @@ export function DemoWidget() {
   // ── Generating ────────────────────────────────────────────────────────────
   if (phase === 'generating') {
     return (
-      <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
+      <div className="w-full rounded-[20px] bg-surface-card border-[2.5px] border-border-default overflow-hidden">
         <div className="flex flex-col items-center justify-center gap-5 py-20 px-8">
           <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-pink-50 dark:bg-pink-950/30 flex items-center justify-center">
               <svg className="w-7 h-7 text-pink-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
@@ -243,9 +243,9 @@ export function DemoWidget() {
             <div className="absolute -inset-1 bg-pink-200 rounded-2xl blur-md opacity-30 animate-pulse" />
           </div>
           <div className="text-center">
-            <p className="text-base font-semibold text-gray-800 mb-1">Generating your flashcards…</p>
-            <p className="text-sm text-gray-400">
-              Reading <span className="font-medium text-gray-500">{fileName}</span> and creating your study set
+            <p className="text-base font-semibold text-text-primary mb-1">Generating your flashcards…</p>
+            <p className="text-sm text-text-faint">
+              Reading <span className="font-medium text-text-muted">{fileName}</span> and creating your study set
             </p>
           </div>
           <div className="flex gap-1.5 mt-2">
@@ -268,20 +268,20 @@ export function DemoWidget() {
   const staleLocked = demoLocked && !hasSavedDeck;
 
   return (
-    <div className="w-full rounded-[20px] bg-white border-[2.5px] border-gray-200 overflow-hidden">
-      <div className="px-8 pt-8 pb-3 border-b border-gray-50">
+    <div className="w-full rounded-[20px] bg-surface-card border-[2.5px] border-border-default overflow-hidden">
+      <div className="px-8 pt-8 pb-3 border-b border-border-subtle">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-semibold uppercase tracking-widest text-[#FF5392]">Live Demo</span>
           {!uploadDisabled && <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />}
         </div>
-        <h3 className="text-xl font-bold font-serif text-gray-900">
+        <h3 className="text-xl font-bold font-serif text-text-primary">
           {staleLocked
             ? 'Demo session not found'
             : uploadDisabled
               ? 'Your demo deck is ready'
               : 'Try it with your own PDF'}
         </h3>
-        <p className="text-sm text-gray-400 mt-1 font-sans">
+        <p className="text-sm text-text-faint mt-1 font-sans">
           {staleLocked
             ? 'We could not load your saved flashcards on this browser. Try the demo again or create an account.'
             : uploadDisabled
@@ -302,10 +302,10 @@ export function DemoWidget() {
           onClick={() => !uploadDisabled && inputRef.current?.click()}
           className={`relative flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed transition-all duration-200 py-14 px-6 ${
             uploadDisabled
-              ? 'border-gray-200 bg-gray-50/80 cursor-not-allowed opacity-60'
+              ? 'border-border-default bg-surface-subtle/80 cursor-not-allowed opacity-60'
               : dragging
-                ? 'border-pink-400 bg-pink-50/60 scale-[1.01] cursor-pointer'
-                : 'border-gray-200 bg-gray-50/50 hover:border-pink-300 hover:bg-pink-50/30 cursor-pointer'
+                ? 'border-pink-400 bg-pink-50/60 dark:bg-pink-950/20 scale-[1.01] cursor-pointer'
+                : 'border-border-default bg-surface-subtle/50 hover:border-pink-300 hover:bg-pink-50/30 dark:hover:bg-pink-950/10 cursor-pointer'
           }`}
         >
           <input
@@ -323,14 +323,14 @@ export function DemoWidget() {
           <div
             className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
               uploadDisabled
-                ? 'bg-gray-100 border border-gray-200'
+                ? 'bg-surface-subtle border border-border-default'
                 : dragging
-                  ? 'bg-pink-100'
-                  : 'bg-white border-[2.5px] border-gray-200'
+                  ? 'bg-pink-100 dark:bg-pink-950/30'
+                  : 'bg-surface-card border-[2.5px] border-border-default'
             }`}
           >
             <svg
-              className={`w-7 h-7 transition-colors ${uploadDisabled || !dragging ? 'text-gray-400' : 'text-pink-500'}`}
+              className={`w-7 h-7 transition-colors ${uploadDisabled || !dragging ? 'text-text-faint' : 'text-pink-500'}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -345,10 +345,10 @@ export function DemoWidget() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm font-semibold text-gray-700">
+            <p className="text-sm font-semibold text-text-secondary">
               {uploadDisabled ? 'Upload locked' : dragging ? 'Drop it here' : 'Drag & drop your PDF'}
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-text-faint mt-1">
               {uploadDisabled ? (
                 <>
                   <Link href="/sign-up" className="text-[#FF5392] font-medium hover:underline">
@@ -407,10 +407,10 @@ export function DemoWidget() {
               { icon: '🧠', label: 'Quiz mode', sub: 'Test yourself live' },
               { icon: '🔒', label: 'No sign-up', sub: 'For this demo only' },
             ].map(({ icon, label, sub }) => (
-              <div key={label} className="flex flex-col items-center gap-1.5 bg-gray-50 rounded-xl px-3 py-4">
+              <div key={label} className="flex flex-col items-center gap-1.5 bg-surface-subtle rounded-xl px-3 py-4">
                 <span className="text-xl">{icon}</span>
-                <p className="text-xs font-semibold text-gray-700 text-center">{label}</p>
-                <p className="text-[10px] text-gray-400 text-center">{sub}</p>
+                <p className="text-xs font-semibold text-text-secondary text-center">{label}</p>
+                <p className="text-[10px] text-text-faint text-center">{sub}</p>
               </div>
             ))}
           </div>

@@ -11,7 +11,7 @@ export function StudyGuideSectionBody({ content, compact }: StudyGuideSectionBod
 
   return (
     <div
-      className={`flex flex-col font-sans text-gray-700 leading-relaxed ${
+      className={`flex flex-col font-sans text-text-secondary leading-relaxed ${
         compact ? 'gap-1.5 text-sm' : 'gap-2 text-sm'
       }`}
     >
@@ -21,14 +21,14 @@ export function StudyGuideSectionBody({ content, compact }: StudyGuideSectionBod
 
         if (trimmed.startsWith('### ')) {
           return (
-            <h4 key={i} className="text-sm font-semibold text-gray-900 mt-2">
+            <h4 key={i} className="text-sm font-semibold text-text-primary mt-2">
               {trimmed.slice(4)}
             </h4>
           );
         }
         if (trimmed.startsWith('## ')) {
           return (
-            <h3 key={i} className="text-base font-semibold text-gray-900 mt-3">
+            <h3 key={i} className="text-base font-semibold text-text-primary mt-3">
               {trimmed.slice(3)}
             </h3>
           );
@@ -58,7 +58,7 @@ function InlineMarkdown({ text }: { text: string }) {
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
-            <strong key={i} className="font-semibold text-gray-900">
+            <strong key={i} className="font-semibold text-text-primary">
               {part.slice(2, -2)}
             </strong>
           );

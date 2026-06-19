@@ -124,10 +124,10 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-surface-page">
         <div className="w-full max-w-md">
           {/* Back Home Link */}
-          <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-8 transition-colors">
+          <Link href="/" className="inline-flex items-center text-sm text-text-secondary hover:text-text-primary mb-8 transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -144,11 +144,11 @@ export default function AuthPage() {
                 height={48}
                 className="w-12 h-12"
               />
-              <h1 className="text-4xl font-bold text-gray-900">
+              <h1 className="text-4xl font-bold text-text-primary">
                 Papermind
               </h1>
             </div>
-            <p className="text-gray-600 text-lg">
+            <p className="text-text-secondary text-lg">
               {isLogin ? 'Welcome back! Ready to ace your exams?' : 'Start your journey to exam success'}
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function AuthPage() {
             <button 
               type="button" 
               onClick={handleGoogleSignIn}
-              className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+              className="w-full inline-flex justify-center items-center py-3 px-4 border border-border-strong rounded-lg shadow-sm bg-surface-card text-sm font-medium text-text-secondary hover:bg-surface-subtle transition-all cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -174,10 +174,10 @@ export default function AuthPage() {
           <div className="mb-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-border-strong" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-gray-50 text-gray-500">
+                <span className="px-3 bg-surface-page text-text-muted">
                   Or continue with email
                 </span>
               </div>
@@ -195,7 +195,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1.5">
                   Full Name
                 </label>
                 <input
@@ -205,14 +205,14 @@ export default function AuthPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required={!isLogin}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
+                  className="w-full px-4 py-3 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
                   placeholder="Enter your full name"
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
                 Email Address
               </label>
               <input
@@ -222,13 +222,13 @@ export default function AuthPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
+                className="w-full px-4 py-3 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
                 placeholder="email@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -239,13 +239,13 @@ export default function AuthPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
+                  className="w-full px-4 py-3 pr-12 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary cursor-pointer"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,7 +263,7 @@ export default function AuthPage() {
 
             {!isLogin && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-secondary mb-1.5">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -274,13 +274,13 @@ export default function AuthPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required={!isLogin}
-                    className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-500"
+                    className="w-full px-4 py-3 pr-12 bg-surface-card border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-text-primary placeholder:text-text-faint"
                     placeholder="Confirm your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary cursor-pointer"
                   >
                     {showConfirmPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +325,7 @@ export default function AuthPage() {
           </form>
 
           {/* Footer text */}
-          <div className="mt-8 text-center text-sm text-gray-600">
+          <div className="mt-8 text-center text-sm text-text-secondary">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <Link
               href="/sign-in"

@@ -95,17 +95,17 @@ export function StudyDeckCard({
         >
           <div className="relative w-full pt-1 pl-1">
             <div
-              className="absolute top-2 left-2 right-0 bottom-0 rounded-xl bg-white border border-gray-200/80 shadow-sm"
+              className="absolute top-2 left-2 right-0 bottom-0 rounded-xl bg-surface-card border border-border-default shadow-sm"
               aria-hidden
             />
-            <div className="relative aspect-square rounded-xl bg-gradient-to-br from-pink-50 via-white to-purple-100 border border-gray-200 shadow-sm overflow-hidden group-hover:shadow-md transition-shadow">
+            <div className="relative aspect-square rounded-xl bg-gradient-to-br from-pink-50 via-white to-purple-100 dark:from-pink-950/20 dark:via-zinc-800 dark:to-purple-950/20 border border-border-default shadow-sm overflow-hidden group-hover:shadow-md transition-shadow">
               <div className="absolute inset-0 flex items-center justify-center opacity-40">
                 <svg className="w-14 h-14 text-pink-200" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                 </svg>
               </div>
               <div
-                className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-white border-2 border-white shadow-md flex items-center justify-center text-xs font-semibold text-pink-600"
+                className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-surface-card border-2 border-surface-card shadow-md flex items-center justify-center text-xs font-semibold text-pink-600 dark:text-pink-400"
                 title="You"
               >
                 {userInitial}
@@ -114,7 +114,7 @@ export function StudyDeckCard({
           </div>
 
           <div className="px-0.5">
-            <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1 w-full bg-surface-subtle rounded-full overflow-hidden">
               <div
                 className="h-full bg-amber-400 rounded-full transition-all"
                 style={{ width: `${pct}%` }}
@@ -135,19 +135,19 @@ export function StudyDeckCard({
               if (e.key === 'Escape') { e.preventDefault(); cancelRename(); }
             }}
             maxLength={80}
-            className="text-sm font-medium text-gray-800 leading-tight px-1.5 py-0.5 rounded-lg border border-pink-400 ring-2 ring-pink-200 outline-none w-full min-h-[2.5rem] bg-white"
+            className="text-sm font-medium text-text-primary leading-tight px-1.5 py-0.5 rounded-lg border border-pink-400 ring-2 ring-pink-200 outline-none w-full min-h-[2.5rem] bg-surface-card"
           />
         ) : (
           <Link
             href={href}
-            className="text-sm font-medium text-gray-800 leading-tight line-clamp-2 min-h-[2.5rem] px-0.5 cursor-pointer"
+            className="text-sm font-medium text-text-primary leading-tight line-clamp-2 min-h-[2.5rem] px-0.5 cursor-pointer"
           >
             {title}
           </Link>
         )}
 
         {/* Card count */}
-        <div className="flex items-center gap-3 text-[11px] text-gray-400 px-0.5">
+        <div className="flex items-center gap-3 text-[11px] text-text-faint px-0.5">
           <span className="flex items-center gap-1">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -170,7 +170,7 @@ export function StudyDeckCard({
                 e.stopPropagation();
                 setMenuOpen((prev) => !prev);
               }}
-              className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-white/80 transition-all cursor-pointer"
+              className="p-1 rounded-md text-text-faint hover:text-text-secondary hover:bg-surface-card/80 transition-all cursor-pointer"
               aria-label="Deck options"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@ export function StudyDeckCard({
             {menuOpen && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-7 z-20 bg-white border border-gray-100 rounded-lg shadow-lg py-1 w-36"
+                className="absolute right-0 top-7 z-20 bg-surface-card border border-border-subtle rounded-lg shadow-lg py-1 w-36"
               >
                 {onRename && (
                   <button
@@ -192,7 +192,7 @@ export function StudyDeckCard({
                       setRenameValue(title);
                       setIsRenaming(true);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface-subtle transition-colors cursor-pointer"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -232,18 +232,18 @@ export function StudyDeckCard({
           onClick={() => !isDeleting && setConfirmOpen(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 w-80 max-w-[90vw]"
+            className="bg-surface-card rounded-2xl shadow-xl p-6 w-80 max-w-[90vw]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Delete deck?</h3>
-            <p className="text-sm text-gray-500 mb-5">
+            <h3 className="text-base font-semibold text-text-primary mb-1">Delete deck?</h3>
+            <p className="text-sm text-text-muted mb-5">
               &ldquo;{title}&rdquo; and all its cards will be permanently deleted.
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmOpen(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface-subtle rounded-lg hover:bg-border-default transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>

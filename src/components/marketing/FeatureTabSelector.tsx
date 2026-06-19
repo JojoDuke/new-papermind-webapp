@@ -45,7 +45,7 @@ export function FeatureTabSelector() {
     <div className="mt-8 w-full max-w-3xl mx-auto">
       <div className="flex w-full max-w-full justify-center overflow-x-auto px-1">
         <div
-          className="inline-flex shrink-0 overflow-hidden rounded-[10px] border-[2.5px] border-gray-200 bg-white"
+          className="inline-flex shrink-0 overflow-hidden rounded-[10px] border-[2.5px] border-border-default bg-surface-card"
           role="tablist"
           aria-label="Feature highlights"
         >
@@ -66,7 +66,7 @@ export function FeatureTabSelector() {
                 } ${
                   isActive
                     ? 'pink-glowing-button flat-chrome text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                    : 'bg-surface-card text-text-secondary hover:bg-surface-subtle hover:text-text-primary'
                 }`}
               >
                 <span>{label}</span>
@@ -80,14 +80,14 @@ export function FeatureTabSelector() {
         id="feature-tabpanel"
         role="tabpanel"
         aria-labelledby={`feature-tab-${selected}`}
-        className="mt-6 rounded-[20px] border-[2.5px] border-gray-200 bg-white p-8 md:p-10 text-left"
+        className="mt-6 rounded-[20px] border-[2.5px] border-border-default bg-surface-card p-8 md:p-10 text-left"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">{detail.eyebrow}</p>
-        <h3 className="text-2xl font-bold font-serif text-gray-900 mb-3">{detail.title}</h3>
-        <p className="text-gray-500 font-sans leading-relaxed mb-6">{detail.description}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-faint mb-2">{detail.eyebrow}</p>
+        <h3 className="text-2xl font-bold font-serif text-text-primary mb-3">{detail.title}</h3>
+        <p className="text-text-muted font-sans leading-relaxed mb-6">{detail.description}</p>
         <ul className="space-y-2.5">
           {detail.bullets.map((item) => (
-            <li key={item} className="flex gap-2.5 text-sm text-gray-600 font-sans leading-relaxed">
+            <li key={item} className="flex gap-2.5 text-sm text-text-secondary font-sans leading-relaxed">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FF5392]" aria-hidden />
               {item}
             </li>

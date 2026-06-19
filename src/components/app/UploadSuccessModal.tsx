@@ -1,13 +1,9 @@
 'use client';
 
-import { Id } from '../../../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-const EXPECTED_STUDY_GUIDE_COUNT = 3;
-
 interface UploadSuccessModalProps {
-  documentId: Id<'documents'>;
   documentName: string;
   onClose: () => void;
   onGenerateFlashcards: () => void;
@@ -15,7 +11,6 @@ interface UploadSuccessModalProps {
 }
 
 export function UploadSuccessModal({
-  documentId,
   documentName,
   onClose,
   onGenerateFlashcards,
@@ -35,10 +30,10 @@ export function UploadSuccessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pb-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-8 sm:mt-16 animate-modal-bounce">
+      <div className="relative bg-surface-card rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-visible mt-8 sm:mt-16 animate-modal-bounce">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer"
+          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-border-default transition-colors text-text-muted cursor-pointer"
           aria-label="Close"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,43 +55,35 @@ export function UploadSuccessModal({
         <div className="px-6 pb-6">
           <div className="text-center mb-1">
             <span className="text-pink-500 mr-1">✦</span>
-            <span className="text-xl font-serif font-bold text-gray-900">Your document has been added!</span>
+            <span className="text-xl font-serif font-bold text-text-primary">Your document has been added!</span>
             <span className="text-pink-500 ml-1">✦</span>
           </div>
-          <p className="text-center text-[13px] text-gray-500 mb-5">
-            We&apos;ve analysed{' '}
+          <p className="text-center text-[13px] text-text-muted mb-5">
             <span className="font-semibold text-[#e63f6e]">
               {documentName.length > 30 ? documentName.slice(0, 30) + '…' : documentName}
             </span>
-            {` and created ${EXPECTED_STUDY_GUIDE_COUNT} study guides to help you get started.`}
+            {' '}is ready. Choose what to generate from it below.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <button
               onClick={handleGoToLibrary}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-green-50 hover:border-green-200 transition-colors group cursor-pointer"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border-subtle bg-surface-subtle hover:bg-green-50 hover:border-green-200 dark:hover:bg-green-950/30 transition-colors group cursor-pointer"
             >
-              <div className="relative">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {EXPECTED_STUDY_GUIDE_COUNT}
-                </span>
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
               </div>
               <div className="text-center">
-                <p className="text-xs font-semibold text-gray-700">Study Guides</p>
-                <p className="text-[10px] text-green-600 font-medium leading-tight">
-                  {EXPECTED_STUDY_GUIDE_COUNT} created for you
-                </p>
+                <p className="text-xs font-semibold text-text-secondary">Study Guides</p>
+                <p className="text-[10px] text-green-600 font-medium leading-tight">Generate from doc</p>
               </div>
             </button>
 
             <button
               onClick={handleGenerateMore}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-pink-50 hover:border-pink-200 transition-colors group cursor-pointer"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border-subtle bg-surface-subtle hover:bg-pink-50 hover:border-pink-200 dark:hover:bg-pink-950/30 transition-colors group cursor-pointer"
             >
               <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center group-hover:bg-pink-200 transition-colors">
                 <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,14 +91,14 @@ export function UploadSuccessModal({
                 </svg>
               </div>
               <div className="text-center">
-                <p className="text-xs font-semibold text-gray-700">Flashcards</p>
+                <p className="text-xs font-semibold text-text-secondary">Flashcards</p>
                 <p className="text-[10px] text-pink-500 font-medium leading-tight">Generate in one click</p>
               </div>
             </button>
 
             <button
               onClick={onGenerateQuizzes}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 transition-colors group cursor-pointer"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border-subtle bg-surface-subtle hover:bg-purple-50 hover:border-purple-200 dark:hover:bg-purple-950/30 transition-colors group cursor-pointer"
             >
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                 <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,17 +106,17 @@ export function UploadSuccessModal({
                 </svg>
               </div>
               <div className="text-center">
-                <p className="text-xs font-semibold text-gray-700">Quizzes</p>
+                <p className="text-xs font-semibold text-text-secondary">Quizzes</p>
                 <p className="text-[10px] text-purple-500 font-medium leading-tight">Generate quiz from doc</p>
               </div>
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-pink-50 rounded-2xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-3 bg-pink-50 dark:bg-pink-950/30 rounded-2xl px-4 py-3 mb-5">
             <Image src="/assets/foxLeftSidebar.png" alt="" width={32} height={32} className="object-contain shrink-0" />
             <div>
-              <p className="text-xs font-semibold text-gray-700">All materials will be saved to your library.</p>
-              <p className="text-[11px] text-gray-400">You can access and review them anytime.</p>
+              <p className="text-xs font-semibold text-text-secondary">All materials will be saved to your library.</p>
+              <p className="text-[11px] text-text-faint">You can access and review them anytime.</p>
             </div>
             <span className="ml-auto text-pink-300 text-lg">✦</span>
           </div>
