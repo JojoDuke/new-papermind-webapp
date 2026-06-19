@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth } from 'convex/react';
 import { authRedirectUrl } from '@/lib/auth-redirect';
+import { DEFAULT_BILLING_PLAN } from '@/lib/billing';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
@@ -92,7 +93,7 @@ export default function AuthPage() {
         process.env.NEXT_PUBLIC_DEV_BYPASS_SUBSCRIPTION === 'true';
       if (!devBypass && typeof window !== 'undefined') {
         const q = new URLSearchParams(window.location.search);
-        const plan = q.get('plan') === 'starter' ? 'starter' : 'pro';
+        const plan = DEFAULT_BILLING_PLAN;
         const interval = q.get('interval') === 'yearly' ? 'yearly' : 'monthly';
         sessionStorage.setItem('pm_checkout_plan', plan);
         sessionStorage.setItem('pm_checkout_interval', interval);

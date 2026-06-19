@@ -740,7 +740,7 @@ export default function DashboardPage() {
                     onClick={() =>
                       openPricingModal({
                         title: 'Unlock Mock Exams',
-                        subtitle: 'Full-length practice exams are included on Pro. Choose a plan to get started.',
+                        subtitle: 'Full-length practice exams are included with a paid plan. Upgrade to get started.',
                       })
                     }
                     className="bg-purple-50 border border-purple-200 rounded-2xl py-6 sm:py-10 flex flex-col items-center text-center gap-2 sm:gap-3 cursor-pointer hover:border-purple-300 transition-all group opacity-90"

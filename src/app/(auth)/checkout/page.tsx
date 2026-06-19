@@ -12,8 +12,9 @@ import {
   consumeCheckoutSuccessNavigation,
   wasRecentlyPaywalledToCheckout,
 } from '@/lib/checkout-grace';
-import type { BillingInterval, BillingPlan } from '@/lib/billing';
+import type { BillingInterval } from '@/lib/billing';
 import {
+  DEFAULT_BILLING_PLAN,
   LIST_PRICE_MONTHLY_USD,
   TRIAL_DAYS,
   YEARLY_SAVINGS_PERCENT,
@@ -21,33 +22,12 @@ import {
   formatUsd,
 } from '@/lib/billing';
 
-const PLAN_META: {
-  id: BillingPlan;
-  name: string;
-  blurbMonthly: string;
-  blurbYearly: string;
-}[] = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    blurbMonthly: 'After your trial — solid limits for regular study weeks.',
-    blurbYearly: 'After your trial — same limits, best value for a full school year.',
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    blurbMonthly: 'After your trial — highest limits, mock exams, priority AI.',
-    blurbYearly: 'After your trial — full power for serious exam seasons.',
-  },
-];
-
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signOut } = useAuthActions();
   const authToken = useAuthToken();
   const hasAccess = useQuery(api.subscriptions.hasPaidAccess);
-  const [plan, setPlan] = useState<BillingPlan>('pro');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [loading, setLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -65,20 +45,11 @@ function CheckoutContent() {
   }, []);
 
   useEffect(() => {
-    const qPlan = searchParams?.get('plan');
     const qInterval = searchParams?.get('interval');
-    if (qPlan === 'starter' || qPlan === 'pro') {
-      setPlan(qPlan);
-    }
     if (qInterval === 'monthly' || qInterval === 'yearly') {
       setBillingInterval(qInterval);
     }
     if (typeof window !== 'undefined') {
-      const storedPlan = sessionStorage.getItem('pm_checkout_plan');
-      if (storedPlan === 'starter' || storedPlan === 'pro') {
-        setPlan(storedPlan);
-        sessionStorage.removeItem('pm_checkout_plan');
-      }
       const storedInterval = sessionStorage.getItem('pm_checkout_interval');
       if (storedInterval === 'monthly' || storedInterval === 'yearly') {
         setBillingInterval(storedInterval);
@@ -133,7 +104,7 @@ function CheckoutContent() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ plan, interval: billingInterval }),
+        body: JSON.stringify({ plan: DEFAULT_BILLING_PLAN, interval: billingInterval }),
       });
       const raw = await res.text();
       let data: { error?: string; url?: string } = {};
@@ -277,40 +248,25 @@ function CheckoutContent() {
             </div>
           </div>
 
-          <div className="space-y-3 mb-6">
-            {PLAN_META.map((p) => {
-              const monthly = LIST_PRICE_MONTHLY_USD[p.id];
-              const priceLine =
-                billingInterval === 'monthly'
-                  ? `${formatUsd(monthly)}/mo`
-                  : `${formatUsd(effectiveMonthlyWhenYearly(p.id))}/mo`;
-              const sub = billingInterval === 'yearly' ? 'Billed Annually' : undefined;
-              const blurb =
-                billingInterval === 'yearly' ? p.blurbYearly : p.blurbMonthly;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlan(p.id)}
-                  className={`w-full text-left rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                    plan === p.id
-                      ? 'border-[#FF5392] bg-pink-50/80'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-gray-900">{p.name}</span>
-                    <div className="text-right shrink-0">
-                      <span className="text-gray-900 font-semibold block tabular-nums">{priceLine}</span>
-                      {sub && (
-                        <span className="text-xs text-emerald-600 font-medium block mt-1">{sub}</span>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">{blurb}</p>
-                </button>
-              );
-            })}
+          <div className="rounded-xl border-2 border-[#FF5392] bg-pink-50/80 p-4 mb-6">
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-semibold text-gray-900">Papermind</span>
+              <div className="text-right shrink-0">
+                <span className="text-gray-900 font-semibold block tabular-nums">
+                  {billingInterval === 'monthly'
+                    ? `${formatUsd(LIST_PRICE_MONTHLY_USD)}/mo`
+                    : `${formatUsd(effectiveMonthlyWhenYearly())}/mo`}
+                </span>
+                {billingInterval === 'yearly' && (
+                  <span className="text-xs text-emerald-600 font-medium block mt-1">Billed Annually</span>
+                )}
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {billingInterval === 'yearly'
+                ? 'After your trial — best value for a full school year.'
+                : 'After your trial — full access to every feature.'}
+            </p>
           </div>
 
           {error && (

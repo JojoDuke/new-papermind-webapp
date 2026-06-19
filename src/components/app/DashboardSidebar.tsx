@@ -187,7 +187,7 @@ export function DashboardSidebar() {
                   closeMobileNav();
                   openPricingModal({
                     title: 'Unlock Mock Exams',
-                    subtitle: 'Full-length practice exams are included on Pro. Choose a plan to get started.',
+                    subtitle: 'Full-length practice exams are included with a paid plan. Upgrade to get started.',
                   });
                 }}
                 className={`${className} w-full cursor-pointer`}
@@ -227,7 +227,7 @@ export function DashboardSidebar() {
             <div className="absolute right-2 top-2 text-lg leading-none" aria-hidden>
               ✦
             </div>
-            <p className="text-sm font-bold text-gray-900 pr-6">Upgrade to Pro</p>
+            <p className="text-sm font-bold text-gray-900 pr-6">Upgrade your plan</p>
             <p className="text-xs text-gray-600 mt-1 mb-3 leading-snug">Unlock unlimited content and features.</p>
             <button
               type="button"

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
 import {
+  DEFAULT_BILLING_PLAN,
   TRIAL_DAYS,
   type BillingInterval,
-  type BillingPlan,
 } from "@/lib/billing";
 import { getPolarServer } from "@/lib/polar-server";
 
@@ -22,29 +22,12 @@ function appOrigin(req: NextRequest): string {
  * Polar product UUIDs from the dashboard (Products → copy ID).
  * Primary names: POLAR_PAPERMIND_*_PRODUCT_ID — falls back to POLAR_PRODUCT_* for older setups.
  */
-function resolvePolarProductId(
-  plan: BillingPlan,
-  interval: BillingInterval
-): string | undefined {
+function resolvePolarProductId(interval: BillingInterval): string | undefined {
   if (interval === "yearly") {
-    if (plan === "pro") {
-      return (
-        process.env.POLAR_PAPERMIND_PRO_YEARLY_PRODUCT_ID ??
-        process.env.POLAR_PRODUCT_PRO_YEARLY ??
-        process.env.POLAR_PRODUCT_PRO
-      );
-    }
     return (
       process.env.POLAR_PAPERMIND_STARTER_YEARLY_PRODUCT_ID ??
       process.env.POLAR_PRODUCT_STARTER_YEARLY ??
       process.env.POLAR_PRODUCT_STARTER
-    );
-  }
-  if (plan === "pro") {
-    return (
-      process.env.POLAR_PAPERMIND_PRO_MONTHLY_PRODUCT_ID ??
-      process.env.POLAR_PRODUCT_PRO_MONTHLY ??
-      process.env.POLAR_PRODUCT_PRO
     );
   }
   return (
@@ -77,30 +60,26 @@ export async function POST(req: NextRequest) {
     }
     convex.setAuth(token);
 
-    let body: { plan?: BillingPlan; interval?: BillingInterval };
+    let body: { interval?: BillingInterval };
     try {
       body = await req.json();
     } catch {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const plan: BillingPlan = body.plan === "starter" ? "starter" : "pro";
+    const plan = DEFAULT_BILLING_PLAN;
     const interval: BillingInterval =
       body.interval === "yearly" ? "yearly" : "monthly";
 
-    const productId = resolvePolarProductId(plan, interval);
+    const productId = resolvePolarProductId(interval);
 
     if (!productId) {
       const hint =
         interval === "yearly"
-          ? plan === "pro"
-            ? "Set POLAR_PAPERMIND_PRO_YEARLY_PRODUCT_ID (or POLAR_PRODUCT_PRO_YEARLY / POLAR_PRODUCT_PRO)"
-            : "Set POLAR_PAPERMIND_STARTER_YEARLY_PRODUCT_ID (or POLAR_PRODUCT_STARTER_YEARLY / POLAR_PRODUCT_STARTER)"
-          : plan === "pro"
-            ? "Set POLAR_PAPERMIND_PRO_MONTHLY_PRODUCT_ID (or POLAR_PRODUCT_PRO_MONTHLY / POLAR_PRODUCT_PRO)"
-            : "Set POLAR_PAPERMIND_STARTER_MONTHLY_PRODUCT_ID (or POLAR_PRODUCT_STARTER_MONTHLY / POLAR_PRODUCT_STARTER)";
+          ? "Set POLAR_PAPERMIND_STARTER_YEARLY_PRODUCT_ID (or POLAR_PRODUCT_STARTER_YEARLY / POLAR_PRODUCT_STARTER)"
+          : "Set POLAR_PAPERMIND_STARTER_MONTHLY_PRODUCT_ID (or POLAR_PRODUCT_STARTER_MONTHLY / POLAR_PRODUCT_STARTER)";
       return NextResponse.json(
-        { error: `Polar product ID missing for ${plan} (${interval}). ${hint}` },
+        { error: `Polar product ID missing (${interval}). ${hint}` },
         { status: 503 }
       );
     }
@@ -116,7 +95,7 @@ export async function POST(req: NextRequest) {
     const checkout = await polar.checkouts.create({
       products: [productId],
       successUrl: `${origin}/checkout/success?checkout_id={CHECKOUT_ID}`,
-      returnUrl: `${origin}/checkout?canceled=1&plan=${plan}&interval=${interval}`,
+      returnUrl: `${origin}/checkout?canceled=1&interval=${interval}`,
       embedOrigin: origin,
       externalCustomerId: user._id,
       customerEmail: user.email ?? undefined,

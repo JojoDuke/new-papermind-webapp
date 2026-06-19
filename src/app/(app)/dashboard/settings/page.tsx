@@ -154,7 +154,7 @@ export default function DashboardSettingsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p className="text-sm text-blue-700">
-                        Your free trial gives you full Pro access.{' '}
+                        Your free trial gives you full access.{' '}
                         {Math.max(0, Math.ceil((subscriptionState.trialEndsAt - Date.now()) / 86400000))} days remaining.
                       </p>
                     </div>

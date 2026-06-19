@@ -8,46 +8,20 @@ import { useAuthActions, useAuthToken } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { ProtectedRoute } from '@/components/app/ProtectedRoute';
-import type { BillingInterval, BillingPlan } from '@/lib/billing';
+import type { BillingInterval } from '@/lib/billing';
 import {
+  DEFAULT_BILLING_PLAN,
   LIST_PRICE_MONTHLY_USD,
   YEARLY_SAVINGS_PERCENT,
   effectiveMonthlyWhenYearly,
   formatUsd,
 } from '@/lib/billing';
 
-const PLAN_META: { id: BillingPlan; name: string; description: string; features: string[] }[] = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    description: 'Solid limits for regular study weeks.',
-    features: [
-      'Flashcards & quizzes from your PDFs',
-      'Up to 5 uploads',
-      'Standard AI generation speed',
-      'Progress tracking',
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    description: 'Everything in Starter, plus mock exams and priority AI.',
-    features: [
-      'Unlimited uploads',
-      'Mock exams (NCLEX-RN)',
-      'Priority AI generation',
-      'Advanced progress analytics',
-      'Study guides & AI chat',
-    ],
-  },
-];
-
 function UpgradeContent() {
   const { signOut } = useAuthActions();
   const authToken = useAuthToken();
   const searchParams = useSearchParams();
   const subscriptionState = useQuery(api.subscriptions.getSubscriptionState);
-  const [plan, setPlan] = useState<BillingPlan>('pro');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [loading, setLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -63,9 +37,7 @@ function UpgradeContent() {
   }, []);
 
   useEffect(() => {
-    const qPlan = searchParams?.get('plan');
     const qInterval = searchParams?.get('interval');
-    if (qPlan === 'starter' || qPlan === 'pro') setPlan(qPlan);
     if (qInterval === 'monthly' || qInterval === 'yearly') setBillingInterval(qInterval);
   }, [searchParams]);
 
@@ -105,7 +77,7 @@ function UpgradeContent() {
       const res = await fetch('/api/polar/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body: JSON.stringify({ plan, interval: billingInterval }),
+        body: JSON.stringify({ plan: DEFAULT_BILLING_PLAN, interval: billingInterval }),
       });
       const raw = await res.text();
       let data: { error?: string; url?: string } = {};
@@ -192,53 +164,36 @@ function UpgradeContent() {
             </div>
           </div>
 
-          {/* Plan cards */}
-          <div className="space-y-3 mb-6">
-            {PLAN_META.map((p) => {
-              const monthly = LIST_PRICE_MONTHLY_USD[p.id];
-              const priceLine =
-                billingInterval === 'monthly'
-                  ? `${formatUsd(monthly)}/mo`
-                  : `${formatUsd(effectiveMonthlyWhenYearly(p.id))}/mo`;
-              const sub = billingInterval === 'yearly' ? 'Billed Annually' : undefined;
-              const isSelected = plan === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlan(p.id)}
-                  className={`w-full text-left rounded-xl border-2 p-4 transition-all cursor-pointer ${isSelected ? 'border-[#FF5392] bg-pink-50/80' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      {isSelected && (
-                        <span className="w-4 h-4 rounded-full bg-[#FF5392] flex items-center justify-center shrink-0">
-                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 12 12">
-                            <path d="M9.707 3.293a1 1 0 010 1.414L5.414 9l-2.121-2.121a1 1 0 111.414-1.414L5.414 6.172l2.879-2.879a1 1 0 011.414 0z" />
-                          </svg>
-                        </span>
-                      )}
-                      <span className="font-semibold text-gray-900">{p.name}</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-gray-900 font-semibold block tabular-nums">{priceLine}</span>
-                      {sub && <span className="text-xs text-emerald-600 font-medium block mt-0.5">{sub}</span>}
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mb-2">{p.description}</p>
-                  <ul className="space-y-1">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </button>
-              );
-            })}
+          <div className="rounded-xl border-2 border-[#FF5392] bg-pink-50/80 p-4 mb-6">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <span className="font-semibold text-gray-900">Papermind</span>
+              <div className="text-right shrink-0">
+                <span className="text-gray-900 font-semibold block tabular-nums">
+                  {billingInterval === 'monthly'
+                    ? `${formatUsd(LIST_PRICE_MONTHLY_USD)}/mo`
+                    : `${formatUsd(effectiveMonthlyWhenYearly())}/mo`}
+                </span>
+                {billingInterval === 'yearly' && (
+                  <span className="text-xs text-emerald-600 font-medium block mt-0.5">Billed Annually</span>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-2">Full access to every feature.</p>
+            <ul className="space-y-1">
+              {[
+                'Unlimited uploads',
+                'Flashcards, quizzes & study guides',
+                'Mock exams',
+                'Progress tracking',
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {error && (
@@ -282,7 +237,7 @@ function UpgradeContent() {
               { icon: '🗂️', text: 'All your uploaded PDFs are preserved' },
               { icon: '🃏', text: 'Flashcard decks and quiz history intact' },
               { icon: '📊', text: 'Progress tracking continues from where you left off' },
-              { icon: '🎓', text: 'Mock exams available on Pro' },
+              { icon: '🎓', text: 'Mock exams included' },
             ].map(({ icon, text }) => (
               <div key={text} className="flex items-center gap-3">
                 <span className="text-xl">{icon}</span>

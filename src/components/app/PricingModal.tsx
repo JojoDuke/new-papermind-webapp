@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import posthog from 'posthog-js';
 import {
+  DEFAULT_BILLING_PLAN,
   LIST_PRICE_MONTHLY_USD,
   YEARLY_SAVINGS_PERCENT,
   effectiveMonthlyWhenYearly,
@@ -18,18 +19,29 @@ type PricingModalProps = {
   subtitle?: string;
 };
 
+const PLAN_FEATURES = [
+  'Unlimited uploads',
+  'Flashcards & quizzes from your docs',
+  'Study guides & mock exams',
+  'Progress tracking & analytics',
+  'AI-powered generation',
+];
+
 export function PricingModal({
   open,
   onClose,
   title = 'Simple, transparent pricing',
-  subtitle = 'Two plans. Pick what fits how you study.',
+  subtitle = 'One plan. Everything you need to study smarter.',
 }: PricingModalProps) {
   const [billing, setBilling] = useState<BillingInterval>('monthly');
 
   if (!open) return null;
 
-  const checkoutHref = (plan: 'starter' | 'pro') =>
-    `/checkout?plan=${plan}&interval=${billing}`;
+  const checkoutHref = `/checkout?plan=${DEFAULT_BILLING_PLAN}&interval=${billing}`;
+  const price =
+    billing === 'monthly'
+      ? formatUsd(LIST_PRICE_MONTHLY_USD)
+      : formatUsd(effectiveMonthlyWhenYearly());
 
   return (
     <div
@@ -37,7 +49,7 @@ export function PricingModal({
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -98,174 +110,58 @@ export function PricingModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-            <PlanCard
-              name="Starter"
-              price={
-                billing === 'monthly'
-                  ? formatUsd(LIST_PRICE_MONTHLY_USD.starter)
-                  : formatUsd(effectiveMonthlyWhenYearly('starter'))
-              }
-              billing={billing}
-              features={[
-                'Solid monthly upload limits',
-                'Flashcards & quizzes from your docs',
-                'Medium & large flashcard decks',
-                'Progress tracking & analytics',
-                'Standard AI processing',
-              ]}
-              ctaHref={checkoutHref('starter')}
-              ctaLabel="Start with Starter"
-              variant="light"
-              onSelect={() =>
+          <div className="rounded-[20px] border-[2.5px] border-gray-900 bg-gray-900 p-6 flex flex-col gap-5">
+            <div>
+              <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Papermind</p>
+              <div className="flex items-end gap-1">
+                <p className="text-4xl font-black font-serif text-white">{price}</p>
+                <p className="text-sm mb-1.5 text-gray-400">/month</p>
+              </div>
+              {billing === 'yearly' && (
+                <p className="text-sm font-semibold mt-1 text-emerald-400">Billed annually</p>
+              )}
+              <p className="text-sm mt-2 text-gray-400">7-day free trial · Cancel anytime</p>
+            </div>
+            <ul className="flex flex-col gap-2.5">
+              {PLAN_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#FF5392"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="shrink-0 mt-0.5"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={checkoutHref}
+              onClick={() =>
                 posthog.capture('pricing_plan_selected', {
-                  plan: 'starter',
+                  plan: DEFAULT_BILLING_PLAN,
                   interval: billing,
                   source: 'modal',
                 })
               }
-            />
-
-            <PlanCard
-              name="Pro"
-              price={
-                billing === 'monthly'
-                  ? formatUsd(LIST_PRICE_MONTHLY_USD.pro)
-                  : formatUsd(effectiveMonthlyWhenYearly('pro'))
-              }
-              billing={billing}
-              tagline="For exams & heavy prep"
-              features={[
-                'Everything in Starter',
-                'Highest monthly limits',
-                'Mock exams & full practice tests',
-                'Adaptive AI quiz mode',
-                'Priority AI processing',
-                'Large documents & long page ranges',
-              ]}
-              ctaHref={checkoutHref('pro')}
-              ctaLabel="Start with Pro"
-              variant="dark"
-              popular
-              onSelect={() =>
-                posthog.capture('pricing_plan_selected', {
-                  plan: 'pro',
-                  interval: billing,
-                  source: 'modal',
-                })
-              }
-            />
+              className="pink-glowing-button group relative mt-auto w-full text-center py-3 rounded-[10px] text-white text-sm font-medium font-sans transition-all"
+            >
+              <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden>
+                <span className="blurred-border absolute inset-0 z-20 rounded-[10px]" />
+              </span>
+              <span className="relative z-30">Start free trial</span>
+            </Link>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PlanCard({
-  name,
-  price,
-  billing,
-  tagline,
-  features,
-  ctaHref,
-  ctaLabel,
-  variant,
-  popular,
-  onSelect,
-}: {
-  name: string;
-  price: string;
-  billing: BillingInterval;
-  tagline?: string;
-  features: string[];
-  ctaHref: string;
-  ctaLabel: string;
-  variant: 'light' | 'dark';
-  popular?: boolean;
-  onSelect: () => void;
-}) {
-  const isDark = variant === 'dark';
-
-  return (
-    <div
-      className={`rounded-[20px] border-[2.5px] p-6 flex flex-col gap-5 min-h-full relative ${
-        isDark
-          ? 'bg-gray-900 border-gray-700'
-          : 'bg-white border-gray-200'
-      }`}
-    >
-      {popular && (
-        <span className="absolute top-4 right-4 text-xs font-semibold bg-[#FF5392] text-white px-3 py-1 rounded-full font-sans">
-          Most popular
-        </span>
-      )}
-      <div>
-        <p className={`text-sm font-semibold font-sans mb-1 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>
-          {name}
-        </p>
-        <div className="flex items-end gap-1">
-          <p className={`text-4xl font-black font-serif ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {price}
-          </p>
-          <p className={`text-sm mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>/month</p>
-        </div>
-        {billing === 'yearly' && (
-          <p className={`text-sm font-semibold mt-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-            Billed annually
-          </p>
-        )}
-        {tagline && (
-          <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>{tagline}</p>
-        )}
-        {!tagline && <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>Cancel anytime</p>}
-      </div>
-      <ul className="flex flex-col gap-2.5 flex-1">
-        {features.map((f) => (
-          <li
-            key={f}
-            className={`flex items-start gap-2 text-sm font-sans ${
-              isDark ? 'text-gray-300' : 'text-gray-600'
-            }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={isDark ? '#FF5392' : '#10b981'}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="shrink-0 mt-0.5"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={ctaHref}
-        onClick={onSelect}
-        className={`mt-auto w-full text-center py-3 rounded-[10px] text-sm font-medium font-sans transition-all ${
-          isDark
-            ? 'pink-glowing-button text-white relative'
-            : 'border-[2.5px] border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-        }`}
-      >
-        {isDark ? (
-          <>
-            <span className="absolute inset-0 z-20 pointer-events-none" aria-hidden>
-              <span className="blurred-border absolute inset-0 z-20 rounded-[10px]" />
-            </span>
-            <span className="relative z-30">{ctaLabel}</span>
-          </>
-        ) : (
-          ctaLabel
-        )}
-      </Link>
     </div>
   );
 }
