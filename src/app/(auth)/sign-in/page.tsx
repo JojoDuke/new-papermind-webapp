@@ -77,8 +77,9 @@ export default function AuthPage() {
         });
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+      const msg = err instanceof Error ? err.message : 'An error occurred';
+      const isNetwork = msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('network') || msg.toLowerCase().includes('failed to fetch');
+      setError(isNetwork ? 'Connection failed. Check your internet connection and try again.' : msg);
     } finally {
       setIsLoading(false);
     }
@@ -91,8 +92,9 @@ export default function AuthPage() {
         redirectTo: authRedirectUrl('/dashboard'),
       });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';
-      setError(errorMessage);
+      const msg = err instanceof Error ? err.message : 'Google sign-in failed';
+      const isNetwork = msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('network') || msg.toLowerCase().includes('failed to fetch');
+      setError(isNetwork ? 'Connection failed. Check your internet connection and try again.' : msg);
     }
   };
 
