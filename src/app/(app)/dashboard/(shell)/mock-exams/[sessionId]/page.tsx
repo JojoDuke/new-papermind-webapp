@@ -123,15 +123,15 @@ export default function MockExamSessionPage() {
 
   if (session === undefined) {
     return (
-      <main className={`${dashboardMainClass} flex items-center justify-center`}>
-        <div className="w-8 h-8 border-2 border-pink-300 border-t-transparent rounded-full animate-spin" />
+      <main className={`${dashboardMainClass} bg-surface-page flex items-center justify-center`}>
+        <div className="w-8 h-8 border-2 border-pink-300 dark:border-pink-700 border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   if (session === null) {
     return (
-      <main className={`${dashboardMainClass} flex items-center justify-center`}>
+      <main className={`${dashboardMainClass} bg-surface-page flex items-center justify-center`}>
         <div className="text-center">
           <p className="text-text-muted mb-4">Exam session not found.</p>
           <button onClick={() => router.push('/dashboard/mock-exams')} className="text-[#FF5392] text-sm font-medium cursor-pointer">
@@ -151,7 +151,7 @@ export default function MockExamSessionPage() {
       : 0;
 
     return (
-      <main className={`${dashboardMainClass} flex flex-col`}>
+      <main className={`${dashboardMainClass} bg-surface-page flex flex-col`}>
         <button
           type="button"
           onClick={() => router.push('/dashboard/mock-exams')}
@@ -164,11 +164,19 @@ export default function MockExamSessionPage() {
             </button>
 
             {/* Score banner */}
-            <div className={`rounded-2xl p-8 mb-6 text-center ${passed ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
-              <p className="text-sm font-semibold uppercase tracking-widest mb-1" style={{ color: passed ? '#059669' : '#dc2626' }}>
+            <div className={`rounded-2xl p-8 mb-6 text-center ${
+              passed
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40'
+                : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40'
+            }`}>
+              <p className={`text-sm font-semibold uppercase tracking-widest mb-1 ${
+                passed ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+              }`}>
                 {passed ? '🎉 Passing score' : 'Keep studying'}
               </p>
-              <p className="text-6xl font-bold mb-1" style={{ color: passed ? '#059669' : '#dc2626' }}>{score}%</p>
+              <p className={`text-6xl font-bold mb-1 ${
+                passed ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+              }`}>{score}%</p>
               <p className="text-sm text-text-secondary">{correctCount} / {session.questions.length} correct</p>
               <p className="text-xs text-text-faint mt-1">NCLEX-RN passing threshold is 75%</p>
             </div>
@@ -182,7 +190,11 @@ export default function MockExamSessionPage() {
                 const choices = shuffledChoices[idx] ?? [q.correctAnswer, q.distractor1, q.distractor2];
 
                 return (
-                  <div key={idx} className={`rounded-xl border p-5 ${isCorrect ? 'border-emerald-200 bg-emerald-50/40' : 'border-red-200 bg-red-50/40'}`}>
+                  <div key={idx} className={`rounded-xl border p-5 ${
+                    isCorrect
+                      ? 'border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20'
+                      : 'border-red-200 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/20'
+                  }`}>
                     <div className="flex items-start gap-2 mb-3">
                       <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'}`}>
                         {isCorrect ? (
@@ -206,9 +218,9 @@ export default function MockExamSessionPage() {
                             key={choice}
                             className={`text-xs px-3 py-1.5 rounded-lg border ${
                               isCorrectChoice
-                                ? 'bg-emerald-100 border-emerald-300 text-emerald-800 font-medium'
+                                ? 'bg-emerald-100 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-medium'
                                 : isUserChoice && !isCorrectChoice
-                                ? 'bg-red-100 border-red-300 text-red-700'
+                                ? 'bg-red-100 dark:bg-red-950/40 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300'
                                 : 'bg-surface-card border-border-default text-text-secondary'
                             }`}
                           >
@@ -230,7 +242,7 @@ export default function MockExamSessionPage() {
   // ── Pre-start screen ─────────────────────────────────────────────────────
   if (!examStarted) {
     return (
-      <main className={`${dashboardMainClass} flex items-center justify-center`}>
+      <main className={`${dashboardMainClass} bg-surface-page flex items-center justify-center`}>
             <div className="bg-surface-card border border-border-default rounded-2xl p-8 sm:p-12 max-w-md w-full text-center">
               <div className="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-950/30 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,7 +309,7 @@ export default function MockExamSessionPage() {
   const isLowTime = timeLeft !== null && timeLeft < 300;
 
   return (
-    <main className={`${dashboardMainClass} flex flex-col max-w-3xl mx-auto`}>
+    <main className={`${dashboardMainClass} bg-surface-page flex flex-col max-w-3xl mx-auto`}>
           {/* Exam header */}
           <div className="flex items-center justify-between mb-6 shrink-0">
             <div className="min-w-0">
@@ -371,7 +383,7 @@ export default function MockExamSessionPage() {
               <button
                 type="button"
                 onClick={() => setCurrentIndex((i) => i + 1)}
-                className="flex-1 py-2.5 rounded-xl border border-[#FF5392] text-sm text-[#FF5392] font-semibold hover:bg-pink-50 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl border border-[#FF5392] text-sm text-[#FF5392] font-semibold hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-colors cursor-pointer"
               >
                 Next →
               </button>

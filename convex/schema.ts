@@ -134,9 +134,19 @@ export default defineSchema({
     userId: v.id("users"),
   }).index("by_user", ["userId"]),
 
+  mockExamQuestionBank: defineTable({
+    examType: v.string(),
+    question: v.string(),
+    correctAnswer: v.string(),
+    distractor1: v.string(),
+    distractor2: v.string(),
+    distractor3: v.optional(v.string()),
+    topic: v.optional(v.string()),
+  }).index("by_exam_type", ["examType"]),
+
   mockExamSessions: defineTable({
     userId: v.id("users"),
-    documentId: v.id("documents"),
+    documentId: v.optional(v.id("documents")),
     title: v.string(),
     examType: v.string(), // e.g. "nclex-rn"
     timeLimitMinutes: v.number(),

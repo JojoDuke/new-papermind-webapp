@@ -12,7 +12,7 @@ import { formatUserPlanLabel, userPlanLabelClass, type UserPlan } from '@/lib/bi
 export function DashboardTopBar() {
   const router = useRouter();
   const { signOut } = useAuthActions();
-  const { openMobileNav } = useDashboardNav();
+  const { openMobileNav, topBarBack } = useDashboardNav();
   const user = useQuery(api.auth.currentUser);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -81,8 +81,20 @@ export function DashboardTopBar() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <div className="flex-1 md:hidden" aria-hidden />
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
+      {topBarBack && (
+        <button
+          type="button"
+          onClick={topBarBack.onClick}
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-secondary transition-colors cursor-pointer shrink-0"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {topBarBack.label ?? 'Back'}
+        </button>
+      )}
+      <div className="flex-1 min-w-0" aria-hidden />
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
       {/* Dark / light mode toggle */}
       <button
         onClick={() => setIsDarkMode((v) => !v)}

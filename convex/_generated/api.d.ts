@@ -16,6 +16,7 @@ import type * as flashcards from "../flashcards.js";
 import type * as http from "../http.js";
 import type * as lib_authRedirect from "../lib/authRedirect.js";
 import type * as lib_isPaidUser from "../lib/isPaidUser.js";
+import type * as lib_mockExamBankSeed from "../lib/mockExamBankSeed.js";
 import type * as lib_newUserNotifyMessage from "../lib/newUserNotifyMessage.js";
 import type * as lib_telegram from "../lib/telegram.js";
 import type * as migrations from "../migrations.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/authRedirect": typeof lib_authRedirect;
   "lib/isPaidUser": typeof lib_isPaidUser;
+  "lib/mockExamBankSeed": typeof lib_mockExamBankSeed;
   "lib/newUserNotifyMessage": typeof lib_newUserNotifyMessage;
   "lib/telegram": typeof lib_telegram;
   migrations: typeof migrations;
