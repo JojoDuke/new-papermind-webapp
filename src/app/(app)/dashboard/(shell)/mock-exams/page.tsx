@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense, useEffect, useCallback } from 'react';
+import { useState, Suspense, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../../../convex/_generated/api';
@@ -9,32 +9,21 @@ import toast from 'react-hot-toast';
 import { openPricingModal } from '@/components/app/pricing-modal-context';
 import { useDashboardNav } from '@/components/app/dashboard-nav-context';
 import { dashboardMainClass } from '@/components/app/dashboard-page-styles';
-
-type ExamType = 'nclex-rn';
-
-const EXAM_TYPES: {
-  id: ExamType;
-  label: string;
-  badge: string;
-  description: string;
-  iconPath: string;
-}[] = [
-  {
-    id: 'nclex-rn',
-    label: 'NCLEX-RN',
-    badge: 'Nursing',
-    description: 'Timed NCLEX-RN practice exams from Papermind\'s curated question bank',
-    iconPath:
-      'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
-  },
-];
+import { MockExamCatalogCard } from '@/components/app/MockExamCatalogCard';
+import {
+  MOCK_EXAM_CATEGORIES,
+  getCategoryById,
+  getExamsByCategory,
+  type MockExamCatalogItem,
+  type MockExamCategoryId,
+} from '@/lib/mock-exam-catalog';
 
 const FADE_MS = 300;
 
-const NCLEX_INSTRUCTIONS = [
+const EXAM_INSTRUCTIONS = [
   {
     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-    text: 'Questions are pulled from Papermind\'s curated NCLEX-RN question bank — no uploads needed.',
+    text: 'Questions are pulled from Papermind\'s curated question bank — no uploads needed.',
   },
   {
     icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -54,16 +43,19 @@ const NCLEX_INSTRUCTIONS = [
   },
 ];
 
-function NclexInstructionsView({
+function ExamInstructionsView({
+  exam,
   visible,
   onStart,
   isCreating,
 }: {
+  exam: MockExamCatalogItem;
   visible: boolean;
   onStart: () => void;
   isCreating: boolean;
 }) {
-  const examType = EXAM_TYPES[0];
+  const category = getCategoryById(exam.categoryId);
+  const isAvailable = !!exam.examType;
 
   return (
     <div
@@ -73,24 +65,27 @@ function NclexInstructionsView({
     >
       <div className="flex flex-1 min-h-0 items-start justify-center overflow-hidden pt-2 sm:pt-4">
         <div className="w-full max-w-md flex flex-col items-center text-center">
-          <div className="w-11 h-11 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center mb-3">
-            <svg className="w-6 h-6 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={examType.iconPath} />
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${category.accentBg}`}>
+            <svg className={`w-6 h-6 ${category.accent}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={category.iconPath} />
             </svg>
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-1">
-            <h2 className="text-xl font-bold text-text-primary">{examType.label}</h2>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
-              {examType.badge}
+            <h2 className="text-xl font-bold text-text-primary">{exam.title}</h2>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-subtle text-text-muted">
+              {category.label}
             </span>
           </div>
+          <p className="text-sm text-text-muted mb-1 max-w-sm">
+            {exam.questionCount} questions · {exam.timeLimitMinutes} min
+          </p>
           <p className="text-sm text-text-muted mb-4 max-w-sm">
             Here&apos;s what to expect before you start your mock exam.
           </p>
 
           <ul className="w-full space-y-2.5 text-left mb-4">
-            {NCLEX_INSTRUCTIONS.map(({ icon, text }) => (
+            {EXAM_INSTRUCTIONS.map(({ icon, text }) => (
               <li key={text} className="flex items-start gap-2.5">
                 <span className="w-8 h-8 rounded-lg bg-surface-subtle border border-border-default flex items-center justify-center shrink-0">
                   <svg className="w-3.5 h-3.5 text-text-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,16 +100,18 @@ function NclexInstructionsView({
           <button
             type="button"
             onClick={onStart}
-            disabled={isCreating}
-            className="w-full flex items-center justify-center py-2.5 rounded-xl bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
+            disabled={isCreating || !isAvailable}
+            className="w-full flex items-center justify-center py-2.5 rounded-xl bg-[#FF5392] hover:bg-[#FF5392]/90 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isCreating ? (
               <span className="inline-flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Creating exam…
               </span>
-            ) : (
+            ) : isAvailable ? (
               "Let's get started"
+            ) : (
+              'Coming soon'
             )}
           </button>
         </div>
@@ -131,9 +128,9 @@ function formatDate(ms: number) {
   });
 }
 
-function NclexRnContent() {
+function YourMockExamsSection() {
   const router = useRouter();
-  const sessions = useQuery(api.mockExams.listMyMockExamSessions, { examType: 'nclex-rn' });
+  const sessions = useQuery(api.mockExams.listMyMockExamSessions, {});
   const deleteSession = useMutation(api.mockExams.deleteMockExamSession);
 
   const handleDelete = async (sessionId: Id<'mockExamSessions'>) => {
@@ -147,87 +144,91 @@ function NclexRnContent() {
 
   if (sessions === undefined) {
     return (
-      <div className="flex flex-wrap gap-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="w-full sm:w-72 h-44 rounded-2xl bg-surface-subtle animate-pulse" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-44 rounded-2xl bg-surface-subtle animate-pulse" />
         ))}
       </div>
     );
   }
 
-  if (sessions.length === 0) {
-    return null;
-  }
+  if (sessions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-5 mt-8">
-      {sessions.map((session) => {
-        const isComplete = !!session.completedAt;
-        const isInProgress = !!session.startedAt && !session.completedAt;
-        const scoreColor =
-          session.scorePercent !== undefined
-            ? session.scorePercent >= 75
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : session.scorePercent >= 50
-              ? 'text-amber-600 dark:text-amber-400'
-              : 'text-red-500 dark:text-red-400'
-            : '';
+    <section className="mt-10 pt-8 border-t border-border-subtle">
+      <h2 className="text-base font-semibold text-text-primary mb-1">Your mock exams</h2>
+      <p className="text-sm text-text-muted mb-5">Exams you&apos;ve started or completed.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {sessions.map((session) => {
+          const isComplete = !!session.completedAt;
+          const isInProgress = !!session.startedAt && !session.completedAt;
+          const scoreColor =
+            session.scorePercent !== undefined
+              ? session.scorePercent >= 75
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : session.scorePercent >= 50
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-red-500 dark:text-red-400'
+              : '';
 
-        return (
-          <div
-            key={session._id}
-            className="w-full sm:w-72 bg-surface-card border border-border-default rounded-2xl p-5 hover:shadow-md dark:hover:shadow-black/20 transition-shadow flex flex-col gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+          return (
+            <div
+              key={session._id}
+              className="bg-surface-card border border-border-default rounded-2xl p-5 hover:shadow-md dark:hover:shadow-black/20 transition-shadow flex flex-col gap-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(session._id)}
+                  className="text-text-faint hover:text-red-400 dark:hover:text-red-400 transition-colors cursor-pointer"
+                  aria-label="Delete"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-text-primary leading-snug mb-1 line-clamp-2">{session.title}</p>
+                <p className="text-xs text-text-faint">{session.questions.length} questions · {session.timeLimitMinutes} min</p>
+                <p className="text-xs text-text-faint mt-0.5">{formatDate(session.createdAt)}</p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    isComplete
+                      ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                      : isInProgress
+                        ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
+                        : 'bg-surface-subtle text-text-muted'
+                  }`}
+                >
+                  {isComplete ? 'Completed' : isInProgress ? 'In progress' : 'Not started'}
+                </span>
+                {isComplete && session.scorePercent !== undefined && (
+                  <span className={`text-sm font-bold ${scoreColor}`}>{session.scorePercent}%</span>
+                )}
+              </div>
+
               <button
                 type="button"
-                onClick={() => handleDelete(session._id)}
-                className="text-text-faint hover:text-red-400 dark:hover:text-red-400 transition-colors cursor-pointer"
-                aria-label="Delete"
+                onClick={() => router.push(`/dashboard/mock-exams/${session._id}`)}
+                className="w-full py-2 rounded-xl border border-border-default text-sm font-medium text-text-secondary hover:border-[#FF5392] hover:text-[#FF5392] hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-all cursor-pointer"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                {isComplete ? 'Review results' : isInProgress ? 'Continue exam' : 'Start exam'}
               </button>
             </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-text-primary leading-snug mb-1 line-clamp-2">{session.title}</p>
-              <p className="text-xs text-text-faint">{session.questions.length} questions · {session.timeLimitMinutes} min</p>
-              <p className="text-xs text-text-faint mt-0.5">{formatDate(session.createdAt)}</p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                isComplete
-                  ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
-                  : isInProgress
-                  ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
-                  : 'bg-surface-subtle text-text-muted'
-              }`}>
-                {isComplete ? 'Completed' : isInProgress ? 'In progress' : 'Not started'}
-              </span>
-              {isComplete && session.scorePercent !== undefined && (
-                <span className={`text-sm font-bold ${scoreColor}`}>{session.scorePercent}%</span>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => router.push(`/dashboard/mock-exams/${session._id}`)}
-              className="w-full py-2 rounded-xl border border-border-default text-sm font-medium text-text-secondary hover:border-[#FF5392] hover:text-[#FF5392] hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-all cursor-pointer"
-            >
-              {isComplete ? 'Review results' : isInProgress ? 'Continue exam' : 'Start exam'}
-            </button>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -235,15 +236,25 @@ function MockExamsContent() {
   const router = useRouter();
   const createMockExam = useMutation(api.mockExams.createMockExamFromBank);
   const { setTopBarBack } = useDashboardNav();
+  const [activeCategory, setActiveCategory] = useState<MockExamCategoryId>('nursing');
   const [screen, setScreen] = useState<'hub' | 'instructions'>('hub');
   const [hubVisible, setHubVisible] = useState(true);
   const [instructionsVisible, setInstructionsVisible] = useState(false);
+  const [selectedExam, setSelectedExam] = useState<MockExamCatalogItem | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  const startNewMockExam = async () => {
+  const categoryExams = useMemo(() => getExamsByCategory(activeCategory), [activeCategory]);
+  const activeCategoryMeta = useMemo(() => getCategoryById(activeCategory), [activeCategory]);
+
+  const startMockExam = async (exam: MockExamCatalogItem) => {
+    if (!exam.examType) {
+      toast('This exam is coming soon.', { icon: '📚' });
+      return;
+    }
+
     setIsCreating(true);
     try {
-      const { sessionId } = await createMockExam({ examType: 'nclex-rn' });
+      const { sessionId } = await createMockExam({ examType: exam.examType });
       toast.success('Mock exam created!');
       router.push(`/dashboard/mock-exams/${sessionId}`);
     } catch (err) {
@@ -265,11 +276,13 @@ function MockExamsContent() {
     setInstructionsVisible(false);
     window.setTimeout(() => {
       setScreen('hub');
+      setSelectedExam(null);
       requestAnimationFrame(() => setHubVisible(true));
     }, FADE_MS);
   }, []);
 
-  const openInstructions = () => {
+  const openInstructions = (exam: MockExamCatalogItem) => {
+    setSelectedExam(exam);
     setHubVisible(false);
     window.setTimeout(() => {
       setScreen('instructions');
@@ -298,67 +311,82 @@ function MockExamsContent() {
             hubVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 md:mb-8 shrink-0">
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold text-text-primary mb-1">Mock Exams</h1>
-              <p className="text-sm text-text-muted">
-                Full-length timed practice exams from Papermind&apos;s curated question bank
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={startNewMockExam}
-              disabled={isCreating}
-              className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#FF5392] text-white text-sm font-semibold hover:bg-[#FF5392]/90 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {isCreating ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating…
-                </>
-              ) : (
-                <>
-                  <span className="text-base leading-none">+</span>
-                  New mock exam
-                </>
-              )}
-            </button>
+          <div className="mb-6 md:mb-8 shrink-0">
+            <h1 className="text-xl font-bold text-text-primary mb-1">Mock Exams</h1>
+            <p className="text-sm text-text-muted max-w-2xl">
+              Full-length timed practice exams across nursing, finance, medicine, and more — from
+              Papermind&apos;s curated question bank.
+            </p>
           </div>
 
-          <div className="flex flex-wrap gap-3 shrink-0">
-            {EXAM_TYPES.map((type) => (
-              <button
-                key={type.id}
-                type="button"
-                onClick={openInstructions}
-                className="relative flex flex-col w-44 h-44 sm:w-48 sm:h-48 p-5 rounded-2xl border-2 text-left transition-all cursor-pointer border-border-default bg-surface-card hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/40 dark:hover:bg-purple-950/20"
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-100 dark:bg-purple-950/40">
-                  <svg className="w-6 h-6 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={type.iconPath} />
-                  </svg>
-                </div>
-                <div className="flex-1 flex flex-col justify-end min-w-0 mt-3">
-                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                    <span className="text-sm font-semibold text-text-primary">{type.label}</span>
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-surface-subtle text-text-muted">
-                      {type.badge}
+          {/* Category tabs */}
+          <div className="shrink-0 mb-6 -mx-1 px-1 overflow-x-auto scrollbar-horizontal pb-2">
+            <div className="flex items-center gap-2 min-w-max pb-1">
+              {MOCK_EXAM_CATEGORIES.map((category) => {
+                const isActive = category.id === activeCategory;
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? 'bg-[#FF5392] border-[#FF5392] text-white shadow-sm'
+                        : 'bg-surface-card border-border-default text-text-secondary hover:border-[#FF5392]/30 hover:text-[#FF5392]'
+                    }`}
+                  >
+                    <span
+                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                        isActive ? 'bg-white/20' : category.accentBg
+                      }`}
+                    >
+                      <svg
+                        className={`w-3.5 h-3.5 ${isActive ? 'text-white' : category.accent}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.iconPath} />
+                      </svg>
                     </span>
-                  </div>
-                  <p className="text-xs leading-snug line-clamp-3 text-text-faint">{type.description}</p>
-                </div>
-              </button>
+                    {category.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Active category header */}
+          <div className="flex items-center justify-between gap-4 mb-5 shrink-0">
+            <div>
+              <h2 className="text-base font-semibold text-text-primary">{activeCategoryMeta.label}</h2>
+              <p className="text-sm text-text-muted">
+                {categoryExams.length} practice exam{categoryExams.length === 1 ? '' : 's'} available
+              </p>
+            </div>
+          </div>
+
+          {/* Exam grid — 4 columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {categoryExams.map((exam) => (
+              <MockExamCatalogCard
+                key={exam.id}
+                exam={exam}
+                category={activeCategoryMeta}
+                onClick={() => openInstructions(exam)}
+              />
             ))}
           </div>
 
-          <NclexRnContent />
+          <YourMockExamsSection />
         </div>
       )}
 
-      {screen === 'instructions' && (
-        <NclexInstructionsView
+      {screen === 'instructions' && selectedExam && (
+        <ExamInstructionsView
+          exam={selectedExam}
           visible={instructionsVisible}
-          onStart={startNewMockExam}
+          onStart={() => startMockExam(selectedExam)}
           isCreating={isCreating}
         />
       )}

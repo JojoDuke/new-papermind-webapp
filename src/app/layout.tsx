@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, PT_Serif } from "next/font/google";
+import { Plus_Jakarta_Sans, PT_Serif, Geist } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
@@ -8,6 +8,9 @@ import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 import { PostHogProvider } from "@/providers/PostHogProvider";
 import { PostHogPageView } from "@/components/marketing/PostHogPageView";
 import { Suspense } from "react";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta-sans",
@@ -33,7 +36,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <head>
         {/* Apply dark class before paint to prevent flash of unstyled content */}
         <script
