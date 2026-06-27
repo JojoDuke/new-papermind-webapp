@@ -35,6 +35,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <head>
@@ -44,6 +45,12 @@ export default async function RootLayout({
             __html: `(function(){try{var p=window.location.pathname;if(!p.startsWith('/dashboard'))return;var t=localStorage.getItem('theme');if(t==='dark'||(t==null&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
           }}
         />
+        {posthogHost && (
+          <>
+            <link rel="preconnect" href={posthogHost} />
+            <link rel="dns-prefetch" href={posthogHost} />
+          </>
+        )}
       </head>
       <body
         className={`${jakartaSans.variable} ${ptSerif.variable} antialiased`}
