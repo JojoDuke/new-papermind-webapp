@@ -3,9 +3,31 @@ import { Navbar } from '@/components/marketing/Navbar';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata('/', {
-  title: 'Papermind - AI-Powered Study Tool',
+  title: 'Papermind — AI Study Tool: Turn PDFs into Quizzes Instantly',
   description:
-    'Transform your study materials into interactive quizzes with the power of AI. Upload PDFs, generate personalized quizzes, and master your subjects faster.',
+    'Transform your study materials into interactive quizzes with AI. Upload a PDF, generate personalized quizzes, and pass your next exam faster.',
+  openGraph: {
+    type: 'website',
+    url: 'https://www.usepapermind.app/',
+    title: 'Papermind — AI Study Tool: Turn PDFs into Quizzes Instantly',
+    description:
+      'Transform your study materials into interactive quizzes with AI. Upload a PDF, generate personalized quizzes, and pass your next exam faster.',
+    images: [
+      {
+        url: 'https://www.usepapermind.app/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    siteName: 'Papermind',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Papermind — AI Study Tool: Turn PDFs into Quizzes Instantly',
+    description:
+      'Transform your study materials into interactive quizzes with AI. Upload a PDF, generate personalized quizzes, and pass your next exam faster.',
+    images: ['https://www.usepapermind.app/og-image.png'],
+  },
 });
 import { Footer } from '@/components/marketing/Footer';
 import { DemoWidget } from '@/components/marketing/DemoWidget';
