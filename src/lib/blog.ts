@@ -36,12 +36,21 @@ function slugFromFileName(fileName: string): string {
   return fileName.replace(/\.mdx$/, '');
 }
 
+function normalizePublishedAt(value: unknown): string {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  if (typeof value === 'string' && value.length > 0) {
+    return value.slice(0, 10);
+  }
+  return new Date().toISOString().slice(0, 10);
+}
+
 function parsePostMeta(slug: string, data: Record<string, unknown>): BlogPostMeta {
   const title = typeof data.title === 'string' ? data.title : slug;
   const excerpt = typeof data.excerpt === 'string' ? data.excerpt : '';
   const author = typeof data.author === 'string' ? data.author : 'Papermind Team';
-  const publishedAt =
-    typeof data.publishedAt === 'string' ? data.publishedAt : new Date().toISOString().slice(0, 10);
+  const publishedAt = normalizePublishedAt(data.publishedAt);
   const readTime = typeof data.readTime === 'string' ? data.readTime : '5 min read';
   const image = typeof data.image === 'string' ? data.image : '';
   const imageAlt = typeof data.imageAlt === 'string' ? data.imageAlt : undefined;
