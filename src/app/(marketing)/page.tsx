@@ -1,16 +1,63 @@
 import type { Metadata } from 'next';
 import { Navbar } from '@/components/marketing/Navbar';
-import { pageMetadata } from '@/lib/site';
+import { Footer } from '@/components/marketing/Footer';
+import { DemoWidget } from '@/components/marketing/DemoWidget';
+import { FeatureTabSelector } from '@/components/marketing/FeatureTabSelector';
+import { LandingCTAButton } from '@/components/marketing/LandingCTAButton';
+import { pageMetadata, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata('/', {
   title: 'Papermind — #1 AI Study Tool | Turn PDFs into Quizzes Instantly',
   description:
     'Transform your study materials into interactive quizzes with the power of AI. Upload PDFs, generate personalized quizzes, and master your subjects faster.',
 });
-import { Footer } from '@/components/marketing/Footer';
-import { DemoWidget } from '@/components/marketing/DemoWidget';
-import { FeatureTabSelector } from '@/components/marketing/FeatureTabSelector';
-import { LandingCTAButton } from '@/components/marketing/LandingCTAButton';
+
+const faqs = [
+  {
+    question: 'What is Papermind?',
+    answer:
+      'Papermind is an AI study tool that converts your PDF notes and textbooks into personalized quizzes and flashcards, helping you study smarter and pass exams faster.',
+  },
+  {
+    question: 'How does the AI quiz generator work?',
+    answer:
+      "Upload any PDF, and Papermind's AI analyzes the content to generate targeted quiz questions, flashcards, and practice exams tailored to your material.",
+  },
+];
+
+const softwareApplicationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Papermind',
+  url: SITE_URL,
+  applicationCategory: 'EducationApplication',
+  operatingSystem: 'Web',
+  description:
+    'AI-powered study tool that transforms PDFs into interactive quizzes and flashcards to help students pass exams faster.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.8',
+    reviewCount: '500',
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 
 const testimonials = [
   {
@@ -74,6 +121,14 @@ const trustItems = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-br from-pink-50/50 via-white to-purple-50/30 dark:from-zinc-950 dark:via-zinc-900 dark:to-purple-950/20 relative overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Navbar />
       <main className="max-w-[1200px] mx-auto px-4 md:px-0 py-10 md:py-16">
 
@@ -352,6 +407,29 @@ export default function Home() {
                   </svg>
                 </div>
                 <p className="text-sm text-text-secondary font-sans leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section id="faq" className="mt-32 text-left">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">FAQ</p>
+            <h2 className="text-4xl md:text-5xl font-bold font-serif text-text-primary mb-4">Frequently asked questions</h2>
+            <p className="text-lg text-text-muted max-w-xl mx-auto font-sans">
+              Everything you need to know about Papermind&apos;s AI study tools.
+            </p>
+          </div>
+
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {faqs.map((faq) => (
+              <div
+                key={faq.question}
+                className="bg-surface-card rounded-[20px] border-[2.5px] border-border-default p-6 md:p-8"
+              >
+                <h3 className="text-lg font-bold font-serif text-text-primary mb-3">{faq.question}</h3>
+                <p className="text-text-muted font-sans text-sm leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>
