@@ -3,7 +3,7 @@ import { Navbar } from '@/components/marketing/Navbar';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata('/', {
-  title: 'Papermind - AI-Powered Study Tool',
+  title: 'Papermind — #1 AI Study Tool | Turn PDFs into Quizzes Instantly',
   description:
     'Transform your study materials into interactive quizzes with the power of AI. Upload PDFs, generate personalized quizzes, and master your subjects faster.',
 });
