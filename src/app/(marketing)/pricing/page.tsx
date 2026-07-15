@@ -22,8 +22,16 @@ const PLAN_FEATURES = [
   'AI-powered generation',
 ];
 
+const FREE_PLAN_FEATURES = [
+  'Upload up to 2 documents',
+  '1 flashcard deck per document',
+  '1 quiz & study guide per document',
+  '1 mock exam preview',
+  'Progress tracking',
+];
+
 export default function PricingPage() {
-  const [billing, setBilling] = useState<BillingInterval>('monthly');
+  const [billing, setBilling] = useState<BillingInterval>('yearly');
 
   const authHref = `/sign-up?plan=${DEFAULT_BILLING_PLAN}&interval=${billing}`;
 
@@ -35,7 +43,7 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#FF5392] mb-3">Pricing</p>
             <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4">Simple, transparent pricing</h1>
-            <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">One plan. Everything you need to study smarter.</p>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto font-sans">Start for free, then upgrade when you&apos;re ready.</p>
           </div>
 
           <div className="flex justify-center mb-12">
@@ -72,10 +80,36 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="max-w-md mx-auto">
+          <div className="max-w-4xl mx-auto grid gap-6 md:grid-cols-2">
+            <div className="bg-white rounded-[20px] border border-gray-200 p-7 md:p-8 flex flex-col gap-6 min-h-full shadow-sm">
+              <div>
+                <p className="text-sm font-semibold text-gray-500 font-sans mb-1">Free</p>
+                <div className="flex items-end gap-1">
+                  <p className="text-5xl font-black font-serif text-gray-900">$0</p>
+                  <p className="text-gray-500 font-sans text-sm mb-2">/month</p>
+                </div>
+                <p className="text-sm text-gray-500 font-sans mt-2">Free forever. No credit card required.</p>
+              </div>
+              <ul className="flex flex-col gap-3 flex-1">
+                {FREE_PLAN_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2.5 text-sm text-gray-600 font-sans">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF5392" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/sign-up"
+                className="mt-auto w-full rounded-[10px] border border-gray-300 py-3 text-center text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:scale-95"
+                onClick={() => posthog.capture('pricing_plan_selected', { plan: 'free' })}
+              >
+                Get started free
+              </Link>
+            </div>
+
             <div className="bg-gray-900 rounded-[20px] border-[2.5px] border-gray-700 p-7 md:p-8 flex flex-col gap-6 min-h-full">
               <div>
-                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Papermind</p>
+                <p className="text-sm font-semibold text-gray-400 font-sans mb-1">Papermind Pro</p>
                 <div className="flex items-end gap-1 flex-wrap">
                   <p className="text-5xl font-black font-serif text-white">
                     {formatUsd(billing === 'monthly' ? LIST_PRICE_MONTHLY_USD : effectiveMonthlyWhenYearly())}
