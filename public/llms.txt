@@ -1,0 +1,31 @@
+# Papermind
+
+> Papermind is an AI-powered study platform that turns PDFs, notes, and textbooks into personalized quizzes, flashcards, study guides, and mock exams.
+
+Papermind helps students and professionals learn faster from their own study materials. Users upload a document, then use AI-generated learning tools and performance tracking to focus on weak topics and prepare for exams.
+
+## Product
+
+- [Papermind](https://www.usepapermind.app/): AI study tool for transforming study materials into interactive learning resources.
+- [Pricing](https://www.usepapermind.app/pricing): Plans, included features, and subscription options.
+- [About Papermind](https://www.usepapermind.app/about): Papermind's mission to make learning more effective and personalized.
+
+## How it works
+
+1. Upload PDFs, notes, or study guides.
+2. Generate quizzes, flashcards, study guides, and mock exams from the material.
+3. Review performance and revisit topics that need more practice.
+
+## Use cases
+
+- [NCLEX-RN preparation](https://www.usepapermind.app/use-cases/nclex-rn): Use Papermind to prepare for the NCLEX-RN exam.
+
+## Resources
+
+- [Blog](https://www.usepapermind.app/blog): Study strategies, exam-preparation advice, and Papermind updates.
+- [Sitemap](https://www.usepapermind.app/sitemap.xml): Complete list of public pages.
+
+## Policies
+
+- [Privacy Policy](https://www.usepapermind.app/privacy)
+- [Terms of Service](https://www.usepapermind.app/terms)
