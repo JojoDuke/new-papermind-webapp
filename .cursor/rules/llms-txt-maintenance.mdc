@@ -1,0 +1,12 @@
+---
+description: Keep the LLM discovery document current with public pages
+alwaysApply: true
+---
+
+# LLMs.txt maintenance
+
+When adding a new public Papermind page, also update `public/llms.txt` if the page is an important product, use-case, resource, or policy page that should be discoverable by LLMs.
+
+- Add a concise Markdown link and accurate one-line description.
+- Do not add authenticated, private, transactional, or otherwise non-public routes.
+- Keep the document's product summary and workflow accurate when the product changes materially.
